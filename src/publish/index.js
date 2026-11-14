@@ -40,12 +40,12 @@ function normalise(text) {
  * one of the last `lookback` posts. Cheap insurance against a state rollback
  * re-publishing the same quote.
  */
-async function findDuplicate(caption, lookback = 12) {
+async function findDuplicate(caption, lookback = 12, account = 0) {
   const mine = normalise(firstLine(caption));
   if (mine.length < 8) return null;
   let recent;
   try {
-    recent = await ig.recentMedia(lookback);
+    recent = await ig.recentMedia(lookback, account);
   } catch (e) {
     log.warn(`ig: duplicate check skipped (${String(e.message).slice(0, 120)})`);
     return null;
@@ -63,7 +63,7 @@ function dateStamp() {
 /**
  * @returns {{mediaId, permalink, creationId, url, key}}
  */
-async function publishVideo({ postId, videoPath, caption, keepHosted = false, onContainer } = {}) {
+async function publishVideo({ postId, videoPath, caption, keepHosted = false, onContainer, account = 0 } = {}) {
   const check = await validateVideo(videoPath);
   if (!check.ok) {
     throw new Error(`video rejected before upload: ${check.reasons.join('; ')}`);
@@ -80,7 +80,7 @@ async function publishVideo({ postId, videoPath, caption, keepHosted = false, on
     throw new Error(`R2 not configured, missing: ${host.missing().join(', ')}`);
   }
 
-  const dup = await findDuplicate(caption);
+  const dup = await findDuplicate(caption, 12, account);
   if (dup) {
     throw new Error(
       `refusing to publish: identical opening line already live as ${dup.id} ${dup.permalink || ''}`.trim()
@@ -89,7 +89,7 @@ async function publishVideo({ postId, videoPath, caption, keepHosted = false, on
 
   if (mode === 'direct') {
     log.info('publish: using direct resumable upload (no R2)');
-    const res = await ig.publishReel({ filePath: videoPath, caption, onContainer });
+    const res = await ig.publishReel({ filePath: videoPath, caption, onContainer, account });
     return { ...res, uploadMode: 'direct' };
   }
 
@@ -101,7 +101,7 @@ async function publishVideo({ postId, videoPath, caption, keepHosted = false, on
   log.info(`hosted: ${uploaded.url}`);
 
   try {
-    const res = await ig.publishReel({ videoUrl: uploaded.url, caption, onContainer });
+    const res = await ig.publishReel({ videoUrl: uploaded.url, caption, onContainer, account });
     return { ...res, url: uploaded.url, key, uploadMode: 'url' };
   } finally {
     if (!keepHosted) {

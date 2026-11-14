@@ -102,6 +102,12 @@ ensureColumn('posts', 'music_path', 'TEXT');
 ensureColumn('posts', 'published_at', 'TEXT');
 ensureColumn('posts', 'permalink', 'TEXT');
 ensureColumn('posts', 'creation_id', 'TEXT');
+ensureColumn('posts', 'ig_id_2', 'TEXT');
+ensureColumn('posts', 'permalink_2', 'TEXT');
+ensureColumn('posts', 'creation_id_2', 'TEXT');
+ensureColumn('posts', 'ig_id_3', 'TEXT');
+ensureColumn('posts', 'permalink_3', 'TEXT');
+ensureColumn('posts', 'creation_id_3', 'TEXT');
 
 // ---- state -----------------------------------------------------------------
 function getState(key, fallback = null) {
@@ -186,11 +192,11 @@ function lastPublishedAt() {
 /** Rows stuck in 'publishing' mean a previous run died mid-publish. */
 function stalePublishing(olderThanMinutes = 0) {
   if (!olderThanMinutes) {
-    return db.prepare(`SELECT * FROM posts WHERE status = 'publishing'`).all();
+    return db.prepare(`SELECT * FROM posts WHERE status IN ('publishing', 'partial')`).all();
   }
   const cutoff = new Date(Date.now() - olderThanMinutes * 60_000).toISOString();
   return db
-    .prepare(`SELECT * FROM posts WHERE status = 'publishing' AND created_at < ?`)
+    .prepare(`SELECT * FROM posts WHERE status IN ('publishing', 'partial') AND created_at < ?`)
     .all(cutoff);
 }
 

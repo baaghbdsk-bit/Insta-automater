@@ -89,131 +89,158 @@ function randomDuration() {
  */
 async function reconcileStale() {
   const stale = store.stalePublishing(0);
-  if (!stale.length) return { checked: 0, recovered: 0, deferred: 0, blocked: false };
+  if (!stale.length) return { checked: 0, recovered: 0, deferred: 0, failed: 0, blocked: false };
 
-  let recent = null;
-  try {
-    recent = await ig.recentMedia(25);
-  } catch (e) {
-    log.warn(`reconcile: cannot read recent media (${String(e.message).slice(0, 120)})`);
+  const accounts = ig.configuredAccounts();
+
+  // Fetch recent media for each account
+  const recentByAccount = {};
+  let anyRecentMissing = false;
+  for (const acct of accounts) {
+    try {
+      recentByAccount[acct] = await ig.recentMedia(25, acct);
+    } catch (e) {
+      log.warn(`reconcile: cannot read recent media for account ${acct} (${String(e.message).slice(0, 120)})`);
+      recentByAccount[acct] = null;
+      anyRecentMissing = true;
+    }
   }
 
-  // Without visibility into the account we cannot tell a lost publish from a
-  // failed one. Defer every row rather than guessing: the run will not publish
-  // another reel while state is uncertain, and the next execution retries.
-  if (!recent) {
+  // If we can't see any account, defer everything
+  if (anyRecentMissing && Object.values(recentByAccount).every(v => v === null)) {
     log.warn(`reconcile: ${stale.length} row(s) still unresolved, deferring to the next run`);
-    return { checked: 0, recovered: 0, deferred: stale.length, blocked: true };
+    return { checked: 0, recovered: 0, deferred: stale.length, failed: 0, blocked: true };
   }
 
   let recovered = 0;
   let deferred = 0;
   let failed = 0;
+
   for (const row of stale) {
+    let rowDeferred = false;
+    let rowFailed = false;
     const mine = normalise(firstLine(row.caption_text));
-    const hit = recent.find((m) => normalise(firstLine(m.caption)) === mine);
 
-    // Case 1: Instagram already has the caption -> the publish succeeded.
-    if (hit) {
-      store.updatePost(row.id, {
-        status: 'published',
-        ig_id: hit.id,
-        permalink: hit.permalink || null,
-        published_at: hit.timestamp || new Date().toISOString(),
-        creation_id: row.creation_id || null,
-      });
-      recovered++;
-      log.ok(`reconcile: post #${row.id} was actually live as ${hit.id}`);
-      continue;
-    }
+    for (const acct of accounts) {
+      const suffix = acct === 0 ? '' : `_${acct + 1}`;
+      const igCol = `ig_id${suffix}`;
+      const permalinkCol = `permalink${suffix}`;
+      const creationCol = `creation_id${suffix}`;
 
-    // Case 2: container id known -> ask Instagram what happened to it.
-    if (row.creation_id) {
-      let status = null;
-      try {
-        status = await ig.containerStatus(row.creation_id);
-      } catch (e) {
-        log.warn(`reconcile: container status failed for #${row.id} (${String(e.message).slice(0, 120)})`);
-      }
+      // Skip if already published for this account
+      if (row[igCol]) continue;
 
-      const code = status && status.code ? String(status.code).toUpperCase() : '';
-      if (code === 'PUBLISHED') {
-        // Published but the media has not surfaced in the recent list yet.
-        // Defer: do not risk a second post.
-        deferred++;
-        log.warn(`reconcile: post #${row.id} container ${row.creation_id} is PUBLISHED but media not listed yet, deferring`);
+      const recent = recentByAccount[acct];
+      if (!recent) { rowDeferred = true; continue; }
+
+      const hit = recent.find((m) => normalise(firstLine(m.caption)) === mine);
+
+      // Case 1: already live on this account
+      if (hit) {
+        const upd = {};
+        upd[igCol] = hit.id;
+        upd[permalinkCol] = hit.permalink || null;
+        store.updatePost(row.id, upd);
+        recovered++;
+        log.ok(`reconcile: post #${row.id} acct ${acct} was actually live as ${hit.id}`);
         continue;
       }
-      if (code === 'FINISHED') {
-        // Container is ready but never got published: publish it now. This is
-        // safe because media_publish only succeeds once per container.
+
+      // Case 2: container id known
+      const creationId = row[creationCol];
+      if (creationId) {
+        let status = null;
         try {
-          const mediaId = await ig.publishContainer(row.creation_id);
-          let permalink = '';
-          try {
-            const info = await ig.mediaInfo(mediaId);
-            permalink = info.permalink || '';
-          } catch (e) {
-            log.warn(`ig: published but permalink lookup failed (${String(e.message).slice(0, 120)})`);
-          }
-          store.updatePost(row.id, {
-            status: 'published',
-            ig_id: mediaId,
-            permalink: permalink || null,
-            published_at: new Date().toISOString(),
-          });
-          recovered++;
-          log.ok(`reconcile: post #${row.id} recovered via container ${row.creation_id} -> ${mediaId}`);
-          continue;
+          status = await ig.containerStatus(creationId);
         } catch (e) {
-          log.warn(`reconcile: could not publish recovered container for #${row.id} (${String(e.message).slice(0, 120)})`);
-          if (e && e.uncertain) {
-            deferred++;
-            continue;
-          }
-          store.updatePost(row.id, {
-            status: 'failed',
-            error: String(e.message || e).slice(0, 900),
-          });
-          failed++;
+          log.warn(`reconcile: container status failed for #${row.id} acct ${acct} (${String(e.message).slice(0, 120)})`);
+        }
+
+        const code = status && status.code ? String(status.code).toUpperCase() : '';
+
+        if (code === 'PUBLISHED') {
+          rowDeferred = true;
+          log.warn(`reconcile: post #${row.id} acct ${acct} container ${creationId} is PUBLISHED but media not listed, deferring`);
           continue;
         }
-      }
-      if (code === 'IN_PROGRESS') {
-        deferred++;
-        log.warn(`reconcile: post #${row.id} container still IN_PROGRESS, deferring`);
+        if (code === 'FINISHED') {
+          try {
+            const mediaId = await ig.publishContainer(creationId);
+            let permalink = '';
+            try {
+              const info = await ig.mediaInfo(mediaId);
+              permalink = info.permalink || '';
+            } catch (e) {
+              log.warn(`ig: published but permalink lookup failed (${String(e.message).slice(0, 120)})`);
+            }
+            const upd = {};
+            upd[igCol] = mediaId;
+            upd[permalinkCol] = permalink || null;
+            store.updatePost(row.id, upd);
+            recovered++;
+            log.ok(`reconcile: post #${row.id} acct ${acct} recovered via container ${creationId} -> ${mediaId}`);
+            continue;
+          } catch (e) {
+            log.warn(`reconcile: could not publish recovered container for #${row.id} acct ${acct} (${String(e.message).slice(0, 120)})`);
+            if (e && e.uncertain) { rowDeferred = true; continue; }
+            rowFailed = true;
+            continue;
+          }
+        }
+        if (code === 'IN_PROGRESS') {
+          rowDeferred = true;
+          log.warn(`reconcile: post #${row.id} acct ${acct} container still IN_PROGRESS, deferring`);
+          continue;
+        }
+        if (code === 'ERROR' || code === 'EXPIRED' || code === '') {
+          // Don't fail the whole row, just this account
+          log.warn(`reconcile: post #${row.id} acct ${acct} container ${code || 'unknown'}, skipping`);
+          continue;
+        }
+        // Unknown status
+        rowDeferred = true;
+        log.warn(`reconcile: post #${row.id} acct ${acct} container status ${code} not understood, deferring`);
         continue;
       }
-      if (code === 'ERROR' || code === 'EXPIRED' || code === '') {
-        store.updatePost(row.id, {
-          status: 'failed',
-          error: `execution interrupted during publish; container ended ${code || 'unknown'}`,
-        });
-        log.warn(`reconcile: post #${row.id} marked failed (container ${code || 'unknown'})`);
-        failed++;
-        continue;
-      }
-      // Unknown status code: defer rather than guess.
-      deferred++;
-      log.warn(`reconcile: post #${row.id} container status ${code} not understood, deferring`);
-      continue;
+
+      // Case 3: no container id and no matching media
+      log.warn(`reconcile: post #${row.id} acct ${acct} no container, not found on Instagram`);
     }
 
-    // Case 3: no container id and no matching media -> crash before container
-    // creation. Safe to fail.
-    store.updatePost(row.id, {
-      status: 'failed',
-      error: 'execution interrupted before container creation; no matching media on Instagram',
-    });
-    log.warn(`reconcile: post #${row.id} marked failed (no container, not found on Instagram)`);
-    failed++;
+    // Determine overall row status
+    if (rowDeferred) {
+      deferred++;
+    } else if (rowFailed) {
+      // Only mark failed if primary account failed
+      const primaryIgId = row.ig_id;
+      if (!primaryIgId) {
+        store.updatePost(row.id, { status: 'failed', error: 'execution interrupted during publish; no matching media on Instagram' });
+        failed++;
+        log.warn(`reconcile: post #${row.id} marked failed`);
+      }
+    } else {
+      // All accounts handled. Check if all configured accounts are now published.
+      const updatedRow = store.db.prepare('SELECT * FROM posts WHERE id = ?').get(row.id);
+      const allPublished = accounts.every(acct => {
+        const suffix = acct === 0 ? '' : `_${acct + 1}`;
+        const igCol = `ig_id${suffix}`;
+        return !!updatedRow[igCol];
+      });
+      if (allPublished && updatedRow.status !== 'published') {
+        store.updatePost(row.id, { status: 'published' });
+        log.ok(`reconcile: post #${row.id} all accounts published, marked published`);
+      } else if (!allPublished) {
+        const currentRow = store.db.prepare('SELECT status FROM posts WHERE id = ?').get(row.id);
+        if (currentRow && (currentRow.status === 'publishing' || currentRow.status === 'partial')) {
+          store.updatePost(row.id, { status: 'partial' });
+        }
+      }
+    }
   }
 
   const blocked = deferred > 0;
   return { checked: stale.length, recovered, deferred, failed, blocked };
 }
-
-// -------------------------------------------------------------- preflight
 
 async function tokenHealth() {
   if (!env.FB_APP_ID || !env.FB_APP_SECRET) return null;
@@ -230,20 +257,24 @@ async function tokenHealth() {
 }
 
 async function preflight({ dryRun }) {
-  if (!ig.isConfigured()) throw new Error('IG_USER_ID / IG_ACCESS_TOKEN missing');
+  const accounts = ig.configuredAccounts();
+  if (!accounts.length) throw new Error('No Instagram accounts configured (IG_USER_ID / IG_ACCESS_TOKEN missing)');
 
-  let me;
-  try {
-    me = await ig.preflight();
-  } catch (e) {
-    if (e instanceof ig.IgError && e.authProblem) {
-      throw new Error(
-        `Instagram authorization expired or was revoked. Re-authorize and update the IG_ACCESS_TOKEN secret. (${e.message})`
-      );
+  const mes = [];
+  for (const acct of accounts) {
+    try {
+      const me = await ig.preflight(acct);
+      mes.push(me);
+      log.ok(`ig: account ${acct} authenticated as @${me.username || me.id}`);
+    } catch (e) {
+      if (e instanceof ig.IgError && e.authProblem) {
+        throw new Error(
+          `Instagram authorization expired or was revoked for account ${acct}. Re-authorize and update the IG_ACCESS_TOKEN secret. (${e.message})`
+        );
+      }
+      throw e;
     }
-    throw e;
   }
-  log.ok(`ig: authenticated as @${me.username || me.id}`);
 
   if (!dryRun && uploadMode() === 'url' && !host.isConfigured()) {
     throw new Error(`R2 hosting is not configured, missing: ${host.missing().join(', ')}`);
@@ -265,7 +296,7 @@ async function preflight({ dryRun }) {
     }
   }
 
-  return me;
+  return mes[0] || { username: 'multi-account' };
 }
 
 // ----------------------------------------------------------------- build
@@ -465,6 +496,7 @@ async function run({ slot = '', theme = '', dryRun = false, force = false } = {}
     result.notes.push(`line engine: ${built.engine}, variant: ${built.variant}, ${built.duration}s`);
     result.notes.push(`photo: ${built.photo.provider} [${built.photo.license}]`);
 
+    const accounts = ig.configuredAccounts();
     store.updatePost(built.postId, { status: dryRun ? 'built' : 'publishing' });
 
     if (dryRun) {
@@ -475,53 +507,86 @@ async function run({ slot = '', theme = '', dryRun = false, force = false } = {}
       return result;
     }
 
-    // -------- publish
-    let published;
-    try {
-      published = await publishVideo({
-        postId: built.postId,
-        videoPath: built.outPath,
-        caption: built.caption,
-        onContainer: (creationId) => store.updatePost(built.postId, { creation_id: creationId }),
-      });
-    } catch (e) {
-      if (e && e.uncertain) {
-        // The publish may or may not have landed. Leave the row in 'publishing'
-        // with the container id so the next run can reconcile; never mark failed.
-        const pubFields = { status: 'publishing', error: String(e.message || e).slice(0, 900) };
-        if (e.creationId) pubFields.creation_id = e.creationId;
-        store.updatePost(built.postId, pubFields);
-      } else {
-        store.updatePost(built.postId, { status: 'failed', error: String(e.message || e).slice(0, 900) });
+    // -------- publish to all configured accounts
+    const results = [];
+    let anySuccess = false;
+    let allSuccess = true;
+
+    for (const acct of accounts) {
+      const suffix = acct === 0 ? '' : `_${acct + 1}`;
+      const creationCol = `creation_id${suffix}`;
+
+      let published;
+      try {
+        published = await publishVideo({
+          postId: built.postId,
+          videoPath: built.outPath,
+          caption: built.caption,
+          account: acct,
+          onContainer: (creationId) => store.updatePost(built.postId, { [creationCol]: creationId }),
+        });
+        results.push({ acct, ok: true, mediaId: published.mediaId, permalink: published.permalink, creationId: published.creationId });
+        anySuccess = true;
+        log.ok(`account ${acct}: published ${published.mediaId}`);
+      } catch (e) {
+        if (e && e.uncertain) {
+          const pubFields = { status: 'publishing', error: String(e.message || e).slice(0, 900) };
+          if (e.creationId) pubFields[creationCol] = e.creationId;
+          store.updatePost(built.postId, pubFields);
+        } else {
+          store.updatePost(built.postId, { error: String(e.message || e).slice(0, 900) });
+        }
+        results.push({ acct, ok: false, error: String(e.message || e).slice(0, 300) });
+        allSuccess = false;
+        log.warn(`account ${acct}: failed (${String(e.message || e).slice(0, 120)})`);
       }
-      throw e;
+    }
+
+    // Record results
+    const updateFields = { published_at: new Date().toISOString() };
+    for (const r of results) {
+      if (!r.ok) continue;
+      const suffix = r.acct === 0 ? '' : `_${r.acct + 1}`;
+      const igCol = `ig_id${suffix}`;
+      const permalinkCol = `permalink${suffix}`;
+      updateFields[igCol] = r.mediaId;
+      updateFields[permalinkCol] = r.permalink || null;
+      if (r.creationId) updateFields[`creation_id${suffix}`] = r.creationId;
+    }
+
+    if (allSuccess) {
+      updateFields.status = 'published';
+    } else if (anySuccess) {
+      updateFields.status = 'partial';
+    } else {
+      updateFields.status = 'failed';
     }
 
     try {
-      store.updatePost(built.postId, {
-        status: 'published',
-        ig_id: published.mediaId,
-        permalink: published.permalink || null,
-        published_at: new Date().toISOString(),
-        creation_id: published.creationId || null,
-      });
+      store.updatePost(built.postId, updateFields);
     } catch (e) {
-      // Published but we could not record it. Leave the row 'publishing' so the
-      // next run reconciles instead of (possibly) publishing a second reel.
       store.updatePost(built.postId, {
         status: 'publishing',
-        creation_id: published.creationId || null,
-        error: `published as ${published.mediaId} but DB write failed: ${String(e.message).slice(0, 300)}`,
+        error: `published but DB write failed: ${String(e.message).slice(0, 300)}`,
       });
-      log.error(`run: published ${published.mediaId} but DB update failed; will reconcile next run`);
+      log.error(`run: DB update failed; will reconcile next run`);
+    }
+
+    if (!anySuccess) {
+      throw new Error(results.map(r => `acct ${r.acct}: ${r.error}`).join('; '));
     }
 
     result.ok = true;
-    result.status = 'published';
-    result.mediaId = published.mediaId;
-    result.permalink = published.permalink || null;
-    result.notes.push(`published ${published.mediaId}`);
-    store.finishRun(runId, { status: 'published', postId: built.postId });
+    result.status = allSuccess ? 'published' : 'partial';
+    const primary = results.find(r => r.acct === 0);
+    result.mediaId = primary?.mediaId || results[0]?.mediaId;
+    result.permalink = primary?.permalink || results[0]?.permalink;
+    result.notes.push(`published to ${results.filter(r => r.ok).length}/${accounts.length} account(s)`);
+    for (const r of results) {
+      if (r.ok) result.notes.push(`  acct ${r.acct}: ${r.mediaId}`);
+    }
+    store.finishRun(runId, { status: result.status, postId: built.postId });
+    return result;
     return result;
   } catch (e) {
     result.error = String(e.message || e);
