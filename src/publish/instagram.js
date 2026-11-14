@@ -59,22 +59,41 @@ function version() {
   return String(env.IG_API_VERSION || (config.instagram && config.instagram.apiVersion) || 'v23.0');
 }
 
-function token() {
+function accountSuffix(account = 0) {
+  return account === 0 ? '' : `_${account + 1}`;
+}
+
+function token(account = 0) {
+  const s = accountSuffix(account);
   // A Page access token is the documented token for Instagram content publishing;
   // use it when present, fall back to the user token otherwise.
-  const t = String(env.FB_PAGE_TOKEN || env.IG_ACCESS_TOKEN || '').trim();
-  if (!t) throw new Error('IG_ACCESS_TOKEN is not set');
+  const t = String(env[`FB_PAGE_TOKEN${s}`] || env[`IG_ACCESS_TOKEN${s}`] || '').trim();
+  if (!t) throw new Error(`IG_ACCESS_TOKEN${s} is not set`);
   return t;
 }
 
-function igUser() {
-  const id = String(env.IG_USER_ID || '').trim();
-  if (!id) throw new Error('IG_USER_ID is not set');
+function igUser(account = 0) {
+  const s = accountSuffix(account);
+  const id = String(env[`IG_USER_ID${s}`] || '').trim();
+  if (!id) throw new Error(`IG_USER_ID${s} is not set`);
   return id;
 }
 
-function isConfigured() {
-  return !!(String(env.IG_ACCESS_TOKEN || '').trim() && String(env.IG_USER_ID || '').trim());
+function isConfigured(account = 0) {
+  const s = accountSuffix(account);
+  return !!(
+    String(env[`IG_ACCESS_TOKEN${s}`] || env[`FB_PAGE_TOKEN${s}`] || '').trim() &&
+    String(env[`IG_USER_ID${s}`] || '').trim()
+  );
+}
+
+/** List of configured account indices (0 = primary, 1 = second, 2 = third). */
+function configuredAccounts() {
+  const out = [];
+  for (let a = 0; a < 3; a++) {
+    if (isConfigured(a)) out.push(a);
+  }
+  return out;
 }
 
 /**
@@ -82,12 +101,13 @@ function isConfigured() {
  * message, so this is safe to run in a public repository's Actions log.
  */
 async function request(method, pathname, params = {}, opts = {}) {
+  const account = opts.account || 0;
   const url = `${GRAPH}/${version()}/${pathname}`;
   const label = `ig ${method} ${pathname.split('?')[0]}`;
 
   return withRetry(
     async () => {
-      const payload = { ...params, access_token: token() };
+      const payload = { ...params, access_token: token(account) };
       let res;
       if (method === 'GET') {
         const u = new URL(url);
@@ -126,39 +146,39 @@ async function request(method, pathname, params = {}, opts = {}) {
 // ---------------------------------------------------------------- account
 
 /** Cheap token/account check. Throws IgError (code 190) when re-auth is needed. */
-async function preflight() {
-  const me = await request('GET', igUser(), { fields: 'id,username' });
+async function preflight(account = 0) {
+  const me = await request('GET', igUser(account), { fields: 'id,username' }, { account });
   return me;
 }
 
-async function publishingLimit() {
-  const r = await request('GET', `${igUser()}/content_publishing_limit`, {
+async function publishingLimit(account = 0) {
+  const r = await request('GET', `${igUser(account)}/content_publishing_limit`, {
     fields: 'quota_usage,config',
-  });
+  }, { account });
   const row = (r.data && r.data[0]) || {};
   return { usage: Number(row.quota_usage || 0), config: row.config || null };
 }
 
 /** Most recent media, used for duplicate-caption detection and reconciliation. */
-async function recentMedia(limit = 15) {
-  const r = await request('GET', `${igUser()}/media`, {
+async function recentMedia(limit = 15, account = 0) {
+  const r = await request('GET', `${igUser(account)}/media`, {
     fields: 'id,caption,permalink,timestamp,media_type,media_product_type',
     limit,
-  });
+  }, { account });
   return r.data || [];
 }
 
 // ---------------------------------------------------------------- publish
 
-async function createUrlContainer({ videoUrl, caption, shareToFeed = true }) {
-  const r = await request('POST', `${igUser()}/media`, {
+async function createUrlContainer({ videoUrl, caption, shareToFeed = true, account = 0 }) {
+  const r = await request('POST', `${igUser(account)}/media`, {
     media_type: 'REELS',
     video_url: videoUrl,
     caption,
     share_to_feed: shareToFeed ? 'true' : 'false',
-  });
+  }, { account });
   if (!r.id) throw new Error('Instagram did not return a container id');
-  log.info(`ig: container ${r.id} created (url upload)`);
+  log.info(`ig: container ${r.id} created (url upload, account ${account})`);
   return r.id;
 }
 
@@ -167,18 +187,18 @@ async function createUrlContainer({ videoUrl, caption, shareToFeed = true }) {
  * and the rupload URI to POST the bytes to. No video_url is sent: the video is
  * uploaded separately via uploadResumable().
  */
-async function createResumableContainer({ caption, shareToFeed = true }) {
-  const r = await request('POST', `${igUser()}/media`, {
+async function createResumableContainer({ caption, shareToFeed = true, account = 0 }) {
+  const r = await request('POST', `${igUser(account)}/media`, {
     media_type: 'REELS',
     upload_type: 'resumable',
     caption,
     share_to_feed: shareToFeed ? 'true' : 'false',
-  });
+  }, { account });
   if (!r.id) throw new Error('Instagram did not return a container id');
   const uri =
     r.uri ||
     `${RUPLOAD}/ig-api-upload/${version()}/${r.id}`;
-  log.info(`ig: container ${r.id} created (resumable upload)`);
+  log.info(`ig: container ${r.id} created (resumable upload, account ${account})`);
   return { id: r.id, uri };
 }
 
@@ -187,7 +207,7 @@ async function createResumableContainer({ caption, shareToFeed = true }) {
  * throws on any failure so the caller can decide whether the attempt is
  * recoverable.
  */
-async function uploadResumable({ uri, filePath }) {
+async function uploadResumable({ uri, filePath, account = 0 }) {
   const fs = require('node:fs');
   if (!fs.existsSync(filePath)) throw new Error(`upload source missing: ${filePath}`);
   const buf = fs.readFileSync(filePath);
@@ -199,7 +219,7 @@ async function uploadResumable({ uri, filePath }) {
     res = await fetch(url, {
       method: 'POST',
       headers: {
-        Authorization: `OAuth ${token()}`,
+        Authorization: `OAuth ${token(account)}`,
         offset: '0',
         file_size: String(buf.length),
       },
@@ -288,18 +308,18 @@ async function mediaInfo(mediaId) {
 }
 
 /** Full publish. Returns { creationId, mediaId, permalink }. */
-async function publishReel({ videoUrl, filePath, caption, shareToFeed = true, onContainer } = {}) {
+async function publishReel({ videoUrl, filePath, caption, shareToFeed = true, onContainer, account = 0 } = {}) {
   const direct = !videoUrl && !!filePath;
   let creationId;
   let uri;
 
   try {
     if (direct) {
-      const created = await createResumableContainer({ caption, shareToFeed });
+      const created = await createResumableContainer({ caption, shareToFeed, account });
       creationId = created.id;
       uri = created.uri;
     } else {
-      creationId = await createUrlContainer({ videoUrl, caption, shareToFeed });
+      creationId = await createUrlContainer({ videoUrl, caption, shareToFeed, account });
     }
   } catch (e) {
     throw e;
@@ -318,7 +338,7 @@ async function publishReel({ videoUrl, filePath, caption, shareToFeed = true, on
 
   let containerError = null;
   try {
-    if (direct) await uploadResumable({ uri, filePath });
+    if (direct) await uploadResumable({ uri, filePath, account });
     await waitForContainer(creationId);
   } catch (e) {
     e.creationId = creationId;
@@ -368,7 +388,7 @@ function metricValue(data, name) {
   return typeof v === 'number' ? v : v === undefined || v === null ? null : Number(v);
 }
 
-async function fetchInsights(mediaId) {
+async function fetchInsights(mediaId, account = 0) {
   let lastErr;
   for (const metrics of METRIC_GROUPS) {
     try {
@@ -376,7 +396,7 @@ async function fetchInsights(mediaId) {
         'GET',
         `${mediaId}/insights`,
         { metric: metrics.join(',') },
-        { attempts: 2 }
+        { attempts: 2, account }
       );
       const data = r.data || [];
       return {
@@ -415,6 +435,7 @@ async function debugToken() {
 module.exports = {
   IgError,
   isConfigured,
+  configuredAccounts,
   version,
   request,
   preflight,

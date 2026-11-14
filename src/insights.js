@@ -13,23 +13,32 @@ const ig = require('./publish/instagram');
  * hammer the API for numbers that barely move.
  */
 async function collectRecent({ limit = 12, minAgeHours = 6 } = {}) {
-  const posts = store
-    .publishedPosts(40)
-    .filter((p) => p.ig_id)
-    .slice(0, limit);
+  const posts = store.publishedPosts(40);
+  const accounts = ig.configuredAccounts();
+
+  // Build list of {mediaId, postId, account} for all configured accounts
+  const targets = [];
+  for (const p of posts) {
+    for (const acct of accounts) {
+      const suffix = acct === 0 ? '' : `_${acct + 1}`;
+      const igId = acct === 0 ? p.ig_id : p[`ig_id${suffix}`];
+      if (igId) targets.push({ mediaId: igId, postId: p.id, account: acct });
+    }
+  }
+  const sliced = targets.slice(0, limit * accounts.length);
 
   let updated = 0;
-  for (const p of posts) {
-    const existing = store.insightFor(p.ig_id);
+  for (const t of sliced) {
+    const existing = store.insightFor(t.mediaId);
     if (existing) {
       const age = (Date.now() - new Date(existing.collected_at).getTime()) / 3_600_000;
       if (age < minAgeHours) continue;
     }
     try {
-      const m = await ig.fetchInsights(p.ig_id);
+      const m = await ig.fetchInsights(t.mediaId, t.account);
       store.upsertInsight({
-        mediaId: p.ig_id,
-        postId: p.id,
+        mediaId: t.mediaId,
+        postId: t.postId,
         reach: m.reach,
         views: m.views,
         saves: m.saves,
@@ -40,13 +49,13 @@ async function collectRecent({ limit = 12, minAgeHours = 6 } = {}) {
       });
       updated++;
       log.info(
-        `insights: ${p.ig_id} reach=${m.reach ?? '-'} views=${m.views ?? '-'} saves=${m.saves ?? '-'}`
+        `insights: ${t.mediaId} (acct ${t.account}) reach=${m.reach ?? '-'} views=${m.views ?? '-'} saves=${m.saves ?? '-'}`
       );
     } catch (e) {
-      log.warn(`insights: ${p.ig_id} failed (${String(e.message).slice(0, 140)})`);
+      log.warn(`insights: ${t.mediaId} failed (${String(e.message).slice(0, 140)})`);
     }
   }
-  return { checked: posts.length, updated };
+  return { checked: sliced.length, updated };
 }
 
 /** Aggregated view used outside the engine (CLI `insights` command, reports). */

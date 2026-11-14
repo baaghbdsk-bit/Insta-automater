@@ -83,17 +83,20 @@ async function cmdDoctor() {
     warns++;
   }
 
-  if (ig.isConfigured()) {
-    try {
-      const me = await ig.preflight();
-      log.ok(`instagram: authenticated as @${me.username || me.id}`);
-    } catch (e) {
-      log.error(`instagram: ${e.message}`);
-      fails++;
-    }
-  } else {
-    log.warn('instagram: IG_USER_ID / IG_ACCESS_TOKEN missing');
+  const accounts = ig.configuredAccounts();
+  if (accounts.length === 0) {
+    log.warn('instagram: no accounts configured');
     warns++;
+  } else {
+    for (const acct of accounts) {
+      try {
+        const me = await ig.preflight(acct);
+        log.ok(`instagram: account ${acct} authenticated as @${me.username || me.id}`);
+      } catch (e) {
+        log.error(`instagram account ${acct}: ${e.message}`);
+        fails++;
+      }
+    }
   }
 
   const { uploadMode } = require('./publish');
