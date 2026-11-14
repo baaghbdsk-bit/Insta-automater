@@ -245,6 +245,8 @@ async function renderQuote({
     '-preset', 'medium',
     '-crf', '20',
     '-pix_fmt', 'yuv420p',
+    '-color_range', 'tv',
+    '-colorspace', 'bt709',
     '-profile:v', 'high',
     '-level', '4.1',
     '-c:a', 'aac',

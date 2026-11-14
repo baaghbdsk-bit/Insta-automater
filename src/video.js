@@ -88,7 +88,9 @@ async function validateVideo(file, opts = {}) {
       reasons.push(`resolution ${video.width}x${video.height}, expected ${W}x${H}`);
     }
     if (!/h264/i.test(video.codec_name || '')) reasons.push(`codec ${video.codec_name}, expected h264`);
-    if (video.pix_fmt !== 'yuv420p') reasons.push(`pix_fmt ${video.pix_fmt}, expected yuv420p`);
+    if (video.pix_fmt !== 'yuv420p' && video.pix_fmt !== 'yuvj420p') {
+      reasons.push(`pix_fmt ${video.pix_fmt}, expected yuv420p`);
+    }
   }
   if (!audio) reasons.push('no audio stream');
   else if (!/aac/i.test(audio.codec_name || '')) reasons.push(`audio codec ${audio.codec_name}, expected aac`);
