@@ -165,10 +165,10 @@ async function reconcileStale() {
         }
         if (code === 'FINISHED') {
           try {
-            const mediaId = await ig.publishContainer(creationId);
+            const mediaId = await ig.publishContainer(creationId, acct);
             let permalink = '';
             try {
-              const info = await ig.mediaInfo(mediaId);
+              const info = await ig.mediaInfo(mediaId, acct);
               permalink = info.permalink || '';
             } catch (e) {
               log.warn(`ig: published but permalink lookup failed (${String(e.message).slice(0, 120)})`);

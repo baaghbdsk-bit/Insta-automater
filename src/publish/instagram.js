@@ -292,19 +292,19 @@ async function waitForContainer(creationId, { timeoutMs = 6 * 60_000, intervalMs
   }
 }
 
-async function publishContainer(creationId) {
+async function publishContainer(creationId, account = 0) {
   // media_publish is intentionally single-shot: retrying a successful-but-unacknowledged
   // publish would risk a double post, and reconcile() handles the ambiguous case.
-  const r = await request('POST', `${igUser()}/media_publish`, { creation_id: creationId }, { attempts: 1 });
+  const r = await request('POST', `${igUser(account)}/media_publish`, { creation_id: creationId }, { attempts: 1, account });
   if (!r.id) throw new Error('Instagram did not return a media id on publish');
   log.ok(`ig: published media ${r.id}`);
   return r.id;
 }
 
-async function mediaInfo(mediaId) {
+async function mediaInfo(mediaId, account = 0) {
   return request('GET', mediaId, {
     fields: 'id,permalink,media_type,media_product_type,timestamp',
-  });
+  }, { account });
 }
 
 /** Full publish. Returns { creationId, mediaId, permalink }. */
@@ -348,7 +348,7 @@ async function publishReel({ videoUrl, filePath, caption, shareToFeed = true, on
 
   let mediaId;
   try {
-    mediaId = await publishContainer(creationId);
+    mediaId = await publishContainer(creationId, account);
   } catch (e) {
     e.creationId = creationId;
     // media_publish is single-shot; any failure is ambiguous.
@@ -358,7 +358,7 @@ async function publishReel({ videoUrl, filePath, caption, shareToFeed = true, on
 
   let permalink = '';
   try {
-    const info = await mediaInfo(mediaId);
+    const info = await mediaInfo(mediaId, account);
     permalink = info.permalink || '';
   } catch (e) {
     log.warn(`ig: published but permalink lookup failed (${String(e.message).slice(0, 120)})`);
