@@ -1,0 +1,31 @@
+{
+  "feeds": [
+    {
+      "name": "Google News - BJP",
+      "url": "https://news.google.com/rss/search?q=BJP+OR+%22Lok+Sabha%22+OR+%22Uttar+Pradesh%22+politics&hl=en-IN&gl=IN&ceid=IN:en",
+      "enabled": true
+    },
+    {
+      "name": "Google News - India politics (Hindi)",
+      "url": "https://news.google.com/rss/search?q=%E0%A4%B0%E0%A4%BE%E0%A4%9C%E0%A4%A8%E0%A5%80%E0%A4%A4%E0%A4%BF&hl=hi&gl=IN&ceid=IN:hi",
+      "enabled": true
+    },
+    {
+      "name": "NDTV India",
+      "url": "https://feeds.feedburner.com/ndtvnews-india-news",
+      "enabled": true
+    },
+    {
+      "name": "Indian Express India",
+      "url": "https://indianexpress.com/section/india/feed/",
+      "enabled": false
+    },
+    {
+      "name": "The Hindu National",
+      "url": "https://www.thehindu.com/news/national/feeder/default.rss",
+      "enabled": false
+    }
+  ],
+  "minTitleLength": 25,
+  "requireKeywords": []
+}

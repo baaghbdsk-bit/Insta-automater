@@ -1,0 +1,30 @@
+{
+  "name": "reel-engine",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Autonomous Instagram Reels engine: AI quote -> photo -> ffmpeg -> Cloudflare R2 -> Graph API publish, scheduled by GitHub Actions",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "run": "node src/index.js run",
+    "dry": "node src/index.js run --dry-run",
+    "doctor": "node src/index.js doctor",
+    "status": "node src/index.js status",
+    "insights": "node src/index.js insights",
+    "quote": "node src/index.js quote",
+    "library": "node src/index.js library:status",
+    "r2:check": "node src/index.js r2:check",
+    "ig:upload-check": "node src/index.js ig:upload-check",
+    "photos:fetch": "node src/index.js photos:fetch",
+    "music:fetch": "node src/index.js music:fetch",
+    "cleanup": "node src/index.js cleanup",
+    "token:status": "node src/index.js token:status",
+    "test": "node --test tests/"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "ffprobe-static": "^3.1.0"
+  }
+}

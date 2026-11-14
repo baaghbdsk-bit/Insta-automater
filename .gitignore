@@ -1,0 +1,20 @@
+node_modules/
+output/
+.env
+assets/tmp/
+*.log
+
+# Unused leftovers from the retired political/clip engine. Kept on disk, not in
+# git, because the quote renderer never reads them.
+assets/backgrounds/
+assets/avatar/
+
+# State is committed on purpose: data/engine.db is the only thing that stops
+# duplicate posts, and the daily state commit also keeps GitHub from disabling
+# the schedule after 60 days of repository inactivity.
+data/*
+!data/engine.db
+!data/.gitkeep
+data/*.db-wal
+data/*.db-shm
+data/*.db-journal

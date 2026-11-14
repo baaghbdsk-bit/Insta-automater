@@ -1,0 +1,147 @@
+name: reel-engine
+
+# Four slots per day, IST (UTC+5:30):
+#   02:30 UTC = 08:00 IST
+#   08:30 UTC = 14:00 IST
+#   14:30 UTC = 20:00 IST
+#   17:30 UTC = 23:00 IST
+# GitHub cron is best-effort (5-30 min delays are normal). The engine enforces
+# a minimum gap and a daily cap, so a late or duplicated trigger cannot double-post.
+on:
+  schedule:
+    - cron: '30 2 * * *'
+    - cron: '30 8 * * *'
+    - cron: '30 14 * * *'
+    - cron: '30 17 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Build the reel but do not publish it'
+        type: boolean
+        default: false
+      theme:
+        description: 'Force a theme (leave empty to let the engine choose)'
+        type: string
+        default: ''
+      slot:
+        description: 'Label shown in the run summary'
+        type: string
+        default: 'manual'
+
+# Queue instead of cancelling: cancelling mid-publish is how a container gets
+# published with no DB record.
+concurrency:
+  group: reel-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  TZ: Asia/Kolkata
+  FFMPEG_PATH: /usr/bin/ffmpeg
+  FFPROBE_PATH: /usr/bin/ffprobe
+
+  IG_USER_ID: ${{ secrets.IG_USER_ID }}
+  IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+  IG_API_VERSION: v27.0
+  IG_UPLOAD_MODE: direct
+  FB_APP_ID: ${{ secrets.FB_APP_ID }}
+  FB_APP_SECRET: ${{ secrets.FB_APP_SECRET }}
+  FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+  FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+
+  LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+  LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+  LLM_MODEL: ${{ secrets.LLM_MODEL }}
+
+  R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+  R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: ${{ secrets.R2_BUCKET }}
+  R2_PUBLIC_BASE: ${{ secrets.R2_PUBLIC_BASE }}
+
+  PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+  GEMINI_IMAGE_MODEL: ${{ secrets.GEMINI_IMAGE_MODEL }}
+  NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
+
+  DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '0' }}
+  THEME: ${{ github.event.inputs.theme }}
+  SLOT: ${{ github.event.inputs.slot || 'cron' }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      # Distro ffmpeg is built with libass. The static npm build is not
+      # guaranteed to be, and every caption goes through the `ass` filter.
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version | head -1
+          ffmpeg -hide_banner -h filter=ass >/dev/null && echo "libass: ok"
+
+      # --ignore-scripts skips the ffmpeg-static binary download (unused here,
+      # and an intermittent GitHub-release fetch is a real failure mode).
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Environment report
+        continue-on-error: true
+        run: node src/index.js doctor
+
+      - name: Generate and publish one reel
+        id: engine
+        run: node src/index.js run
+
+      - name: Keep the rendered video for debugging
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reel-${{ github.run_id }}
+          path: output/
+          retention-days: 3
+          if-no-files-found: ignore
+
+      # The database is the only durable state. Committing it back also keeps
+      # the repository active, which is what stops GitHub from disabling the
+      # schedule after 60 days of inactivity.
+      - name: Persist state
+        if: always()
+        run: |
+          node -e "require('./src/db').checkpoint()" || true
+          git config user.name  "reel-engine[bot]"
+          git config user.email "reel-engine@users.noreply.github.com"
+          for i in 1 2 3; do
+            git add -A data
+            if git diff --cached --quiet; then
+              echo "state unchanged"
+              exit 0
+            fi
+            git commit -m "state: $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]" || true
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
+          done
+          echo "state persist failed after 3 attempts" >&2
+          exit 1

@@ -1,0 +1,42 @@
+{
+  "channel": {
+    "name": "Just Speaks",
+    "handle": "@justspeak_1999",
+    "tagline": "Likha hua sach"
+  },
+  "video": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "bgColorA": "0x0A0F1A",
+    "bgColorB": "0x17243B",
+    "accent": "0xFFC61A",
+    "tailSeconds": 0.7
+  },
+  "limits": {
+    "maxLines": 4,
+    "targetSeconds": 12,
+    "maxSeconds": 15,
+    "maxCaptionCharsPerLine": 22
+  },
+  "schedule": {
+    "timezone": "Asia/Kolkata",
+    "times": ["08:00", "14:00", "20:00", "23:00"],
+    "maxPerDay": 4,
+    "minGapMinutes": 120
+  },
+  "instagram": {
+    "apiVersion": "v27.0"
+  },
+  "music": {
+    "creditInCaption": true,
+    "credit": "Music: Kevin MacLeod (incompetech.com) — CC BY 4.0"
+  },
+  "safety": {
+    "blockedTerms": [
+      "deshdrohi", "gaddar", "terrorist", "rapist", "harami", "kamina",
+      "saala", "bhosdi", "chutiya", "madarchod", "bhenchod"
+    ],
+    "maxFailuresBeforePause": 3
+  }
+}

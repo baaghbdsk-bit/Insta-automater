@@ -1,0 +1,305 @@
+# reel-engine
+
+Autonomous Instagram Reels for **@justspeak_1999**.
+
+GitHub Actions wakes up four times a day, invents a Hinglish quote, finds a
+photo, picks licensed music, renders a 1080×1920 Reel with FFmpeg, uploads it to
+Cloudflare R2, publishes it through the Instagram Graph API, records the result
+in SQLite, and commits that database back to the repository.
+
+No laptop, no Task Scheduler, no server.
+
+```
+GitHub Actions (4 crons, IST)
+   │
+   ├─ ffmpeg (system build, libass)          ← text rendering
+   ├─ theme picked by past reach (insights)
+   ├─ quote written by Gemini (deduped)      ← original lines, not a fixed list
+   ├─ photo: Pexels → Openverse → Gemini image → local pool
+   ├─ music: CC BY 4.0 bed from assets/music
+   ├─ render 1080×1920, 9–15 s, slow push/drift, scrim, watermark
+   ├─ validate the MP4 locally (codec, size, duration, faststart, audio)
+   ├─ upload via direct resumable upload (no hosting)  [R2 fallback available]
+   ├─ POST /media → poll status_code → POST /media_publish → permalink
+   ├─ delete the hosted object
+   └─ commit data/engine.db  [skip ci]
+```
+
+---
+
+## What is automated, and what is not
+
+| Automated | Still manual |
+|---|---|
+| Theme selection, weighted by measured reach | Initial Meta app + token setup |
+| Quote writing, caption writing, hashtags | Keeping the token alive (see expiry) |
+| Photo discovery and fallback | Profile name, bio, avatar (not writable via API) |
+| Music selection, random excerpt per post | Nothing else, once secrets are set |
+| Rendering, validation, hosting, publishing | |
+| Insight collection and theme weighting | |
+| Failure notification, retry, dedupe | |
+
+**Trending Instagram audio cannot be attached through the publishing API.** That
+is an Instagram product limitation, not a shortcut here: the API accepts a video
+file only, so every Reel carries its own licensed music track embedded in the
+MP4.
+
+---
+
+## Repository layout
+
+```
+src/
+  index.js            CLI entry point
+  run.js              one autonomous execution (the orchestrator)
+  lines.js            quote + caption generation, dedupe, seed bank
+  themes.js           14 content themes → music pool, tone, image queries
+  library.js          photo providers, music pool, temp cleanup
+  quote.js            FFmpeg renderer (layout, ASS, scrim, camera move)
+  video.js            pre-publish validation
+  host.js             Cloudflare R2 client (hand-rolled SigV4)
+  publish/
+    instagram.js      Graph API: container, poll, publish, insights
+    index.js          validate → upload → publish → delete
+  insights.js         metric collection and per-theme aggregation
+  notify.js           Actions annotations, step summary, optional webhook
+  db.js               SQLite state (node:sqlite)
+  net.js              retry/backoff HTTP helpers
+  util.js             ffmpeg paths, logging, probing
+  captions.js         ASS primitives shared with the renderer
+  config.js           .env + config/config.json
+  setup/token.js      Meta token exchange and inspection
+assets/
+  fonts/              Anton, Archivo Black, Barlow, Noto Devanagari
+  music/              15 tracks, CC BY 4.0 (attribution in CREDITS.json)
+  photos/             curated fallback pool, per mood
+archive/              the retired political/clip engine, kept for reference
+data/engine.db        committed state: posts, lines, insights, runs, usage
+.github/workflows/publish.yml
+```
+
+`archive/` holds the old feed→script→TTS→video pipeline and the clip compositor.
+They are not imported anywhere and not part of the build.
+
+---
+
+## One-time setup
+
+### 1. Push the repository
+
+```bash
+git remote add origin git@github.com:<you>/<repo>.git
+git push -u origin main
+```
+
+The default branch must be `main`; scheduled workflows only run from the default
+branch.
+
+### 2. Repository secrets
+
+Settings → Secrets and variables → Actions → **New repository secret**.
+
+| Secret | Required | Value |
+|---|---|---|
+| `IG_USER_ID` | yes | `17841436902515070` |
+| `IG_ACCESS_TOKEN` | yes | long-lived user token (used for expiry checks and fallback) |
+| `FB_PAGE_TOKEN` | yes | long-lived **Page** access token with `instagram_content_publish` (used for publishing) |
+| `R2_ACCOUNT_ID` | optional | only needed if `IG_UPLOAD_MODE=url` |
+| `R2_ACCESS_KEY_ID` | optional | only needed if `IG_UPLOAD_MODE=url` |
+| `R2_SECRET_ACCESS_KEY` | optional | only needed if `IG_UPLOAD_MODE=url` |
+| `R2_BUCKET` | optional | only needed if `IG_UPLOAD_MODE=url` |
+| `R2_PUBLIC_BASE` | optional | only needed if `IG_UPLOAD_MODE=url` |
+| `LLM_BASE_URL` | yes | `https://generativelanguage.googleapis.com/v1beta/openai` |
+| `LLM_API_KEY` | yes | Gemini API key |
+| `LLM_MODEL` | yes | `gemini-3-flash-preview,gemini-3.6-flash,gemini-3.8-flash` |
+| `FB_APP_ID` | optional | enables token-expiry reporting |
+| `FB_APP_SECRET` | optional | same |
+| `FB_PAGE_ID` | optional | only needed by `token:exchange` |
+| `PEXELS_API_KEY` | optional | better photos; otherwise Openverse (CC0) |
+| `GEMINI_IMAGE_MODEL` | optional | enables AI image generation when quota allows |
+| `NOTIFY_WEBHOOK_URL` | optional | Discord/Slack webhook for failures |
+
+`R2_PUBLIC_BASE` must be a public, unauthenticated HTTPS URL that returns the MP4
+with `Content-Type: video/mp4`. Instagram fetches it from Meta's infrastructure,
+not from your machine.
+
+### 3. Cloudflare R2
+
+1. Create a bucket (`reel-videos`).
+2. Settings → **Public access** → connect a **custom domain**
+   (`cdn.yourdomain.com`). The `r2.dev` development URL works for a trial but is
+   rate-limited and not meant for production.
+3. Manage R2 API Tokens → **Create API token** → permission *Object Read & Write*
+   → scope it to this one bucket. Copy the access key id and secret.
+4. Add a **lifecycle rule**: prefix `reels/`, delete objects after **2 days**.
+   The engine deletes each video right after publishing; the rule is the safety
+   net for a run that dies between upload and publish.
+5. Verify from your machine:
+
+```bash
+npm run r2:check      # uploads a 20-byte object, reads it over the public URL, deletes it
+```
+
+Free tier: 10 GB storage, 1 M writes, 10 M reads per month, no egress fees. At
+four Reels a day this uses well under 1% of it.
+
+### 4. Meta / Instagram
+
+Already configured for this account, but for the record the app needs:
+
+- Instagram **Business or Creator** account linked to a Facebook Page.
+- App permissions: `instagram_basic`, `instagram_content_publish`,
+  `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`.
+- A long-lived token. `npm run token:status` prints expiry and scopes.
+
+**Token expiry:** the current token has `expires_at: 0` (no refresh needed) but
+`data_access_expires_at` around **12 Feb 2027**. A workflow cannot write
+repository secrets without a separate PAT, so that date is a manual re-auth.
+Runs start warning 21 days before it and fail loudly once it has passed.
+
+### 5. Workflow permissions
+
+Settings → Actions → General → **Workflow permissions** → *Read and write*.
+The workflow commits `data/engine.db` back to the repo.
+
+---
+
+## Activating the schedule
+
+The cron entries are already in `.github/workflows/publish.yml`:
+
+| IST | Cron (UTC) |
+|---|---|
+| 08:00 | `30 2 * * *` |
+| 14:00 | `30 8 * * *` |
+| 20:00 | `30 14 * * *` |
+| 23:00 | `30 17 * * *` |
+
+GitHub cron is best-effort: expect 5–30 minute delays and the occasional dropped
+run. The engine is built for that — a late trigger cannot double-post, because
+it checks the daily cap and the minimum gap between posts.
+
+**Test it before trusting cron:**
+
+1. Actions → *reel-engine* → **Run workflow** → tick `dry_run` → Run.
+   It builds and validates a Reel but publishes nothing. Download the artifact
+   or read the step summary.
+2. Run it again with `dry_run` unticked. That is your first real publish.
+3. Only then let the schedule take over.
+
+Committing state on every run also keeps the repository active, which is what
+stops GitHub from disabling the schedule after 60 days of inactivity.
+
+---
+
+## Local commands
+
+```bash
+npm install                 # full install, downloads the bundled ffmpeg
+npm test                    # unit tests (no network)
+RUN_RENDER_TEST=1 npm test  # also renders a real 8-second Reel
+
+npm run doctor              # ffmpeg filters, fonts, DB, keys, R2, Instagram
+npm run dry                 # full run without publishing
+npm run run                 # full run, publishes if R2 is configured
+npm run status              # recent posts, statuses, today's count
+npm run insights            # reach / saves / shares per post and per theme
+npm run quote -- --theme discipline --variant lower
+npm run library             # photo, music and line inventory
+npm run cleanup             # delete temp files, checkpoint the DB
+npm run token:status
+```
+
+Windows has no system ffmpeg by default; `util.js` falls back to the
+`ffmpeg-static` package. In CI, `FFMPEG_PATH=/usr/bin/ffmpeg` points at the
+distro build, which is compiled with libass.
+
+---
+
+## How the engine decides
+
+**Theme.** 14 themes (`heartbreak`, `loneliness`, `letting_go`, `self_respect`,
+`growth`, `discipline`, `ambition`, `confidence`, `success`, `motivation`,
+`life_lessons`, `reality`, `friendship`, `emotional_intelligence`). Selection is
+weighted by the median reach each theme has actually produced, multiplied by a
+random factor, with a heavy penalty for the last few themes used. A theme that
+reaches 2× the median gets proportionally more airtime — and nothing is ever
+locked in.
+
+**Quote.** Generated by Gemini for the chosen theme, filtered hard: Roman script
+only, 18–118 characters, must contain a Hinglish marker word, no emoji, no
+hashtags, no known cliché, and not within 0.62 Jaccard similarity of any seed,
+recent or already-used line. Survivors go into `generated_lines` with a unique
+normalised form. A hand-written bank of 80 lines is the offline fallback.
+
+**Photo.** Pexels (if keyed) → Openverse (CC0/public domain) → Gemini image
+generation (if a model is configured and quota allows) → curated local pool.
+Remote photos are downloaded per run and not committed, so the repository does
+not grow and the same photo is not reused.
+
+**Music.** Kevin MacLeod / incompetech, CC BY 4.0, 15 tracks across three mood
+pools. Each post takes a random 12–50% offset into the track, so two posts never
+share an intro. Attribution is written into the caption.
+
+**Layout.** Font size is chosen so the quote fills the frame without orphans,
+capped at four lines. Text sits high, centred or low (rotating), on a generated
+gaussian scrim. Camera motion is one of five slow pushes/drifts, chosen at
+random.
+
+---
+
+## Reliability
+
+- **Retries** with exponential backoff and jitter on every network call.
+  Instagram rate-limit codes (4, 17, 32, 613) are retried; validation errors are
+  not, because retrying a bad request only burns publishing quota.
+- **Pre-publish validation**: h264, yuv420p, 1080×1920, AAC audio, 7–18 s,
+  `moov` before `mdat`, size under 100 MB.
+- **Duplicate protection, three layers**: a `publishing` row written *before* the
+  API call; a min-gap and daily-cap check; and a comparison of the caption's
+  first line against the account's last 12 posts.
+- **Crash reconciliation**: rows still `publishing` after 30 minutes are checked
+  against the live account. If the Reel exists it is recorded as published; if
+  not, the row is failed. Never double-posted.
+- **Auth reporting**: `debug_token` runs every execution; under 21 days left
+  produces a warning, and an expired token fails the run with an explicit
+  re-authorisation message.
+- **Notification**: `::error::` annotations, the run step summary, and an
+  optional webhook. A run that fails never reports success.
+- **Cleanup**: the hosted object is deleted after publish (R2 lifecycle rule as
+  backstop); `assets/tmp` is pruned every run.
+
+---
+
+## Costs
+
+| Component | Free tier | This project |
+|---|---|---|
+| GitHub Actions (public repo) | unlimited | ~300 min/month |
+| GitHub Actions (private repo) | 2,000 min/month | ~300 min/month |
+| Cloudflare R2 | 10 GB, 1 M writes, 10 M reads | <1 GB, <400 ops/month |
+| Instagram Graph API | free | 4 publishes/day |
+| Gemini free tier | yes | ~4 calls/day |
+| Domain for the R2 custom domain | — | ₹800–1,200/year (optional but recommended) |
+
+`₹0/month` is realistic; the domain is the only optional spend.
+
+---
+
+## Known limitations
+
+1. **One real publish has not been performed yet.** R2 credentials were not
+   available during implementation, so the upload → container → publish path is
+   written and unit-tested (SigV4 matches AWS's published test vector) but has
+   not touched the live account.
+2. **Trending audio is impossible** via the API. Licensed music is embedded.
+3. **Profile fields are not writable** by the Graph API (`code 100,
+   subcode 33`). Name, bio and avatar stay manual.
+4. **Cron is best-effort.** A slot can drift by up to ~30 minutes or be dropped.
+   The daily cap is 4; three or four posts a day is the normal outcome.
+5. **Gemini image generation is quota-blocked** on the current key (HTTP 429 on
+   every image model). The provider is implemented and stays dormant until
+   `GEMINI_IMAGE_MODEL` is set to a model the key can use.
+6. **Pexels key issuance is paused.** Without it, photos come from Openverse at
+   960–1024 px, upscaled to 2160 for the crop. Fine, but softer than Pexels.
+7. **Token re-auth is manual**, before 12 Feb 2027.
