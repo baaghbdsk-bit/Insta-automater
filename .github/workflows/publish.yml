@@ -9,10 +9,14 @@ name: reel-engine
 # a minimum gap and a daily cap, so a late or duplicated trigger cannot double-post.
 on:
   schedule:
-    - cron: '30 2 * * *'
-    - cron: '30 8 * * *'
-    - cron: '30 14 * * *'
-    - cron: '30 17 * * *'
+    # 6 slots/day for aggressive start (every ~4 hours, IST). Revert to 4 slots
+    # (08:00, 14:00, 20:00, 23:00) when calming down.
+    - cron: '30 18 * * *'   # 00:00 IST
+    - cron: '30 22 * * *'   # 04:00 IST
+    - cron: '30 2 * * *'    # 08:00 IST
+    - cron: '30 6 * * *'    # 12:00 IST
+    - cron: '30 10 * * *'   # 16:00 IST
+    - cron: '30 14 * * *'   # 20:00 IST
   workflow_dispatch:
     inputs:
       dry_run:
