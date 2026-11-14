@@ -21,128 +21,136 @@ const store = require('./db');
 
 const SEED = {
   heartbreak: [
-    'Kisi ko itna pyar mat do ki woh tumhari kamzori ban jaye.',
-    'Woh chala gaya, par uski aadat aaj tak nahi gayi.',
-    'Sabse zyada wahi todte hain jinke liye hum sab kuch chhod dete hain.',
-    'Pyar ka matlab nibhana hota hai, sirf kehna nahi.',
-    'Tumse baat karna ab bhi accha lagta hai, bas ab tum meri nahi ho.',
-    'Kuch log chhod kar nahi jaate, hum unhe dhoondna band kar dete hain.',
-    'Dard woh nahi jo unhone diya, dard woh hai jo hum khud ko dete rahe.',
-    'Mohabbat ka sabse bada jhooth: main hamesha rahunga.',
-    'Jo tumhare bina khush hai, uske liye tum sirf ek aadat the.',
-    'Raat bhar jaag kar socha, subah usne kisi aur ko good morning bhej diya.',
-    'Aaj bhi uski profile dekhta hoon, jaise koi ilaaj ho.',
-    'Uski yaadon se nafrat hai, par unhe bhoolna bhi nahi aata.',
-    'Pyar mein haar tab hoti hai jab tum sab kuch do, aur woh kuch bhi na de.',
-    'Woh lauta, par sirf apni zaroorat ke liye.',
-    'Sabse mushkil kaam: usse bhoolna jo tumhare liye sab kuch tha.',
-    'Ek din meri aadat ho jaoge, par main tab tak ja chuka hounga.',
-    'Tumse door hokar samajh aaya, main akela bhi khush reh sakta hoon.',
-    'Jise tum mera samajhte ho, woh kisi aur ka sabse accha hai.',
-    'Chup rehna sabse bada jawab hai, par usse dard kam nahi hota.',
-    'Jis rishte mein tumhe samjhana padta hai, woh rishta hi nahi.',
-    'Uski muskurahat kisi aur ke naam ho gayi, mera sab kuch wahi reh gaya.',
-    'Jo dil toda usne kaha move on karo, jaise koi switch ho.',
-    'Mujhe uski aadat nahi thi, mujhe uske hone ki aadat thi.',
-    'Woh mujhe bhool gaya, main khud ko nahi bhoola.',
-    'Pyar ke baad dosti wahi nibhata hai jisne pyar jhootha kiya ho.',
-    'Tumhare naam se ab bhi ruk jaata hoon, bas pehchanta nahi.',
-    'Maine tumse pyar kiya tha, tumne mujhse waqt maanga tha.',
-    'Uski shaadi ki khabar pe laga, mera naam bhi kisi aur ka ho gaya.',
+    'The person who broke you is not waiting for you to heal.',
+    'You did not lose them. You lost the version of yourself that needed them.',
+    'Love is not enough when respect left first.',
+    'Stop watering a dead plant and calling it loyalty.',
+    'They did not change. You just finally saw them.',
+    'The hardest part is not leaving. It is accepting they let you.',
+    'You miss them. They miss being needed.',
+    'Some people are lessons, not destinations.',
+    'Healing is not forgetting. It is remembering without bleeding.',
+    'You gave them your best and they called it not enough.',
+    'Do not chase closure from someone who opened the wound.',
+    'The right person does not make you beg for basic respect.',
+    'Your worth was never on trial. You just put it there.',
+    'They came back. Only because the replacement failed.',
+    'Stop calling it love when it only hurts you.',
+    'You are not hard to love. They were just not capable.',
+    'The silence after they leave is louder than any fight.',
+    'Let them go. The version of you that stayed was dying.',
+    'You cannot heal in the same place you got sick.',
+    'Their new happiness is not your failure.',
+    'You stayed loyal to someone who was shopping.',
+    'Grief is love with nowhere to go.',
+    'Do not set yourself on fire to keep someone warm.',
+    'The apology you never got is not your burden to carry.',
+    'You were not too much. They were too little.',
+    'Walking away is not weakness. Staying was.',
+    'The person who leaves teaches you what you are worth.',
+    'Stop romanticizing someone who only loved the idea of you.',
+    'You do not need them to admit it. You already know.',
+    'Some doors close so you stop bleeding on the floor.',
   ],
-
   growth: [
-    'Jo aaj takleef hai, wahi kal ki taakat hai.',
-    'Motivation ek din ka hota hai, discipline har din ka.',
-    'Log tab dekhte hain jab tum jeet jaate ho, koi nahi dekhta jab tum uth rahe hote ho.',
-    'Tumhara 6 AM kisi aur ke 12 PM se zyada powerful hai.',
-    'Jo kaam mushkil hai, wahi tumhe baaki sab se alag karta hai.',
-    'Rone ke baad bhi kaam karna, yahi asli mansikta hai.',
-    'Tumhari zindagi tumhare decisions ka hisaab hai, tumhare excuses ka nahi.',
-    '5 saal baad tum apne aaj ke faislon se kaamyaab ya sharminda hoge.',
-    'Jab tak khud pe invest nahi karoge, koi tumhe nahi khareedega.',
-    'Mood ka intezar mat kar, mood kaam karne se aata hai.',
-    'Tum woh nahi ho jo log bolte hain, tum woh ho jo tum roz karte ho.',
-    'Din kharab tha, zindagi nahi.',
-    'Sapne wahi poore hote hain jinpe roz kaam hota hai.',
-    'Har kisi ko samjhana zaroori nahi, khud ko sabit karna hai.',
-    'Ek saal ki mehnat, dus saal ki aadat badal deti hai.',
-    'Duniya tumhari kahani tab sunegi jab tum result doge.',
-    'Jo aadmi apne time pe control kar leta hai, usse koi nahi rok sakta.',
-    'Tumhe koi nahi bachaega. Aur yahi tumhari sabse badi taakat hai.',
-    'Shuru karna mushkil hai, kyunki sabse zyada dar wahi hota hai.',
-    'Jo roz 1% sudhar gaya, woh saal mein 37 guna badh gaya.',
-    'Perfect din ka intezar mat kar, aaj se shuru kar.',
-    'Logon ko jawab mat do, result do.',
-    'Mehnat chhupti nahi, bas der se dikhti hai.',
-    'Tumhari neend aur tumhara focus, dono ek hi cheez chura rahe hain.',
-    'Sasta khareed kar pachhtaoge, mehnga seekh kar aage nikal jaoge.',
-    'Aaj ka aaram, kal ka pachhtawa hai.',
+    'Discipline is choosing what you want most over what you want now.',
+    'Nobody is coming to save you. That is your advantage.',
+    'Your routine is your real resume.',
+    'Motivation is a guest. Discipline lives here.',
+    'You do not need more time. You need fewer excuses.',
+    'The work you avoid is the life you want.',
+    'Comfort is the enemy wearing a friendly face.',
+    'Show up tired. Show up scared. Just show up.',
+    'Your future is built in the hours nobody sees.',
+    'Excuses sound smart until results do not come.',
+    'You cannot outwork a bad habit. You have to kill it.',
+    'The version of you that quits is not the one who wins.',
+    'Small steps daily beat giant leaps never taken.',
+    'Pain is temporary. Regret is permanent.',
+    'You are one decision away from a different life.',
+    'Stop waiting for the right moment. Make this one right.',
+    'Your habits are voting for the person you become.',
+    'The cost of discipline is less than the cost of regret.',
+    'Nobody owes you anything. That is freedom.',
+    'Work in silence. Let results make the noise.',
+    'You do not rise to your goals. You fall to your systems.',
+    'Tired is not an excuse. Tired is the test.',
+    'The gym does not care about your feelings.',
+    'Consistency beats talent when talent gets lazy.',
+    'Your comfort zone is a slow death with good lighting.',
+    'Every excuse is a brick in the wall of your failure.',
+    'Discipline is self respect in action.',
+    'You are not behind. You are just starting today.',
+    'The grind does not care who you are. It only cares that you show up.',
+    'Stop negotiating with yourself.',
   ],
-
   motivation: [
-    'Koi tumhare liye nahi aayega, khud ke liye aana padta hai.',
-    'Log tumse jalte hain kyunki tum woh kar rahe ho jo unki himmat nahi hui.',
-    'Har kisi ko jawab dena zaroori nahi, kuch log sirf bahane khareedte hain.',
-    'Tumhari value tumhare kaam se hai, tumhari kahaniyon se nahi.',
-    'Jis din samajh liya ki koi nahi aayega, us din jeetna shuru ho gaya.',
-    'Maa-baap ke alawa koi bhi tumhare liye free nahi hai.',
-    'Chup raho, jab tak tumhara kaam bolna shuru na kare.',
-    'Jo tumhe neeche dikhata hai, woh tumhari aukaat nahi, uski nazar hai.',
-    'Tumhe har kisi se pyar karne ki zaroorat nahi, sirf khud se mat karna band.',
-    'Duniya tumhe tab respect degi jab tum khud ko respect dena shuru karoge.',
-    'Sahi waqt ka intezar mat kar, sahi waqt banaya jaata hai.',
-    'Log badalte nahi, bas tum unke liye pehle jaisa nahi rehte.',
-    'Jise tum sab kuch batate ho, wahi ek din sab kuch use karta hai.',
-    'Rishte tabhi mazboot hote hain jab dono ko zaroorat ho, ek ko nahi.',
-    'Jo tumhe akela chhod gaya, woh tumhari taakat ka sabse bada sabak tha.',
-    'Logon ki raay tumhari zindagi ka hisaab nahi.',
-    'Himmat ka matlab dar ka na hona nahi, dar ke saath bhi chalna hai.',
-    'Agar koi tumhe chhota samajhta hai, uski nazar chhoti hai, tum nahi.',
-    'Tumhari zindagi tumhari hai, kisi aur ki script mat jiyo.',
-    'Kuch log sirf tab yaad aate hain jab unka kaam padta hai.',
-    'Aaj jo tumse door hai, kal wo tumhari misaal hogi.',
-    'Mehnat karna imaan hai, dikhawa nahi.',
-    'Jo tumhare saath sach bolta hai, usse kabhi mat chhodo.',
-    'Tum har kisi ko khush nahi kar sakte, aur tumhe karna bhi nahi chahiye.',
-    'Zindagi mein sabse bada risk: kuch bhi risk na lena.',
-    'Jo apne aap se jhooth bolta hai, duniya usse sach nahi sunati.',
+    'Nobody remembers the person who almost tried.',
+    'Your potential is worthless until you use it.',
+    'The world does not reward effort. It rewards results.',
+    'Stop asking for permission to be great.',
+    'Your excuses are more creative than your work.',
+    'The only person you are competing with is yesterday you.',
+    'Action cures fear. Thinking deepens it.',
+    'You are not unlucky. You are unprepared.',
+    'Dreams do not work unless you do.',
+    'The hardest conversation is the one with yourself.',
+    'Stop confusing motion with progress.',
+    'Your talent is not rare. Your work ethic is.',
+    'Failure is not the opposite of success. It is the path.',
+    'You do not need a plan. You need to start.',
+    'The person you want to be is built by the person you are today.',
+    'Stop waiting to feel ready. You never will.',
+    'Your time is the only currency you cannot earn back.',
+    'Be so good they cannot ignore you.',
+    'The only way out is through the work.',
+    'You are not too old. You are just not started.',
+    'Stop blaming the system for your lack of system.',
+    'Greatness is boring. It is just showing up.',
+    'Your network is your net worth only if you bring value.',
+    'Stop collecting advice. Start collecting scars.',
+    'The pain of discipline weighs ounces. The pain of regret weighs tons.',
+    'You are one yes away. But you have to ask.',
+    'Do not wait for motivation. Create momentum.',
+    'Your comfort is costing you your calling.',
+    'The world is not unfair. It is just not about you.',
+    'Become the person who does not need motivation.',
   ],
 };
 
 const CTAS = {
   heartbreak: [
-    'Tag karo usko jo ye feel karata hai.',
-    'Ek shabd mein batao: aaj kaise ho?',
-    'Save karo, dil bhaari ho to padh lena.',
-    'Aapki kahani kya hai? Comment karo.',
+    'Tag someone who needs to read this.',
+    'Save this for the night you cannot sleep.',
+    'Which line hit hardest? Comment below.',
+    'Send this to the person you are trying to forget.',
   ],
   growth: [
-    'Save karo, kal subah padhna.',
-    'Kaunsi line sabse zyada chubhi? Comment karo.',
-    'Tag karo usko jo aaj haar maan raha hai.',
-    'Save karo aur ek hafte baad dobara padhna.',
+    'Save this. Read it tomorrow morning.',
+    'Which line cut the deepest? Comment below.',
+    'Tag someone who is about to quit.',
+    'Save and reread in a week.',
   ],
   motivation: [
-    'Share karo us dost ke saath jise ye sunni thi.',
-    'Sahi laga? Ek dil chhod do.',
-    'Comment mein batao: kaunsi line sach lagi?',
-    'Save karo, jab himmat toote tab padhna.',
+    'Send this to the friend who needs it.',
+    'Hit like if this was for you.',
+    'Comment which line was true for you.',
+    'Save this for the day you want to quit.',
   ],
 };
 
 const HASHTAGS = {
   heartbreak: [
-    '#heartbreak', '#pyar', '#sadquotes', '#hindiquotes', '#breakup',
-    '#emotional', '#dil', '#relationshipquotes', '#movingon',
+    '#heartbreak', '#breakup', '#sadquotes', '#relationshipquotes', '#movingon',
+    '#emotional', '#lettinggo', '#realtalk', '#pain',
   ],
   growth: [
-    '#growth', '#discipline', '#mindset', '#motivation', '#hindiquotes',
-    '#success', '#hustle', '#selfimprovement', '#dailyhabits',
+    '#growth', '#discipline', '#mindset', '#motivation', '#success',
+    '#hustle', '#selfimprovement', '#dailyhabits', '#grind',
   ],
   motivation: [
-    '#motivation', '#zindagi', '#sach', '#hindiquotes', '#inspiration',
-    '#mindset', '#lifequotes', '#reality', '#strongmind',
+    '#motivation', '#realtalk', '#lifequotes', '#inspiration',
+    '#mindset', '#reality', '#strongmind', '#truth', '#success',
   ],
 };
 
@@ -151,6 +159,8 @@ const CLICHE = [
   'stay strong', 'work hard', 'be yourself', 'everything happens for a reason',
   'let it go', 'positive vibes', 'alpha male', 'sigma male', 'chad',
   'trust the process', 'good things take time', 'your time will come',
+  'keep going', 'stay humble', 'dream big', 'hustle hard', 'rise and grind',
+  'good vibes only', 'live laugh love', 'no pain no gain', 'failure is success',
 ];
 
 // ------------------------------------------------------------- helpers
@@ -309,11 +319,8 @@ function acceptLine(line, { mood, recent }) {
   const pool = [...seedBank(mood), ...recent];
   if (pool.some((p) => similar(p, text))) return null;
 
-  // Require at least one Hinglish marker, so the model cannot drift into plain
-  // English motivational poster copy.
-  if (!/\b(hai|hain|ho|hoga|hogi|kar|karo|karta|karti|nahi|na|tum|tumhe|main|mujhe|woh|wo|yeh|ye|aur|se|ko|ki|ka|tha|thi|raha|rahi|jaise|sirf|bas|bhi|jo)\b/i.test(text)) {
-    return null;
-  }
+  // English only: reject anything that is not Roman script (already handled
+  // above via the Devanagari check) and anything too short to be a real line.
   return text;
 }
 
@@ -326,7 +333,7 @@ async function expand(theme, count = 14) {
   const recent = store.recentLines(30);
   const avoid = [...seedBank(mood).slice(0, 14), ...recent.slice(0, 10)];
 
-  const prompt = `You write original one-line quotes for an Instagram Reels page in Indian Hinglish (Roman script).
+  const prompt = `You write original one-line quotes for an Instagram Reels page. Language: ENGLISH ONLY. No Hindi, no Hinglish, no other language.
 
 THEME: ${theme.replace(/_/g, ' ')}
 EMOTIONAL ANGLE: ${tone}
@@ -334,11 +341,11 @@ EMOTIONAL ANGLE: ${tone}
 Write ${count} brand-new lines on this angle.
 
 STYLE
-- Roman-script Hinglish: Hindi words spelled in English letters. Natural spoken Hindi, not translated English.
+- Hard-hitting, direct, uncomfortable truth. Short sentences that land like a punch.
 - 8 to 16 words. Exactly one sentence. No emojis, no hashtags, no quotation marks, no em dashes.
-- Specific and concrete. Second person ("tum") or first person. Real detail beats abstract advice.
+- Specific and concrete. Second person ("you") or first person. Real detail beats abstract advice.
 - A person should want to send it to someone at 1 AM.
-- Rarely, a line may be fully English if it is genuinely stronger that way.
+- No motivational poster fluff. Say the thing people are afraid to say.
 
 HARD RULES
 - Never use: ${CLICHE.join(', ')}.
@@ -460,7 +467,7 @@ async function buildCaption({ theme, mood, line, credit = '' }) {
   let hook = '';
 
   const out = await chatJson(
-    `You manage the Instagram page @${String(config.channel.handle || '').replace('@', '')} (Hinglish quotes for young Indian adults).
+    `You manage the Instagram page @${String(config.channel.handle || '').replace('@', '')} (hard-hitting English quotes).
 
 Quote for this Reel:
 "${line}"
@@ -468,12 +475,12 @@ Quote for this Reel:
 Write the post caption.
 
 RULES
-- 1 or 2 short sentences. Maximum 140 characters total. Roman Hinglish or English, matching the quote's language.
-- Do not repeat the quote. Do not start with "This quote" or "Ye quote".
+- 1 or 2 short sentences. Maximum 140 characters total. English only, matching the quote's language.
+- Do not repeat the quote. Do not start with "This quote".
 - It should feel like a caption a real person wrote, not a motivational page.
 - Optionally one short call to action (save, send to someone, comment). At most one.
 - No emojis at the start. Maximum one emoji, only if it truly fits.
-- Then 9 hashtags: 2 broad Hinglish quote tags, 3 specific to this theme, 2 about feelings/mindset, 2 discovery tags for Indian audiences. Lowercase, no spaces, no duplicates.
+- Then 9 hashtags: 2 broad quote tags, 3 specific to this theme, 2 about feelings/mindset, 2 discovery tags. Lowercase, no spaces, no duplicates.
 
 Return JSON only:
 {"hook":"...","hashtags":["#...","#..."]}`,
