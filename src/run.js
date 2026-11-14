@@ -20,6 +20,7 @@ const notify = require('./notify');
 const host = require('./host');
 const ig = require('./publish/instagram');
 const { publishVideo, normalise, firstLine, uploadMode } = require('./publish');
+const yt = require('./publish/youtube');
 const { validateVideo } = require('./video');
 const { THEMES, THEME_KEYS, VISUAL_VARIANTS } = require('./themes');
 
@@ -585,6 +586,26 @@ async function run({ slot = '', theme = '', dryRun = false, force = false } = {}
     for (const r of results) {
       if (r.ok) result.notes.push(`  acct ${r.acct}: ${r.mediaId}`);
     }
+    // -------- YouTube Shorts (additive, never fails the Instagram run)
+    if (yt.isConfigured() && !dryRun) {
+      try {
+        const ytResult = await yt.publishShort({
+          videoPath: built.outPath,
+          title: built.line,
+          description: built.caption,
+          tags: built.hashtags || [],
+        });
+        store.updatePost(built.postId, { yt_id: ytResult.videoId });
+        result.notes.push(`youtube: ${ytResult.url}`);
+        log.ok(`youtube: published Short ${ytResult.videoId}`);
+      } catch (e) {
+        log.warn(`youtube: publish failed (${String(e.message).slice(0, 200)})`);
+        result.notes.push(`youtube: failed - ${String(e.message).slice(0, 120)}`);
+      }
+    } else if (!yt.isConfigured() && !dryRun) {
+      result.notes.push('youtube: not configured (YT_CLIENT_ID/YT_CLIENT_SECRET/YT_REFRESH_TOKEN missing)');
+    }
+
     store.finishRun(runId, { status: result.status, postId: built.postId });
     return result;
     return result;

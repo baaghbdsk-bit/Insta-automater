@@ -100,6 +100,7 @@ async function cmdDoctor() {
   }
 
   const { uploadMode } = require('./publish');
+  const yt = require('./publish/youtube');
   const mode = uploadMode();
   log.info(`upload mode: ${mode}`);
   if (mode === 'url') {
@@ -111,6 +112,12 @@ async function cmdDoctor() {
     }
   } else {
     log.ok('r2: not required (direct resumable upload)');
+  }
+
+  if (yt.isConfigured()) {
+    log.ok('youtube: configured (Shorts publishing enabled)');
+  } else {
+    log.info('youtube: not configured (optional, set YT_CLIENT_ID/YT_CLIENT_SECRET/YT_REFRESH_TOKEN)');
   }
 
   const lib = library.libraryStatus();
