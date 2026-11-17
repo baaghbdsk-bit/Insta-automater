@@ -50,3 +50,29 @@ test('seed lines are Roman script and within reel length', () => {
     }
   }
 });
+
+test('patternSignature groups structurally identical lines', () => {
+  const a = lines.patternSignature('You are not stuck. You are comfortable.');
+  const b = lines.patternSignature('You are not late. You are patient.');
+  assert.equal(a, b, 'same skeleton should share a signature');
+
+  const c = lines.patternSignature('She read the message twice and put the phone face down.');
+  assert.notEqual(a, c, 'a different skeleton must not collide');
+});
+
+test('conceptSimilar flags a reused idea in fresh words', () => {
+  assert.equal(
+    lines.conceptSimilar(
+      'The apology was for their guilt. You were just standing in the room.',
+      'Their apology was guilt, you were the room.'
+    ),
+    true
+  );
+  assert.equal(
+    lines.conceptSimilar(
+      'The apology was for their guilt. You were just standing in the room.',
+      'Your discipline decides how the next five years look.'
+    ),
+    false
+  );
+});

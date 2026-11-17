@@ -17,6 +17,11 @@ const { log } = require('./util');
 const { THEMES, THEME_KEYS, themeFor } = require('./themes');
 const store = require('./db');
 
+// A/B: v1 is the original pipeline and stays the default. v2 adds writing
+// structures, an impact judge and claim verification. Nothing outside the
+// v2 branch changes behaviour.
+const V2 = process.env.LINES_V2 === '1';
+
 // ------------------------------------------------------------- seed bank
 
 const SEED = {
@@ -193,6 +198,83 @@ function isCliche(line) {
   return CLICHE.some((c) => low.includes(' ' + c + ' '));
 }
 
+// ------------------------------------------------------------- impact (v2)
+
+const STRUCTURES = ['reversal', 'observation', 'insight', 'visual', 'minimal'];
+
+const TIRED_OPENERS = [
+  /^if you\b/i,
+  /^when you\b/i,
+  /^(most|some|many) people\b/i,
+  /^the moment\b/i,
+  /^in a world\b/i,
+  /^you (are|were|have|had|lose|waste|keep|need)\b/i,
+];
+
+// Negations ("not", "never", "no") are deliberately absent: they carry meaning.
+const STOPWORDS = new Set([
+  'a', 'an', 'the', 'and', 'or', 'if', 'when', 'while', 'of', 'to', 'in', 'on',
+  'for', 'with', 'from', 'by', 'at', 'as', 'is', 'are', 'was', 'were', 'be',
+  'been', 'this', 'that', 'it', 'its', 'your', 'yours', 'their', 'them', 'his',
+  'her', 'hers', 'our', 'ours', 'my', 'me', 'do', 'does', 'did', 'so', 'than',
+  'then', 'there', 'here', 'what', 'which', 'who', 'how', 'why', 'just', 'only',
+  'still', 'even', 'into', 'over', 'under', 'own', 'same', 'about',
+]);
+
+const PRON_FIRST = new Set([
+  'i', 'you', 'he', 'she', 'they', 'we', 'it', 'someone', 'some', 'everyone',
+  'nobody', 'nothing', 'the', 'this', 'that', 'most', 'many',
+]);
+
+/**
+ * Structural signature: opener class | clause link | sentence count | shape.
+ * Shape maps each word to s (<=3), m (<=6) or l (7+ chars) and collapses runs,
+ * so "you waste your best words" and "you lose the game" read as the same
+ * skeleton — which is exactly what the first-two-words check kept missing.
+ */
+function patternSignature(line) {
+  const ws = normalise(line).split(' ').filter(Boolean);
+  const first = ws[0] || '';
+  const opener = PRON_FIRST.has(first) ? first : 'other';
+  const link = /\b(but|because|until|when|if|and|yet)\b/i.test(line) ? 'link' : 'nolink';
+  const sentences = String(line).split(/(?<=[.!?])\s+/).filter(Boolean).length;
+  const shape = ws
+    .map((w) => (w.length <= 3 ? 's' : w.length <= 6 ? 'm' : 'l'))
+    .join('')
+    .replace(/(.)\1+/g, '$1');
+  return `${opener}|${link}|${sentences}|${shape}`;
+}
+
+/** Content words only. Used to catch the same idea wearing different words. */
+function conceptKey(line) {
+  return new Set(
+    normalise(line)
+      .split(' ')
+      .filter((w) => w.length > 2 && !STOPWORDS.has(w))
+  );
+}
+
+/** Soft idea-level similarity at a lower bar than similar()'s 0.62. */
+function conceptSimilar(a, b, threshold = 0.35) {
+  const A = conceptKey(a);
+  const B = conceptKey(b);
+  if (!A.size || !B.size) return false;
+  let inter = 0;
+  for (const w of A) if (B.has(w)) inter++;
+  return inter / (A.size + B.size - inter) >= threshold;
+}
+
+/** Ranking tie-breaker only. The impact judge decides the order. */
+function structureScore(line, structure, structCount) {
+  let s = 0;
+  if (TIRED_OPENERS.some((re) => re.test(String(line).trim()))) s -= 2;
+  const n = normalise(line).split(' ').filter(Boolean).length;
+  if (n >= 8 && n <= 14) s += 1;
+  if (n > 18) s -= 1;
+  if (!(structCount[structure] || 0)) s += 1;
+  return s;
+}
+
 const DEVANAGARI = /[\u0900-\u097F]/;
 const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{2190}-\u{21FF}]/u;
 
@@ -325,10 +407,17 @@ function acceptLine(line, { mood, recent }) {
 }
 
 /**
- * Ask for fresh lines for a theme, filter hard, persist the survivors.
- * Returns the number of lines stored.
+ * Ask for fresh lines for a theme and persist the survivors.
+ * Dispatches to the legacy pipeline by default, or to v2 when LINES_V2=1.
  */
 async function expand(theme, count = 14) {
+  return V2 ? expandV2(theme, count) : expandLegacy(theme, count);
+}
+
+/**
+ * v1 pipeline — original behaviour, untouched. Filter hard, keep survivors.
+ */
+async function expandLegacy(theme, count = 14) {
   const { mood, tone } = themeMeta(theme);
   const recent = store.recentLines(30);
   const avoid = [...seedBank(mood).slice(0, 14), ...recent.slice(0, 10)];
@@ -372,6 +461,291 @@ Return JSON only: {"lines":["...","...","..."]}`;
     if (store.insertLine({ theme, line, norm: normalise(line), engine: 'llm' })) stored++;
   }
   log.info(`lines: ${theme} -> ${stored}/${out.lines.length} kept`);
+  return stored;
+}
+
+// ------------------------------------------------------------- v2 pipeline
+
+/**
+ * The v2 writing brief. Quality of the line outranks originality of the idea:
+ * a familiar truth said precisely beats a strange thought said blandly. The
+ * five structures exist so the batch cannot collapse into one rhythm.
+ */
+const PROMPT_V2 = (theme, tone, count, avoid) => `You write one-line quotes that stop a thumb mid-scroll.
+Quality of the line matters more than originality of the idea.
+
+THEME: ${theme.replace(/_/g, ' ')}
+EMOTIONAL ANGLE: ${tone || ''}
+
+Write ${count} lines.
+
+THE TARGET REACTION
+Someone reads it, stops, reads it again, and thinks: wait — what?
+The second read must hit harder than the first. A line that can be understood
+and forgotten in one pass is not good enough.
+
+FIVE STRUCTURES — pick whichever makes each thought land hardest. Use at least
+three of the five in this batch; no structure may be more than 40% of your lines.
+
+1. UNEXPECTED REVERSAL — beat one sets an expectation, beat two flips it.
+   - They did not apologize to heal you. They apologized to stop feeling like a bad person.
+   - You were not the love of their life. You were the wait between two people who were.
+
+2. BRUTAL OBSERVATION — the uncomfortable thing, said outright, no cushioning.
+   - Everyone wants your truth until it becomes inconvenient for them.
+   - Your comfort zone is not free. You pay for it in years.
+
+3. PSYCHOLOGICAL INSIGHT — the hidden motive behind visible behaviour.
+   - They do not miss you. They miss feeling important to you.
+   - The apology was for their guilt. You were just standing in the room.
+
+4. VISUAL STORYTELLING — a scene carries the meaning, never explained.
+   - She read the message twice and put the phone face down.
+   - The last-seen stayed at 2:14 for three days.
+
+5. MINIMALIST PUNCHLINE — 5 to 8 words, one sentence, hard stop.
+   - You are not stuck. You are comfortable.
+   - You were someone's backup plan.
+
+BAD — flat lines we are replacing (every theme produces these):
+- People show you exactly who they are the moment they no longer need anything from you.  (no edge)
+- Your potential is worthless until you use it.  (fortune cookie)
+- Your future is built in the hours nobody sees.  (poster line)
+- You waste your best words on people who only understand the language of being ignored.  (reads deep, says nothing)
+
+WHAT SEPARATES GOOD FROM BAD
+- Specific beats general. One exact detail is worth ten adjectives.
+- Say the thing people think but will not post.
+- Do not explain the meaning. Let the line carry it.
+- Cut the last four words of any line that starts wrapping up neatly.
+- A familiar truth said precisely beats a strange idea said blandly. Never
+  trade impact for novelty.
+
+RULES
+- Every line 18-118 characters.
+- Per structure: reversal 8-16 words in two sentences (second sentence 3-8
+  words); observation and insight 6-16 words; visual 5-14 words with no
+  explanatory second half; minimal 5-8 words, one sentence.
+- Imagery is optional. Use a concrete, photographable image only where it
+  sharpens the thought. Never force a scene onto a line that lands harder as
+  a statement.
+- Vary openings. Never start a line with: "If you", "When you", "Most people",
+  "Some people", "The moment", "In a world".
+- Second person ("you") OR first person ("I"), never both in one line.
+- No emojis, hashtags, quotation marks, parentheses, em dashes, semicolons.
+
+CLAIMS — tag every line:
+- "none"       opinion or metaphor, nothing to verify
+- "behavioral" a claim about human motives or behaviour
+- "factual"    anything checkable: statistics, science, history, medical,
+               "studies show", named diagnoses
+- NEVER write "factual" lines. They are rejected by the system.
+- Behavioural lines must describe observable behaviour. No clinical labels
+  (narcissist, sociopath, trauma response, attachment style).
+
+HARD RULES
+- Never use: ${CLICHE.join(', ')}.
+- Never restate these ideas even in fresh words:
+    - people show you who they are when they need nothing from you
+    - nobody is coming to save you
+    - you were not too much / not hard to love
+    - know your worth / your worth was never on trial
+    - actions speak louder than words
+    - some people are lessons, not destinations
+- No politics, religion, caste, festivals, celebrities, brands, money figures.
+- No abuse, slurs, threats, self-harm.
+- Do not copy or lightly reword any line below.
+
+ALREADY WRITTEN (avoid the wording and the underlying idea):
+${avoid.map((l) => `- ${l}`).join('\n')}
+
+Return JSON only:
+{"lines":[{"line":"...","structure":"reversal|observation|insight|visual|minimal","claim":"none|behavioral|factual"}]}`;
+
+/**
+ * Impact judgement. Code cannot measure this: a contrast word is not an earned
+ * turn and a three-word clause is not rhythm. One extra call per expansion,
+ * and expansions are rare because the pool refills roughly every 14 posts.
+ * Returns a Map(line -> 1..10), or null when the judge is unavailable.
+ */
+async function judgeLines(lines) {
+  if (!llm.apiKey || !lines.length) return null;
+  const out = await chatJson(
+    `You are a ruthless social media editor. Score each line 1-10 for IMPACT.
+
+Ask one question: would a stranger stop scrolling, screenshot this, and send
+it to a friend at 1 AM?
+
+Punish: generic wisdom, corporate phrasing, ideas seen a thousand times,
+lines that explain instead of showing, anything that reads like a caption
+factory wrote it.
+Reward: a jolt of recognition, an earned turn, specific detail, and a line
+with mouth-feel when read aloud.
+
+${lines.map((l, i) => `${i + 1}. ${l}`).join('\n')}
+
+Return JSON only: {"scores":[{"n":1,"score":7},{"n":2,"score":4}]}`,
+    { temperature: 0.2 }
+  );
+  if (!out || !Array.isArray(out.scores)) {
+    log.warn('lines: impact judge unavailable, ranking by structure only');
+    return null;
+  }
+  const map = new Map();
+  for (const s of out.scores) {
+    const line = lines[Number(s.n) - 1];
+    const score = Number(s.score);
+    if (line && Number.isFinite(score)) map.set(line, score);
+  }
+  return map;
+}
+
+/**
+ * Claim verification, deliberately a separate prompt from the writer so the
+ * model cannot rubber-stamp itself. Behavioural claims that cannot be verified
+ * are dropped rather than published unvetted.
+ */
+async function verifyClaims(candidates) {
+  const flagged = candidates.filter((c) => c.claim === 'behavioral');
+  if (!flagged.length) return candidates;
+
+  if (!llm.apiKey) {
+    log.warn('claims: no LLM key, dropping behavioural claims');
+    return candidates.filter((c) => c.claim !== 'behavioral');
+  }
+
+  const out = await chatJson(
+    `You are a fact-checker for an Instagram quotes page. For each line, decide
+if its claim about human behaviour is a defensible observation or an overreach:
+pseudo-science, clinical diagnosis, a universal claim with obvious
+counterexamples, or something that would embarrass the page if challenged.
+
+${flagged.map((c, i) => `${i + 1}. ${c.line}`).join('\n')}
+
+Return JSON only:
+{"verdicts":[{"n":1,"verdict":"keep","reason":"short"},{"n":2,"verdict":"drop","reason":"short"}]}`,
+    { temperature: 0 }
+  );
+
+  if (!out || !Array.isArray(out.verdicts)) {
+    log.warn('claims: verifier unavailable, dropping behavioural claims');
+    return candidates.filter((c) => c.claim !== 'behavioral');
+  }
+
+  const drop = new Set();
+  for (const v of out.verdicts) {
+    const c = flagged[Number(v.n) - 1];
+    if (c && String(v.verdict).toLowerCase() === 'drop') {
+      drop.add(c.line);
+      log.info(`claims: dropped "${c.line.slice(0, 55)}..." (${v.reason || 'unverified'})`);
+    }
+  }
+  return candidates.filter((c) => !drop.has(c.line));
+}
+
+/**
+ * v2 pipeline: structure-aware generation, impact judged by a second prompt,
+ * behavioural claims checked by a third, then ranked with enough diversity
+ * pressure that no single skeleton dominates the batch.
+ */
+async function expandV2(theme, count = 14) {
+  const { mood, tone } = themeMeta(theme);
+  const recent = store.recentLines(30);
+  const avoid = [...seedBank(mood).slice(0, 14), ...recent.slice(0, 10)];
+
+  const out = await chatJson(PROMPT_V2(theme, tone, count + 6, avoid), {
+    temperature: 1.05,
+  });
+  if (!out || !Array.isArray(out.lines)) {
+    log.warn(`lines: ${theme} generation returned nothing`);
+    return 0;
+  }
+
+  // Tier 1 — the original safety filters, called unchanged.
+  const survivors = [];
+  for (const entry of out.lines) {
+    const text = typeof entry === 'string' ? entry : entry && entry.line;
+    const structure = (entry && entry.structure) || 'observation';
+    const claim = (entry && entry.claim) || 'none';
+
+    if (claim === 'factual') {
+      log.warn(`lines: dropped factual claim: ${String(text).slice(0, 60)}`);
+      continue;
+    }
+    if (!STRUCTURES.includes(structure)) continue;
+
+    const line = acceptLine(text, { mood, recent });
+    if (!line) continue;
+    survivors.push({ line, structure, claim });
+  }
+
+  // Tier 4 — behavioural claims checked by the separate verifier.
+  const verified = await verifyClaims(survivors);
+
+  // Tier 3 — impact judgement is the primary sort.
+  const scores = await judgeLines(verified.map((c) => c.line));
+  for (const c of verified) {
+    c.score = scores ? scores.get(c.line) ?? 5 : 5;
+  }
+  verified.sort(
+    (a, b) =>
+      b.score - a.score ||
+      structureScore(b.line, b.structure, {}) - structureScore(a.line, a.structure, {})
+  );
+
+  // Tier 2 — structural + conceptual diversity, then a partial-fill rescue so
+  // a strict diversity pass can never leave the pool short.
+  const quota = Math.max(2, Math.ceil(count * 0.4));
+  const picked = [];
+  const denied = [];
+  const seenSigs = new Set();
+  const structCount = {};
+
+  for (const c of verified) {
+    if (picked.length >= count) break;
+    if ((structCount[c.structure] || 0) >= quota) {
+      denied.push(c);
+      continue;
+    }
+    const sig = patternSignature(c.line);
+    if (seenSigs.has(sig)) {
+      denied.push(c);
+      continue;
+    }
+    if (recent.some((r) => conceptSimilar(r, c.line))) {
+      denied.push(c);
+      continue;
+    }
+    if (picked.some((p) => conceptSimilar(p.line, c.line))) {
+      denied.push(c);
+      continue;
+    }
+    seenSigs.add(sig);
+    structCount[c.structure] = (structCount[c.structure] || 0) + 1;
+    picked.push(c);
+  }
+
+  for (const c of denied) {
+    if (picked.length >= count) break;
+    picked.push(c);
+  }
+
+  let stored = 0;
+  const mix = {};
+  for (const c of picked) {
+    if (store.insertLine({ theme, line: c.line, norm: normalise(c.line), engine: 'llm' })) {
+      stored++;
+      mix[c.structure] = (mix[c.structure] || 0) + 1;
+    }
+  }
+
+  const avg = picked.length
+    ? (picked.reduce((a, b) => a + b.score, 0) / picked.length).toFixed(1)
+    : 'n/a';
+  log.info(
+    `lines: ${theme} -> ${stored}/${out.lines.length} kept ` +
+      `(avg impact ${avg}, structures ${JSON.stringify(mix)})`
+  );
   return stored;
 }
 
@@ -547,4 +921,10 @@ module.exports = {
   moodOf,
   themeMeta,
   chatJson,
+  // v2 helpers (pure, exported for tests)
+  STRUCTURES,
+  patternSignature,
+  conceptSimilar,
+  conceptKey,
+  structureScore,
 };
