@@ -24,6 +24,66 @@ const V2 = process.env.LINES_V2 === '1';
 
 // ------------------------------------------------------------- seed bank
 
+/**
+ * Fallback bank for when the LLM is unavailable and the generated pool is
+ * empty. Written to the same standard as the v2 writer: one clear feeling and
+ * one concrete detail the reader understands instantly. No riddles.
+ */
+const SEED_FRESH = {
+  heartbreak: [
+    'He still has the spare key. You still check the lock.',
+    'The last message you sent is still on delivered.',
+    'You learned his coffee order and forgot your own.',
+    'The playlist you made for her is still called us.',
+    'You moved the photo frame before you moved on.',
+    'He said he needed space. You are still standing in it.',
+    'Your friends stopped asking about him months ago.',
+    'You sleep on your side and leave the other half made.',
+    'The hoodie in your closet still smells like someone else.',
+    'You type his name and delete it before the search finishes.',
+    'She returned your books but kept the note inside.',
+    'The restaurant you avoid is the one you both liked.',
+    'You kept the ticket stub and threw away the reason.',
+    'You still call his apartment home when you give directions.',
+    'You waited two hours so he could cancel in one line.',
+    'The song ended. You kept the earphones in.',
+  ],
+  growth: [
+    'You made the bed before you felt like it.',
+    'The gym bag is by the door, not in the closet.',
+    'You studied for forty minutes and called it a start.',
+    'Your alarm went off at five. You did not negotiate.',
+    'You walked past the cigarette shop without slowing down.',
+    'Nobody clapped when you kept the promise to yourself.',
+    'You opened the laptop before the excuses woke up.',
+    'The dishes were done before your phone left the pocket.',
+    'You said no once and the sky did not fall.',
+    'You left the party when you said you would.',
+    'The run was slow. You still went.',
+    'You kept the receipt for the course you finished.',
+    'The book sat on your desk until you read ten pages.',
+    'You chose the cheaper option and told no one.',
+    'Your shoes are by the door again, still wet.',
+  ],
+  motivation: [
+    'You missed the deadline and opened the file again.',
+    'The message you are afraid to send is one sentence.',
+    'You practiced the pitch in the car before the room.',
+    'Your first draft was bad. You wrote a second.',
+    'You asked for the raise before you felt ready.',
+    'The application sat unfinished for nine days.',
+    'You showed up with a shaky voice and stayed.',
+    'Nobody saw the ten versions before the yes.',
+    'You ran the last kilometre angry and still finished.',
+    'You started again on a Tuesday that felt like nothing.',
+    'The gym at six was empty. You still showed up.',
+    'You sent the work before the fear finished talking.',
+    'Your hands shook during the interview. You answered anyway.',
+    'You kept the habit on the day it stopped being fun.',
+    'You told the truth in a room that preferred comfort.',
+  ],
+};
+
 const SEED = {
   heartbreak: [
     'The person who broke you is not waiting for you to heal.',
@@ -122,6 +182,11 @@ const SEED = {
     'Become the person who does not need motivation.',
   ],
 };
+
+// Best lines first: the fresh bank is drawn before the older seed lines.
+for (const mood of Object.keys(SEED_FRESH)) {
+  SEED[mood] = [...SEED_FRESH[mood], ...SEED[mood]];
+}
 
 const CTAS = {
   heartbreak: [
@@ -480,9 +545,10 @@ EMOTIONAL ANGLE: ${tone || ''}
 Write ${count} lines.
 
 THE TARGET REACTION
-Someone reads it, stops, reads it again, and thinks: wait — what?
-The second read must hit harder than the first. A line that can be understood
-and forgotten in one pass is not good enough.
+Someone reads it once, stops, and thinks: that is me. Or: how did you know.
+Recognition, not confusion. The meaning must be obvious on the first read.
+Depth can arrive on the second read; the meaning cannot. Never make the reader
+decode a riddle, solve an image, or work out what you were trying to say.
 
 FIVE STRUCTURES — pick whichever makes each thought land hardest. Use at least
 three of the five in this batch; no structure may be more than 40% of your lines.
@@ -499,9 +565,10 @@ three of the five in this batch; no structure may be more than 40% of your lines
    - They do not miss you. They miss feeling important to you.
    - The apology was for their guilt. You were just standing in the room.
 
-4. VISUAL STORYTELLING — a scene carries the meaning, never explained.
+4. VISUAL STORYTELLING — a scene carries an emotion that is obvious at a
+   glance, never explained.
    - She read the message twice and put the phone face down.
-   - The last-seen stayed at 2:14 for three days.
+   - He set two plates, then put one back.
 
 5. MINIMALIST PUNCHLINE — 5 to 8 words, one sentence, hard stop.
    - You are not stuck. You are comfortable.
@@ -512,36 +579,58 @@ BAD — flat lines we are replacing (every theme produces these):
 - Your potential is worthless until you use it.  (fortune cookie)
 - Your future is built in the hours nobody sees.  (poster line)
 - You waste your best words on people who only understand the language of being ignored.  (reads deep, says nothing)
+- Your phone battery lasted for three uninterrupted days.  (riddle: the reader has to work out that nobody called)
+
+DETAIL — THE MIDDLE PATH
+There are three ways a line fails:
+1. No detail, pure assertion: "Nobody is coming to check on you." True, but flat.
+2. Hidden detail: "Your phone battery lasted for three uninterrupted days." A
+   riddle: the reader must work out that nobody called.
+3. Working detail: "He walked home slowly just to delay opening the empty front
+   door." One concrete action, understood at a glance, carrying the feeling.
+Aim for 3 every time. The detail does the emotional work. Never explain it,
+and never make the reader assemble it.
 
 WHAT SEPARATES GOOD FROM BAD
+- Say it straight, but show one real detail. Never trade texture for bluntness.
 - Specific beats general. One exact detail is worth ten adjectives.
 - Say the thing people think but will not post.
-- Do not explain the meaning. Let the line carry it.
+- Do not explain the meaning, but do not hide it either. The line carries one
+  clear feeling; it never asks the reader to solve it.
 - Cut the last four words of any line that starts wrapping up neatly.
 - A familiar truth said precisely beats a strange idea said blandly. Never
   trade impact for novelty.
 
 RULES
 - Every line 18-118 characters.
+- At least ${Math.ceil(count * 0.7)} of the ${count} lines must contain a
+  physical detail: an object, an action, a place or a time. The rest may be
+  direct statements, but they still need a specific angle, not generic advice.
 - Per structure: reversal 8-16 words in two sentences (second sentence 3-8
   words); observation and insight 6-16 words; visual 5-14 words with no
   explanatory second half; minimal 5-8 words, one sentence.
 - Imagery is optional. Use a concrete, photographable image only where it
-  sharpens the thought. Never force a scene onto a line that lands harder as
-  a statement.
+  sharpens the thought and its meaning is instant. Never force a scene onto a
+  line that lands harder as a statement. If a reader could ask "what does that
+  mean?", cut the image and say the feeling directly.
 - Vary openings. Never start a line with: "If you", "When you", "Most people",
   "Some people", "The moment", "In a world".
 - Second person ("you") OR first person ("I"), never both in one line.
 - No emojis, hashtags, quotation marks, parentheses, em dashes, semicolons.
 
-CLAIMS — tag every line:
-- "none"       opinion or metaphor, nothing to verify
-- "behavioral" a claim about human motives or behaviour
+CLAIMS — tag every line with exactly one tag:
+- "none"       anything written TO or ABOUT the reader: what you feel, what
+               you remember, what you do alone at night, what you cannot say.
+               Second-person statements about the reader's inner life are
+               ALWAYS "none". Metaphors, opinions and advice are "none" too.
+- "behavioral" a general claim about how PEOPLE behave or what motivates them,
+               e.g. "people apologise to relieve their own guilt". Observable
+               behaviour only. No clinical labels (narcissist, sociopath,
+               trauma response, attachment style).
 - "factual"    anything checkable: statistics, science, history, medical,
-               "studies show", named diagnoses
+               "studies show", named diagnoses.
 - NEVER write "factual" lines. They are rejected by the system.
-- Behavioural lines must describe observable behaviour. No clinical labels
-  (narcissist, sociopath, trauma response, attachment style).
+- When torn between "none" and "behavioral", choose "none".
 
 HARD RULES
 - Never use: ${CLICHE.join(', ')}.
@@ -573,14 +662,24 @@ async function judgeLines(lines) {
   const out = await chatJson(
     `You are a ruthless social media editor. Score each line 1-10 for IMPACT.
 
-Ask one question: would a stranger stop scrolling, screenshot this, and send
-it to a friend at 1 AM?
+FIRST GATE — clarity. Would a stranger know exactly what the line means after
+one read, in two seconds? If the meaning is a riddle, a decoded image, or a
+sentence that needs re-reading to make sense, score 1-4 no matter how clever
+it looks. Confusion is not depth.
+
+SECOND GATE — texture. Does the line contain one concrete detail (an object,
+an action, a place, a time) that is instantly understood? A line with no
+detail is a poster line: cap it at 5. A line whose detail needs decoding is a
+riddle: cap it at 4.
+
+Then ask: would a stranger stop scrolling, screenshot this, and send it to a
+friend at 1 AM?
 
 Punish: generic wisdom, corporate phrasing, ideas seen a thousand times,
-lines that explain instead of showing, anything that reads like a caption
-factory wrote it.
-Reward: a jolt of recognition, an earned turn, specific detail, and a line
-with mouth-feel when read aloud.
+riddle lines, lines that explain instead of showing, anything that reads like
+a caption factory wrote it.
+Reward: a jolt of recognition, an earned turn, one precise detail that lands
+instantly, and a line with mouth-feel when read aloud.
 
 ${lines.map((l, i) => `${i + 1}. ${l}`).join('\n')}
 
@@ -733,6 +832,9 @@ async function expandV2(theme, count = 14) {
   let stored = 0;
   const mix = {};
   for (const c of picked) {
+    if (process.env.DEBUG) {
+      log.info(`line: [${c.structure}/${c.claim}] ${c.score ?? '-'} ${c.line}`);
+    }
     if (store.insertLine({ theme, line: c.line, norm: normalise(c.line), engine: 'llm' })) {
       stored++;
       mix[c.structure] = (mix[c.structure] || 0) + 1;

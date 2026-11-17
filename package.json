@@ -19,6 +19,7 @@
     "ig:upload-check": "node src/index.js ig:upload-check",
     "photos:fetch": "node src/index.js photos:fetch",
     "music:fetch": "node src/index.js music:fetch",
+    "audio:check": "node src/index.js audio:check",
     "cleanup": "node src/index.js cleanup",
     "token:status": "node src/index.js token:status",
     "test": "node --test tests/*.js"

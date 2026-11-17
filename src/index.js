@@ -9,6 +9,7 @@ const token = require('./setup/token');
 const quotes = require('./quote');
 const lines = require('./lines');
 const library = require('./library');
+const audio = require('./audio');
 const host = require('./host');
 const ig = require('./publish/instagram');
 const insights = require('./insights');
@@ -118,6 +119,17 @@ async function cmdDoctor() {
     log.ok('youtube: configured (Shorts publishing enabled)');
   } else {
     log.info('youtube: not configured (optional, set YT_CLIENT_ID/YT_CLIENT_SECRET/YT_REFRESH_TOKEN)');
+  }
+
+  const audioStatus = audio.status();
+  if (audioStatus.enabled) {
+    log.ok(
+      `instagram audio: native tracks on ` +
+        `(trending ${Math.round(audioStatus.trendingShare * 100)}%, min ${audioStatus.minMs / 1000}s, ` +
+        `intro-energy ${audioStatus.energy ? 'on' : 'off'})`
+    );
+  } else {
+    log.info('instagram audio: off (embedded CC-BY bed; set IG_NATIVE_AUDIO=1 to use it)');
   }
 
   const lib = library.libraryStatus();
@@ -342,6 +354,58 @@ const COMMANDS = {
     log.ok(`${n} track(s) downloaded`);
   },
 
+  /**
+   * Read-only diagnostic: what Instagram's licensed catalogue returns for each
+   * mood, and which results survive the duration/vibe filters.
+   */
+  'audio:check': async (argv) => {
+    const opts = parseArgs(argv);
+    const moods = opts.mood ? [String(opts.mood)] : ['heartbreak', 'growth', 'motivation'];
+    const st = audio.status();
+
+    log.step(`native audio: ${st.enabled ? 'ON (IG_NATIVE_AUDIO=1)' : 'off (embedded CC-BY bed)'}`);
+    log.info(
+      `filters: min ${st.minMs / 1000}s, trending ${Math.round(st.trendingShare * 100)}%, ` +
+        `intro-energy ${st.energy ? 'on' : 'off'}`
+    );
+    if (!ig.isConfigured()) throw new Error('Instagram credentials missing (IG_USER_ID / IG_ACCESS_TOKEN)');
+
+    let usableTotal = 0;
+    for (const mood of moods) {
+      console.log(`\n${mood}`);
+      for (const query of audio.queriesFor(mood)) {
+        try {
+          const items = await audio.searchAudio(query);
+          const usable = items.filter((t) => audio.isUsable(t, mood));
+          usableTotal += usable.length;
+          const sample = usable
+            .slice(0, 2)
+            .map((t) => `${t.title} — ${t.display_artist || '?'}`);
+          console.log(
+            `  "${query}": ${items.length} returned, ${usable.length} usable` +
+              (sample.length ? ` | ${sample.join(' | ')}` : '')
+          );
+        } catch (e) {
+          console.log(`  "${query}": FAILED ${String(e.message).slice(0, 120)}`);
+        }
+      }
+    }
+
+    console.log('\ntrending');
+    try {
+      const items = await audio.searchAudio(null);
+      const usable = items.filter((t) => audio.isUsable(t, 'motivation'));
+      console.log(`  ${items.length} returned, ${usable.length} usable`);
+      for (const t of usable.slice(0, 3)) {
+        console.log(`    ${t.title} — ${t.display_artist || '?'} (${Math.round((t.duration_in_ms || 0) / 1000)}s)`);
+      }
+    } catch (e) {
+      console.log(`  FAILED ${String(e.message).slice(0, 120)}`);
+    }
+
+    if (!usableTotal) process.exitCode = 1;
+  },
+
   'library:status': async () => {
     const s = library.libraryStatus();
     console.log('\nphotos:');
@@ -400,6 +464,7 @@ const USAGE = `usage: node src/index.js <command>
   ig:upload-check verify a direct resumable upload without publishing  [--file path]
   photos:fetch    bulk-download photos into assets/photos
   music:fetch      download the CC-BY music bed
+  audio:check     what Instagram's licensed audio catalogue returns per mood  [--mood]
   library:status  photos / music / line and theme inventory
   cleanup         delete temp files and checkpoint the database
   token:status    token expiry, scopes, account

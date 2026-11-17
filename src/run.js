@@ -19,6 +19,7 @@ const insights = require('./insights');
 const notify = require('./notify');
 const host = require('./host');
 const ig = require('./publish/instagram');
+const audio = require('./audio');
 const { publishVideo, normalise, firstLine, uploadMode } = require('./publish');
 const yt = require('./publish/youtube');
 const { validateVideo } = require('./video');
@@ -326,7 +327,27 @@ async function buildPost({ theme, slot = '' }) {
       queries: meta.queries,
       preferLocal: String(env.PHOTO_FROM_LOCAL || '') === '1',
     });
-    const track = library.pickTrack(meta.mood);
+    let track = null;
+    let musicStart;
+
+    // Native audio is an Instagram-only capability. To keep both platforms on
+    // the same song, the track Meta exposes for download is muxed into the
+    // render (YouTube plays it) while IG gets the licensed version natively.
+    let nativeAudio = null;
+    if (audio.enabled()) {
+      try {
+        nativeAudio = await audio.pickAudio({ mood: meta.mood, theme: meta.theme });
+        log.ok(`audio: ${audio.describe(nativeAudio)} id=${nativeAudio.audioId}`);
+        track = await audio.downloadTrack(nativeAudio);
+        musicStart = 0;
+      } catch (e) {
+        log.warn(`audio: native pick failed, embedded music only (${String(e.message).slice(0, 140)})`);
+        nativeAudio = null;
+        track = null;
+      }
+    }
+
+    if (!track) track = library.pickTrack(meta.mood);
 
     const stamp = new Date().toISOString().slice(0, 10);
     const outPath = path.join(paths.output, `${stamp}-${meta.theme}-${postId}-${slug(picked.line, 24)}.mp4`);
@@ -336,6 +357,7 @@ async function buildPost({ theme, slot = '' }) {
       text: picked.line,
       mood: meta.mood,
       music: track,
+      musicStart,
       outPath,
       duration,
       variant,
@@ -351,11 +373,17 @@ async function buildPost({ theme, slot = '' }) {
         `${(check.info.bytes / 1048576).toFixed(1)} MB`
     );
 
+    const credit = nativeAudio
+      ? `Music: ${nativeAudio.title}${nativeAudio.artist ? ` — ${nativeAudio.artist}` : ''}`
+      : config.music.creditInCaption
+        ? library.MUSIC_CREDIT
+        : '';
+
     const cap = await lines.buildCaption({
       theme: meta.theme,
       mood: meta.mood,
       line: picked.line,
-      credit: config.music.creditInCaption ? library.MUSIC_CREDIT : '',
+      credit,
     });
 
     store.updatePost(postId, {
@@ -364,6 +392,26 @@ async function buildPost({ theme, slot = '' }) {
       caption_text: cap.caption,
       bg_path: photo.path,
       music_path: track,
+      script_json: JSON.stringify({
+        theme: meta.theme,
+        mood: meta.mood,
+        engine: picked.engine,
+        slot,
+        variant,
+        duration: render.total,
+        music: track,
+        musicStart: render.offset,
+        nativeAudio: nativeAudio
+          ? {
+              audio_id: nativeAudio.audioId,
+              title: nativeAudio.title,
+              artist: nativeAudio.artist,
+              query: nativeAudio.query,
+              trending: nativeAudio.trending,
+              energy: nativeAudio.energy,
+            }
+          : null,
+      }),
     });
 
     return {
@@ -380,6 +428,7 @@ async function buildPost({ theme, slot = '' }) {
       duration: render.total,
       photo,
       track,
+      nativeAudio,
       bytes: check.info.bytes,
     };
   } catch (e) {
@@ -496,6 +545,7 @@ async function run({ slot = '', theme = '', dryRun = false, force = false } = {}
     result.line = built.line;
     result.notes.push(`line engine: ${built.engine}, variant: ${built.variant}, ${built.duration}s`);
     result.notes.push(`photo: ${built.photo.provider} [${built.photo.license}]`);
+    if (built.nativeAudio) result.notes.push(`audio: ${audio.describe(built.nativeAudio)}`);
 
     const accounts = ig.configuredAccounts();
     store.updatePost(built.postId, { status: dryRun ? 'built' : 'publishing' });
@@ -524,6 +574,7 @@ async function run({ slot = '', theme = '', dryRun = false, force = false } = {}
           videoPath: built.outPath,
           caption: built.caption,
           account: acct,
+          audioTrack: built.nativeAudio,
           onContainer: (creationId) => store.updatePost(built.postId, { [creationCol]: creationId }),
         });
         results.push({ acct, ok: true, mediaId: published.mediaId, permalink: published.permalink, creationId: published.creationId });

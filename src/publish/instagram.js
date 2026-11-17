@@ -170,13 +170,28 @@ async function recentMedia(limit = 15, account = 0) {
 
 // ---------------------------------------------------------------- publish
 
-async function createUrlContainer({ videoUrl, caption, shareToFeed = true, account = 0 }) {
-  const r = await request('POST', `${igUser(account)}/media`, {
+/**
+ * Meta expects audio_configuration as a JSON-encoded string on the container.
+ * Accepts either the audio module's payload object or an already-encoded value.
+ */
+function audioConfiguration(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  if (!value.audio_id) return '';
+  return JSON.stringify(value);
+}
+
+async function createUrlContainer({ videoUrl, caption, shareToFeed = true, account = 0, audioConfig = null }) {
+  const params = {
     media_type: 'REELS',
     video_url: videoUrl,
     caption,
     share_to_feed: shareToFeed ? 'true' : 'false',
-  }, { account });
+  };
+  const audio = audioConfiguration(audioConfig);
+  if (audio) params.audio_configuration = audio;
+
+  const r = await request('POST', `${igUser(account)}/media`, params, { account });
   if (!r.id) throw new Error('Instagram did not return a container id');
   log.info(`ig: container ${r.id} created (url upload, account ${account})`);
   return r.id;
@@ -187,13 +202,17 @@ async function createUrlContainer({ videoUrl, caption, shareToFeed = true, accou
  * and the rupload URI to POST the bytes to. No video_url is sent: the video is
  * uploaded separately via uploadResumable().
  */
-async function createResumableContainer({ caption, shareToFeed = true, account = 0 }) {
-  const r = await request('POST', `${igUser(account)}/media`, {
+async function createResumableContainer({ caption, shareToFeed = true, account = 0, audioConfig = null }) {
+  const params = {
     media_type: 'REELS',
     upload_type: 'resumable',
     caption,
     share_to_feed: shareToFeed ? 'true' : 'false',
-  }, { account });
+  };
+  const audio = audioConfiguration(audioConfig);
+  if (audio) params.audio_configuration = audio;
+
+  const r = await request('POST', `${igUser(account)}/media`, params, { account });
   if (!r.id) throw new Error('Instagram did not return a container id');
   const uri =
     r.uri ||
@@ -308,21 +327,47 @@ async function mediaInfo(mediaId, account = 0) {
 }
 
 /** Full publish. Returns { creationId, mediaId, permalink }. */
-async function publishReel({ videoUrl, filePath, caption, shareToFeed = true, onContainer, account = 0 } = {}) {
+async function publishReel({
+  videoUrl,
+  filePath,
+  caption,
+  shareToFeed = true,
+  onContainer,
+  account = 0,
+  audioConfig = null,
+} = {}) {
   const direct = !videoUrl && !!filePath;
   let creationId;
   let uri;
 
+  const create = (withAudio) =>
+    direct
+      ? createResumableContainer({ caption, shareToFeed, account, audioConfig: withAudio })
+      : createUrlContainer({ videoUrl, caption, shareToFeed, account, audioConfig: withAudio });
+
   try {
+    const created = await create(audioConfig);
     if (direct) {
-      const created = await createResumableContainer({ caption, shareToFeed, account });
       creationId = created.id;
       uri = created.uri;
     } else {
-      creationId = await createUrlContainer({ videoUrl, caption, shareToFeed, account });
+      creationId = created;
     }
   } catch (e) {
-    throw e;
+    const attach = audioConfiguration(audioConfig);
+    const hard = e instanceof IgError && (e.authProblem || e.quotaProblem);
+    if (!attach || hard) throw e;
+    // The audio may not be licensed for this account, or the API may have
+    // changed shape. The embedded bed is already in the file, so retrying
+    // without audio_configuration is always safe.
+    log.warn(`ig: native audio rejected (${String(e.message).slice(0, 120)}); retrying with embedded music only`);
+    const created = await create(null);
+    if (direct) {
+      creationId = created.id;
+      uri = created.uri;
+    } else {
+      creationId = created;
+    }
   }
 
   if (typeof onContainer === 'function') {
@@ -437,6 +482,7 @@ module.exports = {
   isConfigured,
   configuredAccounts,
   version,
+  igUser,
   request,
   preflight,
   publishingLimit,

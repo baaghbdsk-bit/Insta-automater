@@ -160,6 +160,7 @@ async function renderQuote({
   watermark = true,
   variant = 'center',
   motion,
+  musicStart,
 }) {
   if (!image || !fs.existsSync(image)) throw new Error(`image not found: ${image}`);
   if (!text || !String(text).trim()) throw new Error('no text to render');
@@ -201,8 +202,14 @@ async function renderQuote({
   if (music && fs.existsSync(music)) {
     musicFile = music;
     const dur = await probeDuration(music).catch(() => 0);
-    // start somewhere in the body of the track, never the same point twice
-    offset = dur > 25 ? Number((dur * (0.12 + Math.random() * 0.38)).toFixed(2)) : 0;
+    // A fixed start is required for native audio: Instagram always plays the
+    // attached track from 0, so the embedded bed must match it.
+    const fixed = musicStart === undefined || musicStart === null ? null : Number(musicStart);
+    offset = Number.isFinite(fixed)
+      ? Math.max(0, fixed)
+      : dur > 25
+        ? Number((dur * (0.12 + Math.random() * 0.38)).toFixed(2))
+        : 0;
     args.push('-stream_loop', '-1', '-ss', String(offset), '-i', rel(path.resolve(music)));
     musicIdx = 2;
     log.info(`music: ${path.basename(music)} @ ${offset}s`);

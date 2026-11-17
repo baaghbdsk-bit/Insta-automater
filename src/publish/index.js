@@ -15,6 +15,7 @@ const host = require('../host');
 const ig = require('./instagram');
 const { validateVideo } = require('../video');
 const { env, config } = require('../config');
+const audio = require('../audio');
 
 function uploadMode() {
   return String(env.IG_UPLOAD_MODE || (config.instagram && config.instagram.uploadMode) || 'direct').trim().toLowerCase();
@@ -63,7 +64,15 @@ function dateStamp() {
 /**
  * @returns {{mediaId, permalink, creationId, url, key}}
  */
-async function publishVideo({ postId, videoPath, caption, keepHosted = false, onContainer, account = 0 } = {}) {
+async function publishVideo({
+  postId,
+  videoPath,
+  caption,
+  keepHosted = false,
+  onContainer,
+  account = 0,
+  audioTrack = null,
+} = {}) {
   const check = await validateVideo(videoPath);
   if (!check.ok) {
     throw new Error(`video rejected before upload: ${check.reasons.join('; ')}`);
@@ -87,9 +96,11 @@ async function publishVideo({ postId, videoPath, caption, keepHosted = false, on
     );
   }
 
+  const audioConfig = audio.enabled() ? audio.payload(audioTrack) : null;
+
   if (mode === 'direct') {
     log.info('publish: using direct resumable upload (no R2)');
-    const res = await ig.publishReel({ filePath: videoPath, caption, onContainer, account });
+    const res = await ig.publishReel({ filePath: videoPath, caption, onContainer, account, audioConfig });
     return { ...res, uploadMode: 'direct' };
   }
 
@@ -101,7 +112,7 @@ async function publishVideo({ postId, videoPath, caption, keepHosted = false, on
   log.info(`hosted: ${uploaded.url}`);
 
   try {
-    const res = await ig.publishReel({ videoUrl: uploaded.url, caption, onContainer, account });
+    const res = await ig.publishReel({ videoUrl: uploaded.url, caption, onContainer, account, audioConfig });
     return { ...res, url: uploaded.url, key, uploadMode: 'url' };
   } finally {
     if (!keepHosted) {
