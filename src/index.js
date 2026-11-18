@@ -309,7 +309,7 @@ const COMMANDS = {
     console.log(`  status:   ${JSON.stringify(r.byStatus)}`);
     console.log(`  approved by mood: ${JSON.stringify(r.byMood)}`);
     console.log(`  used:     ${r.used} / ${r.total}`);
-    console.log(`  cooldown: ${r.cooldownDays} days (LINE_COOLDOWN_DAYS)`);
+    console.log(`  pick:     ${r.selection} (no cooldown, no rating filter)`);
     console.log(`  problems: ${r.problems.length ? r.problems.join(' | ') : 'none'}`);
     if (r.held.length) {
       console.log('\nheld — promote in bank.json by setting status to "approved":');
