@@ -2,7 +2,8 @@
 
 /**
  * Content themes. Each theme maps to:
- *  - music:  which royalty-free pool to draw a track from
+ *  - music:  which attitude pool the track comes from (heartbreak | growth |
+ *            motivation), used by the curated picks in src/music-picks.js
  *  - queries: image search terms (broad on purpose; narrow queries return nothing)
  *  - tone:   guidance handed to the generator
  *

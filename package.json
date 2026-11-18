@@ -20,6 +20,7 @@
     "photos:fetch": "node src/index.js photos:fetch",
     "music:fetch": "node src/index.js music:fetch",
     "audio:check": "node src/index.js audio:check",
+    "audio:audition": "node src/index.js audio:audition",
     "cleanup": "node src/index.js cleanup",
     "token:status": "node src/index.js token:status",
     "test": "node --test tests/*.js"

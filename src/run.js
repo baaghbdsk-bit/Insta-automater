@@ -329,12 +329,23 @@ async function buildPost({ theme, slot = '' }) {
     });
     let track = null;
     let musicStart;
+    let customTrack = false;
+
+    // User-supplied tracks (assets/music/custom) win over the catalogue. They
+    // are used exactly as supplied: no native attach, no download, and both
+    // platforms hear the same file.
+    const custom = audio.pickCustom(meta.mood);
+    if (custom) {
+      track = custom;
+      customTrack = true;
+      log.ok(`music: custom ${path.basename(custom)}`);
+    }
 
     // Native audio is an Instagram-only capability. To keep both platforms on
     // the same song, the track Meta exposes for download is muxed into the
     // render (YouTube plays it) while IG gets the licensed version natively.
     let nativeAudio = null;
-    if (audio.enabled()) {
+    if (!track && audio.enabled()) {
       try {
         nativeAudio = await audio.pickAudio({ mood: meta.mood, theme: meta.theme });
         log.ok(`audio: ${audio.describe(nativeAudio)} id=${nativeAudio.audioId}`);
@@ -373,11 +384,22 @@ async function buildPost({ theme, slot = '' }) {
         `${(check.info.bytes / 1048576).toFixed(1)} MB`
     );
 
-    const credit = nativeAudio
-      ? `Music: ${nativeAudio.title}${nativeAudio.artist ? ` — ${nativeAudio.artist}` : ''}`
-      : config.music.creditInCaption
-        ? library.MUSIC_CREDIT
+    const customName = customTrack
+      ? path.basename(track, path.extname(track)).replace(/[-_]+/g, ' ')
+      : '';
+    // Original sounds are another creator's upload: the title already names the
+    // song, so the handle is left out of the caption.
+    const creditArtist =
+      nativeAudio && nativeAudio.audioType === 'music' && nativeAudio.artist
+        ? ` — ${nativeAudio.artist}`
         : '';
+    const credit = nativeAudio
+      ? `Music: ${nativeAudio.title}${creditArtist}`
+      : customTrack
+        ? `Music: ${customName}`
+        : config.music.creditInCaption
+          ? library.MUSIC_CREDIT
+          : '';
 
     const cap = await lines.buildCaption({
       theme: meta.theme,
@@ -401,11 +423,13 @@ async function buildPost({ theme, slot = '' }) {
         duration: render.total,
         music: track,
         musicStart: render.offset,
+        customMusic: customTrack,
         nativeAudio: nativeAudio
           ? {
               audio_id: nativeAudio.audioId,
               title: nativeAudio.title,
               artist: nativeAudio.artist,
+              audio_type: nativeAudio.audioType,
               query: nativeAudio.query,
               trending: nativeAudio.trending,
               energy: nativeAudio.energy,

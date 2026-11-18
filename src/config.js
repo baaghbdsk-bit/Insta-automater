@@ -76,6 +76,7 @@ const paths = {
   tmp: path.join(ROOT, 'assets', 'tmp'),
   fonts: path.join(ROOT, 'assets', 'fonts'),
   bgm: path.join(ROOT, 'assets', 'bgm'),
+  music: path.join(ROOT, 'assets', 'music'),
   backgrounds: path.join(ROOT, config.backgrounds.folder || 'assets/backgrounds'),
 };
 

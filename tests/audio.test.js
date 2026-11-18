@@ -2,6 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const audio = require('../src/audio');
+const picks = require('../src/music-picks');
 
 const track = (over = {}) => ({
   audio_id: '123',
@@ -45,6 +46,18 @@ test('isUsable drops short tracks, obvious wrong vibes and missing ids', () => {
   assert.equal(audio.isUsable(track({ display_artist: 'Halston Dare' }), 'heartbreak'), true);
 });
 
+test('curated picks are valid, non-duplicated and cover every mood', () => {
+  assert.deepEqual(picks.problems(), []);
+  for (const mood of ['heartbreak', 'growth', 'motivation']) {
+    const list = picks.forMood(mood);
+    assert.ok(list.length >= 6, `${mood} needs a real pool, got ${list.length}`);
+    for (const p of list) {
+      assert.match(p.id, /^\d{6,20}$/);
+      assert.ok(p.title && p.artist);
+    }
+  }
+});
+
 test('payload is a container-ready audio_configuration with a muted bed', () => {
   const previous = process.env.IG_NATIVE_AUDIO_VIDEO_VOLUME;
   delete process.env.IG_NATIVE_AUDIO_VIDEO_VOLUME;
@@ -52,7 +65,8 @@ test('payload is a container-ready audio_configuration with a muted bed', () => 
     assert.deepEqual(audio.payload({ audioId: '384522768709202' }), {
       audio_id: '384522768709202',
       audio_volume: 100,
-      video_volume: 0,
+      // Meta documents 1-100; 0 published as "Original audio".
+      video_volume: 1,
     });
     assert.equal(audio.payload(null), null);
     assert.equal(audio.payload({}), null);

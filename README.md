@@ -34,15 +34,16 @@ GitHub Actions (4 crons, IST)
 | Theme selection, weighted by measured reach | Initial Meta app + token setup |
 | Quote writing, caption writing, hashtags | Keeping the token alive (see expiry) |
 | Photo discovery and fallback | Profile name, bio, avatar (not writable via API) |
-| Music selection, random excerpt per post | Nothing else, once secrets are set |
+| Music matched to the line's attitude | Nothing else, once secrets are set |
 | Rendering, validation, hosting, publishing | |
 | Insight collection and theme weighting | |
 | Failure notification, retry, dedupe | |
 
-**Trending Instagram audio cannot be attached through the publishing API.** That
-is an Instagram product limitation, not a shortcut here: the API accepts a video
-file only, so every Reel carries its own licensed music track embedded in the
-MP4.
+**Music comes from Instagram's Audio API.** The container is created with
+`audio_configuration`, so the Reel carries the real track — Eminem, The Script,
+slowed/reverb edits — and Instagram credits it. YouTube cannot attach that
+audio, so the same file Meta exposes for download is muxed into the MP4;
+both platforms play the same song. See [Music](#music) below.
 
 ---
 
@@ -71,7 +72,7 @@ src/
   setup/token.js      Meta token exchange and inspection
 assets/
   fonts/              Anton, Archivo Black, Barlow, Noto Devanagari
-  music/              15 tracks, CC BY 4.0 (attribution in CREDITS.json)
+  music/              CC BY 4.0 fallback bed; custom/ holds user-supplied songs
   photos/             curated fallback pool, per mood
 archive/              the retired political/clip engine, kept for reference
 data/engine.db        committed state: posts, lines, insights, runs, usage
@@ -237,9 +238,22 @@ generation (if a model is configured and quota allows) → curated local pool.
 Remote photos are downloaded per run and not committed, so the repository does
 not grow and the same photo is not reused.
 
-**Music.** Kevin MacLeod / incompetech, CC BY 4.0, 15 tracks across three mood
-pools. Each post takes a random 12–50% offset into the track, so two posts never
-share an intro. Attribution is written into the caption.
+**Music.** The track is matched to the *attitude* of the line, not its topic:
+hard truth → rap, quiet hurt → slowed + reverb, rising up → anthemic. Three
+layers, in priority order:
+
+1. `assets/music/custom/<mood>/` — drop any mp3 here and it is used first, on
+   both platforms, exactly as supplied.
+2. `src/music-picks.js` — a curated pool of `original_sound` ids from Instagram's
+   Audio API (real songs and edits, not the stock `music` catalogue). Each id is
+   re-resolved at run time, because Meta's `download_url` expires after ~1.5
+   days; the least-recently-used track is picked.
+3. Keyword search on the same API, then the local CC BY 4.0 bed as a last
+   resort.
+
+`npm run audio:audition` renders 12-second clips of the whole curated
+pool to `output/audition/index.html` so the set can be heard and edited before
+it reaches the account.
 
 **Layout.** Font size is chosen so the quote fills the frame without orphans,
 capped at four lines. Text sits high, centred or low (rotating), on a generated
@@ -292,7 +306,9 @@ random.
    available during implementation, so the upload → container → publish path is
    written and unit-tested (SigV4 matches AWS's published test vector) but has
    not touched the live account.
-2. **Trending audio is impossible** via the API. Licensed music is embedded.
+2. **Content ID is a real risk on YouTube.** The Shorts use the same real songs,
+   which can be claimed or muted there. Accepted deliberately: the reach is
+   worth it, and Instagram is the primary platform.
 3. **Profile fields are not writable** by the Graph API (`code 100,
    subcode 33`). Name, bio and avatar stay manual.
 4. **Cron is best-effort.** A slot can drift by up to ~30 minutes or be dropped.

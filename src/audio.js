@@ -22,6 +22,7 @@ const { env, paths } = require('./config');
 const { log, run, ensureDir, FFMPEG } = require('./util');
 const store = require('./db');
 const ig = require('./publish/instagram');
+const picks = require('./music-picks');
 
 // Search terms per mood. Rotated so the same keyword is not reused every post.
 const MOOD_QUERIES = {
@@ -74,6 +75,25 @@ function energyEnabled() {
   return num('IG_AUDIO_ENERGY', 1) !== 0;
 }
 
+/** Curated picks come first; set IG_AUDIO_CURATED=0 to go back to raw search. */
+function curatedEnabled() {
+  return num('IG_AUDIO_CURATED', 1) !== 0;
+}
+
+/** User-supplied tracks in assets/music/custom win over everything. */
+function customEnabled() {
+  return num('MUSIC_CUSTOM', 1) !== 0;
+}
+
+/**
+ * `music` is the licensed stock catalogue (ad-music). `original_sound` is real
+ * songs and edits already used on Reels, which is what actually fits quotes.
+ */
+function audioType() {
+  const t = String(env.IG_AUDIO_TYPE || 'original_sound').trim();
+  return t === 'music' ? 'music' : 'original_sound';
+}
+
 function energyCandidates() {
   return Math.max(1, Math.min(12, num('IG_AUDIO_ENERGY_CANDIDATES', 6)));
 }
@@ -102,7 +122,7 @@ function isUsable(track, mood = 'motivation', minimum = minMs()) {
   if (!track.download_url) return false;
   const ms = Number(track.duration_in_ms) || 0;
   if (ms < minimum) return false;
-  const label = `${track.title || ''} ${track.display_artist || ''}`;
+  const label = `${track.title || ''} ${track.display_artist || ''} ${track.ig_username || ''}`;
   if (GLOBAL_BLOCK.test(label)) return false;
   const block = MOOD_BLOCK[mood];
   if (block && block.test(label)) return false;
@@ -115,7 +135,7 @@ async function searchAudio(query, { account = 0 } = {}) {
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.items;
 
-  const params = { audio_type: 'music', user_id: ig.igUser(account) };
+  const params = { audio_type: audioType(), user_id: ig.igUser(account) };
   if (query) params.search_query = query;
 
   const r = await ig.request('GET', 'ig_audio', params, { account, attempts: 2 });
@@ -172,21 +192,119 @@ async function rankCandidates(list) {
   return [...scored.map((s) => ({ ...s.track, _energy: s.level })), ...list.slice(head.length)];
 }
 
+/** Fresh metadata (and a fresh download link) for one catalogue id. */
+async function trackMeta(audioId, account = 0) {
+  const r = await ig.request(
+    'GET',
+    String(audioId),
+    { user_id: ig.igUser(account) },
+    { account, attempts: 2 }
+  );
+  return r && r.audio_id ? r : null;
+}
+
+/**
+ * Curated pool first: hand-picked tracks, least-recently-used rotation. Only
+ * one metadata call is needed per pick because the loop stops at the first
+ * candidate that still resolves.
+ */
+async function pickCurated({ mood = 'motivation', theme = '', account = 0 } = {}) {
+  const pool = picks.forMood(mood);
+  if (!pool.length) return null;
+
+  const used = new Map(store.assetUsage('audio').map((r) => [String(r.key), String(r.used_at || '')]));
+  const fresh = shuffle(pool.filter((p) => !used.has(p.id)));
+  const old = pool
+    .filter((p) => used.has(p.id))
+    .sort((a, b) => String(used.get(a.id) || '').localeCompare(String(used.get(b.id) || '')));
+
+  for (const p of [...fresh, ...old]) {
+    let meta;
+    try {
+      meta = await trackMeta(p.id, account);
+    } catch {
+      continue;
+    }
+    if (!isUsable(meta, mood)) continue;
+
+    store.markAsset('audio', String(meta.audio_id));
+    return {
+      audioId: String(meta.audio_id),
+      title: meta.title || p.title,
+      artist: meta.display_artist || meta.ig_username || p.artist,
+      audioType: p.type || audioType(),
+      durationMs: Number(meta.duration_in_ms) || 0,
+      downloadUrl: meta.download_url || '',
+      energy: null,
+      query: null,
+      trending: false,
+      curated: true,
+      mood,
+      theme,
+    };
+  }
+  return null;
+}
+
+const CUSTOM_AUDIO_EXT = /\.(mp3|m4a|aac|wav|ogg|flac)$/i;
+
+/** Folders checked for user-supplied music, mood folder first. */
+function customFolders(mood) {
+  return [path.join(paths.music, 'custom', mood), path.join(paths.music, 'custom')];
+}
+
+function listCustom(mood) {
+  for (const dir of customFolders(mood)) {
+    let names = [];
+    try {
+      names = fs.readdirSync(dir, { withFileTypes: true })
+        .filter((e) => e.isFile() && CUSTOM_AUDIO_EXT.test(e.name))
+        .map((e) => path.join(dir, e.name))
+        .sort();
+    } catch {
+      continue;
+    }
+    if (names.length) return names;
+  }
+  return [];
+}
+
+/**
+ * A track the user dropped into assets/music/custom. These are used exactly as
+ * supplied (no download, no native attach) and rotated like the local library.
+ */
+function pickCustom(mood) {
+  if (!customEnabled()) return null;
+  const pool = listCustom(mood);
+  if (!pool.length) return null;
+  const chosen = store.pickAsset('music', pool);
+  if (chosen) store.markAsset('music', chosen);
+  return chosen;
+}
+
 /**
  * Pick one track for a mood. Order:
- *   1. rotated mood queries (70%) or the trending list first (30%)
- *   2. duration + vibe filter
- *   3. intro-energy ranking
- *   4. least-recently-used rotation on audio_id
+ *   1. curated picks rotated least-recently-used (IG_AUDIO_CURATED=1)
+ *   2. rotated mood queries (70%) or the trending list first (30%)
+ *   3. duration + vibe filter
+ *   4. intro-energy ranking
+ *   5. least-recently-used rotation on audio_id
  *
  * Throws when nothing usable is returned; callers fall back to the embedded bed.
  */
 async function pickAudio({ mood = 'motivation', theme = '', account = 0 } = {}) {
+  const failures = [];
+
+  if (curatedEnabled()) {
+    const curated = await pickCurated({ mood, theme, account });
+    if (curated) return curated;
+    failures.push('curated: no usable track');
+  }
+
   const queries = shuffle(queriesFor(mood));
   if (Math.random() < trendingShare()) queries.unshift(null);
 
   const used = new Map(store.assetUsage('audio').map((r) => [String(r.key), String(r.used_at || '')]));
-  const failures = [];
 
   for (const query of queries) {
     const label = query || 'trending';
@@ -226,7 +344,8 @@ async function pickAudio({ mood = 'motivation', theme = '', account = 0 } = {}) 
     return {
       audioId: String(chosen.audio_id),
       title: chosen.title || '',
-      artist: chosen.display_artist || '',
+      artist: chosen.display_artist || chosen.ig_username || '',
+      audioType: audioType(),
       durationMs: Number(chosen.duration_in_ms) || 0,
       downloadUrl: chosen.download_url || '',
       energy: Number.isFinite(chosen._energy) ? chosen._energy : null,
@@ -271,8 +390,10 @@ function payload(audio) {
     audio_id: String(audio.audioId),
     audio_volume: Math.min(100, Math.max(0, num('IG_AUDIO_VOLUME', 100))),
   };
-  // 0 silences the embedded bed so only Instagram's track is heard.
-  const videoVolume = num('IG_NATIVE_AUDIO_VIDEO_VOLUME', 0);
+  // 1 silences the embedded bed so only Instagram's track is heard. Meta
+  // documents video_volume as 1-100; 0 made the API accept the container but
+  // publish it as "Original audio" instead of the licensed track.
+  const videoVolume = num('IG_NATIVE_AUDIO_VIDEO_VOLUME', 1);
   out.video_volume = Math.min(100, Math.max(0, videoVolume));
   return out;
 }
@@ -280,13 +401,15 @@ function payload(audio) {
 function describe(audio) {
   if (!audio) return 'embedded music';
   const who = audio.artist ? ` — ${audio.artist}` : '';
-  const src = audio.trending ? 'trending' : `"${audio.query}"`;
+  const src = audio.curated ? 'curated' : audio.trending ? 'trending' : `"${audio.query}"`;
   return `${audio.title}${who} (${src})`;
 }
 
 function status() {
   return {
     enabled: enabled(),
+    curated: curatedEnabled(),
+    custom: customEnabled(),
     trendingShare: trendingShare(),
     minMs: minMs(),
     energy: energyEnabled(),
@@ -297,11 +420,15 @@ function status() {
 module.exports = {
   MOOD_QUERIES,
   enabled,
+  curatedEnabled,
+  customEnabled,
   queriesFor,
   isUsable,
   searchAudio,
-  introEnergy,
-  rankCandidates,
+  trackMeta,
+  pickCurated,
+  pickCustom,
+  listCustom,
   pickAudio,
   downloadTrack,
   payload,

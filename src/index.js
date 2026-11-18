@@ -10,6 +10,7 @@ const quotes = require('./quote');
 const lines = require('./lines');
 const library = require('./library');
 const audio = require('./audio');
+const musicPicks = require('./music-picks');
 const host = require('./host');
 const ig = require('./publish/instagram');
 const insights = require('./insights');
@@ -366,13 +367,17 @@ const COMMANDS = {
     log.step(`native audio: ${st.enabled ? 'ON (IG_NATIVE_AUDIO=1)' : 'off (embedded CC-BY bed)'}`);
     log.info(
       `filters: min ${st.minMs / 1000}s, trending ${Math.round(st.trendingShare * 100)}%, ` +
-        `intro-energy ${st.energy ? 'on' : 'off'}`
+        `intro-energy ${st.energy ? 'on' : 'off'}, curated ${st.curated ? 'on' : 'off'}, custom ${st.custom ? 'on' : 'off'}`
     );
     if (!ig.isConfigured()) throw new Error('Instagram credentials missing (IG_USER_ID / IG_ACCESS_TOKEN)');
 
     let usableTotal = 0;
     for (const mood of moods) {
       console.log(`\n${mood}`);
+      const curated = musicPicks.forMood(mood);
+      if (curated.length) {
+        console.log(`  curated: ${curated.length} picks — ${curated.slice(0, 3).map((p) => p.title).join(' | ')}`);
+      }
       for (const query of audio.queriesFor(mood)) {
         try {
           const items = await audio.searchAudio(query);
@@ -404,6 +409,80 @@ const COMMANDS = {
     }
 
     if (!usableTotal) process.exitCode = 1;
+  },
+
+  /**
+   * Play the curated pool without posting: writes 12s clips to output/audition
+   * plus an index.html with one player per track, so the set can be approved or
+   * swapped before it reaches the account.
+   */
+  'audio:audition': async (argv) => {
+    const opts = parseArgs(argv);
+    const moods = opts.mood ? [String(opts.mood)] : ['heartbreak', 'growth', 'motivation'];
+    const seconds = Number(opts.seconds) || 12;
+    const root = ensureDir(path.join(paths.output, 'audition'));
+    if (!ig.isConfigured()) throw new Error('Instagram credentials missing (IG_USER_ID / IG_ACCESS_TOKEN)');
+
+    const sections = [];
+    for (const mood of moods) {
+      const picks = musicPicks.forMood(mood);
+      if (!picks.length) {
+        log.warn(`audition: no curated picks for ${mood}`);
+        continue;
+      }
+      const dir = ensureDir(path.join(root, mood));
+      const rows = [];
+      let n = 0;
+      for (const p of picks) {
+        n++;
+        try {
+          const meta = await audio.trackMeta(p.id);
+          if (!meta || !meta.download_url) throw new Error('no download_url');
+          const file = await audio.downloadTrack({
+            audioId: String(meta.audio_id),
+            downloadUrl: meta.download_url,
+          });
+          const name = `${String(n).padStart(2, '0')}-${slug(meta.title || p.title, 40)}.m4a`;
+          const out = path.join(dir, name);
+          const start = Math.max(0, Math.min(30, (Number(meta.duration_in_ms) || 30_000) / 1000 / 4));
+          await run(FFMPEG, [
+            '-y', '-hide_banner', '-nostats',
+            '-ss', String(start), '-t', String(seconds),
+            '-i', file,
+            '-af', 'loudnorm=I=-16:TP=-1.5:LRA=11',
+            '-c:a', 'aac', '-b:a', '160k',
+            out,
+          ], { timeout: 120_000 });
+          rows.push({ name, title: meta.title || p.title, artist: meta.display_artist || p.artist });
+          log.ok(`audition: ${mood}/${name}`);
+        } catch (e) {
+          log.warn(`audition: ${p.title} skipped (${String(e.message).slice(0, 120)})`);
+        }
+      }
+      if (!rows.length) continue;
+      sections.push(
+        `<h2>${mood}</h2>\n` +
+          rows
+            .map(
+              (r) =>
+                `<figure><figcaption>${r.title} — ${r.artist}</figcaption>` +
+                `<audio controls preload="none" src="${mood}/${encodeURIComponent(r.name)}"></audio></figure>`
+            )
+            .join('\n')
+      );
+    }
+
+    if (!sections.length) throw new Error('no audition clips were produced');
+    const html =
+      '<!doctype html><meta charset="utf-8"><title>Music audition</title>' +
+      '<style>body{font-family:system-ui;background:#111;color:#eee;max-width:720px;margin:40px auto;padding:0 20px}' +
+      'h2{text-transform:capitalize;margin-top:36px}.rep{color:#f88;font-weight:600}' +
+      'figure{margin:14px 0}figcaption{margin-bottom:6px;color:#bbb}audio{width:100%}</style>' +
+      '<h1>Music audition</h1><p>Full list from <code>src/music-picks.js</code>.</p>' +
+      sections.join('\n');
+    const index = path.join(root, 'index.html');
+    fs.writeFileSync(index, html);
+    log.ok(`audition ready: ${index}`);
   },
 
   'library:status': async () => {
@@ -465,6 +544,7 @@ const USAGE = `usage: node src/index.js <command>
   photos:fetch    bulk-download photos into assets/photos
   music:fetch      download the CC-BY music bed
   audio:check     what Instagram's licensed audio catalogue returns per mood  [--mood]
+  audio:audition  render 12s clips of the curated pool to output/audition  [--mood] [--seconds]
   library:status  photos / music / line and theme inventory
   cleanup         delete temp files and checkpoint the database
   token:status    token expiry, scopes, account
