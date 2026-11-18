@@ -14,6 +14,7 @@
     "status": "node src/index.js status",
     "insights": "node src/index.js insights",
     "quote": "node src/index.js quote",
+    "lines:bank": "node src/index.js lines:bank",
     "library": "node src/index.js library:status",
     "r2:check": "node src/index.js r2:check",
     "ig:upload-check": "node src/index.js ig:upload-check",

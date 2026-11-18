@@ -12,10 +12,11 @@
  * Dedupe runs at three levels: exact (DB unique index), near-duplicate
  * (Jaccard over word sets) and "already posted" (used_assets).
  */
-const { llm, config } = require('./config');
+const { llm, config, env } = require('./config');
 const { log } = require('./util');
 const { THEMES, THEME_KEYS, themeFor } = require('./themes');
 const store = require('./db');
+const quoteBank = require('./quote-bank');
 
 // A/B: v1 is the original pipeline and stays the default. v2 adds writing
 // structures, an impact judge and claim verification. Nothing outside the
@@ -869,6 +870,22 @@ function claimGenerated(row) {
 async function compose(theme, { allowGenerate = true } = {}) {
   const meta = themeMeta(theme);
 
+  // Curated lines are the default. Set LINE_SOURCE=llm to restore generation.
+  if (String(env.LINE_SOURCE || 'bank') !== 'llm') {
+    const curated = quoteBank.pick(meta.theme, meta.mood);
+    if (curated) {
+      quoteBank.markUsed(curated);
+      return {
+        theme: meta.theme,
+        mood: meta.mood,
+        line: curated.line,
+        engine: 'bank',
+        bankId: curated.id,
+      };
+    }
+    log.warn(`lines: quote bank has no approved ${meta.mood} line, falling back to generated`);
+  }
+
   const ready = store.availableGenerated(meta.theme);
   if (ready.length) {
     const pick = ready[Math.floor(Math.random() * Math.min(ready.length, 5))];
@@ -1001,6 +1018,7 @@ function themeStatus() {
     mood: moodOf(theme),
     seedLeft: availableSeed(moodOf(theme)).length,
     generatedReady: store.availableGenerated(theme).length,
+    bankReady: quoteBank.approved(moodOf(theme)).length,
   }));
 }
 

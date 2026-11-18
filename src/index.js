@@ -14,6 +14,7 @@ const musicPicks = require('./music-picks');
 const host = require('./host');
 const ig = require('./publish/instagram');
 const insights = require('./insights');
+const quoteBank = require('./quote-bank');
 const { validateVideo } = require('./video');
 const { THEMES } = require('./themes');
 
@@ -299,6 +300,23 @@ const COMMANDS = {
   status: cmdStatus,
   insights: cmdInsights,
   quote: cmdQuote,
+
+  /** Curated bank health: counts, runway, cooldown, validation, held lines. */
+  'lines:bank': async () => {
+    const r = quoteBank.report();
+    console.log(`\nquote bank: ${r.total} lines (source: assets/quotes/bank.json)`);
+    console.log(`  source:   ${String(env.LINE_SOURCE || 'bank')} (set to llm to use generation)`);
+    console.log(`  status:   ${JSON.stringify(r.byStatus)}`);
+    console.log(`  approved by mood: ${JSON.stringify(r.byMood)}`);
+    console.log(`  used:     ${r.used} / ${r.total}`);
+    console.log(`  cooldown: ${r.cooldownDays} days (LINE_COOLDOWN_DAYS)`);
+    console.log(`  problems: ${r.problems.length ? r.problems.join(' | ') : 'none'}`);
+    if (r.held.length) {
+      console.log('\nheld — promote in bank.json by setting status to "approved":');
+      for (const h of r.held) console.log(`  ${h}`);
+    }
+    if (r.problems.length) process.exitCode = 1;
+  },
 
   'r2:check': async () => {
     if (!host.isConfigured()) {
@@ -607,6 +625,7 @@ const USAGE = `usage: node src/index.js <command>
   status          recent builds and publishes
   insights        reach/saves/shares per post and per theme
   quote           render one reel locally without publishing   [--theme] [--line] [--image] [--variant]
+  lines:bank      quote bank counts, runway, validation and held lines
   r2:check        verify R2 upload + public URL reachability
   ig:upload-check verify a direct resumable upload without publishing  [--file path]
   photos:fetch    bulk-download photos into assets/photos
