@@ -33,6 +33,7 @@ const PICKS = {
     ['627434937082245', 'Wildflower', 'Billie Eilish'],
     ['834262641203975', 'Soso', 'Omah Lay'],
     ['26339758578979492', 'Reflections', 'The Neighbourhood'],
+    ['667162318236142', 'Lovely', 'Billie Eilish & Khalid'],
   ],
   growth: [
     ['642916667155384', 'Hall Of Fame', 'The Script ft. will.i.am'],
@@ -43,6 +44,7 @@ const PICKS = {
     ['27919155244416158', 'Warriors', 'Imagine Dragons'],
     ['552543731160111', 'Stronger', 'Kanye West'],
     ['752695924302048', 'Remember The Name', 'Fort Minor'],
+    ['27137478635904664', 'Eyes Closed', 'Imagine Dragons'],
   ],
   motivation: [
     ['100113173193451', 'Lose Yourself', 'Eminem'],
@@ -50,7 +52,6 @@ const PICKS = {
     ['153198434297429', 'The Way I Am', 'Eminem'],
     ['252126270877938', 'Lose Yourself x Unstoppable', 'prakash_musical'],
     ['934100598658090', 'Not Afraid', 'Eminem'],
-    ['193021677030422', 'Unstoppable', 'MŪNTII & Alex Clare'],
     ['216865824673203', 'Sing For The Moment', 'Eminem'],
     ['746759628421977', 'Till I Collapse (Instrumental)', 'migasproductions'],
   ],
