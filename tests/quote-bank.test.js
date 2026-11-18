@@ -4,10 +4,10 @@ const assert = require('node:assert/strict');
 const bank = require('../src/quote-bank');
 const { MUSIC_MOODS } = require('../src/themes');
 
-test('bank loads 550 unique lines with no validation problems', () => {
+test('bank loads 650 unique lines with no validation problems', () => {
   const raw = bank.load();
-  assert.equal(raw.lines.length, 550);
-  assert.equal(new Set(raw.lines.map((l) => l.id)).size, 550);
+  assert.equal(raw.lines.length, 650);
+  assert.equal(new Set(raw.lines.map((l) => l.id)).size, 650);
   assert.deepEqual(bank.problems(), []);
 });
 
@@ -38,8 +38,8 @@ test('random pick varies across repeated calls', () => {
 
 test('report exposes counts, mood coverage and validation', () => {
   const r = bank.report();
-  assert.equal(r.total, 550);
-  assert.equal(r.byStatus.approved, 550);
+  assert.equal(r.total, 650);
+  assert.equal(r.byStatus.approved, 650);
   assert.equal(Object.keys(r.byMood).length, 3);
   assert.equal(r.selection, 'random');
   assert.deepEqual(r.problems, []);
