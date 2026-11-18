@@ -251,9 +251,14 @@ layers, in priority order:
 3. Keyword search on the same API, then the local CC BY 4.0 bed as a last
    resort.
 
+`npm run audio:verify` validates the pool without posting: duration, leading
+silence (native audio starts at 0, so an intro is dead air), hook loudness in the
+first three seconds, true peak and channel layout. It exits 1 when a pick would
+sound broken on a reel.
+
 `npm run audio:audition` renders 12-second clips of the whole curated
 pool to `output/audition/index.html` so the set can be heard and edited before
-it reaches the account.
+it reaches the account. Clips start at 0, which is what Instagram plays.
 
 **Layout.** Font size is chosen so the quote fills the frame without orphans,
 capped at four lines. Text sits high, centred or low (rotating), on a generated

@@ -5,16 +5,21 @@
  * There are two audio types in Meta's Audio API:
  *   - `music`: the licensed stock catalogue. Sounds like ad music. Rejected.
  *   - `original_sound`: real songs and edits already used on Reels — Eminem,
- *     Drake, The Script, slowed/reverb versions. This is the pool we want.
+ *     The Script, Imagine Dragons, slowed/reverb versions. This is the pool.
  *
  * Only `audio_id` is stored. Meta's `download_url` expires after ~1.5 days, so
  * the link is refreshed from the metadata endpoint at run time; a dead id
  * degrades to the next pick instead of breaking a run.
  *
  * Selection rule (from the account owner's examples):
- *   hard truth  -> rap / hard beat        (Eminem, Till I Collapse)
- *   quiet hurt  -> slowed + reverb        (Yebba's Heartbreak, bye)
- *   rising up   -> anthemic / cinematic   (Hall of Fame, Rise Up)
+ *   hard truth  -> rap / hard beat        (Eminem, Till I Collapse, POWER)
+ *   quiet hurt  -> slowed + reverb        (Yebba's Heartbreak, bye, Another Love)
+ *   rising up   -> anthemic / cinematic   (Hall of Fame, Rise Up, Eye of the Tiger)
+ *
+ * Every entry is checked by `npm run audio:verify`: duration, seconds of dead
+ * air at 0 (native audio starts at the top), loudness of the first three
+ * seconds, true peak and channel layout. Uploads that open with silence or have
+ * no hook are dropped even when the song is right.
  */
 const TYPE = 'original_sound';
 
@@ -22,31 +27,31 @@ const PICKS = {
   heartbreak: [
     ['167434233049486', "Yebba's Heartbreak", 'Drake & Yebba'],
     ['154051524260807', "Yebba's Heartbreak (Strings)", 'stringsfromparis'],
-    ['166692702837136', 'Sad Slowed Reverb Lofi', 'trendsofmusic'],
     ['26747970224861864', 'bye (Slowed)', 'justinfeca'],
-    ['488119100104589', 'Mockingbird (Piano)', 'ben.joseph'],
-    ['893418339594556', 'Memories (Slowed)', 'hidanparra'],
-    ['792188256967572', 'Sad Piano Love Story', 'neurovisions.x'],
     ['27286113127696378', 'bye (Slowed)', 'aemilst'],
+    ['323240847404726', 'Another Love', 'Tom Odell'],
+    ['133732726226709', 'Until I Found You', 'Stephen Sanchez'],
+    ['312132938071837', 'When I Was Your Man', 'Bruno Mars'],
+    ['747429971213353', 'Let Her Go', 'Passenger'],
   ],
   growth: [
     ['642916667155384', 'Hall Of Fame', 'The Script ft. will.i.am'],
     ['254274160046909', 'Stronger', 'Kelly Clarkson'],
-    ['363959679489749', 'Rise Up', 'im.vocals'],
-    ['303572679277236', 'Believer', 'Imagine Dragons'],
-    ['1619055698572939', 'Mockingbird (Piano)', 'pianoholic'],
-    ['648108638182964', 'Hall of Fame (Acoustic)', 'maai.cares'],
-    ['390401300738687', 'Rise Up (Cover)', 'ejike.mp3'],
-    ['222895750366787', 'Lose Yourself', 'shady.ediit'],
+    ['1283113742781288', 'Rise Up', 'Andra Day'],
+    ['297768938982507', 'Eye Of The Tiger', 'Survivor'],
+    ['366439462826609', 'Legends Never Die', 'Against The Current'],
+    ['27919155244416158', 'Warriors', 'Imagine Dragons'],
+    ['552543731160111', 'Stronger', 'Kanye West'],
+    ['752695924302048', 'Remember The Name', 'Fort Minor'],
   ],
   motivation: [
     ['100113173193451', 'Lose Yourself', 'Eminem'],
-    ['1774680936465362', 'Till I Collapse', 'Eminem ft. Nate Dogg'],
+    ['1375412437508033', 'Till I Collapse', 'Eminem ft. Nate Dogg'],
     ['153198434297429', 'The Way I Am', 'Eminem'],
     ['252126270877938', 'Lose Yourself x Unstoppable', 'prakash_musical'],
-    ['1255558695868009', 'Till I Collapse (Trailerized)', 'VERBATIM'],
+    ['934100598658090', 'Not Afraid', 'Eminem'],
     ['193021677030422', 'Unstoppable', 'MŪNTII & Alex Clare'],
-    ['216865824673203', 'Sing For The Moment', 'amir_stunt'],
+    ['216865824673203', 'Sing For The Moment', 'Eminem'],
     ['746759628421977', 'Till I Collapse (Instrumental)', 'migasproductions'],
   ],
 };

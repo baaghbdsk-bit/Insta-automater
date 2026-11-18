@@ -19,7 +19,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { env, paths } = require('./config');
-const { log, run, ensureDir, FFMPEG } = require('./util');
+const { log, run, ensureDir, FFMPEG, FFPROBE } = require('./util');
 const store = require('./db');
 const ig = require('./publish/instagram');
 const picks = require('./music-picks');
@@ -383,9 +383,140 @@ async function downloadTrack(audio, { force = false } = {}) {
   return file;
 }
 
+// ---------------------------------------------------------------- validation
+
+/** How much of the track Instagram actually plays before the reel ends. */
+function introSeconds() {
+  return Math.max(3, Math.min(30, num('IG_AUDIO_INTRO_SECONDS', 15)));
+}
+
+/** Cheap container stats: codec, bitrate, channels, duration. */
+async function probeAudio(file) {
+  const out = {};
+  try {
+    const { stdout } = await run(
+      FFPROBE,
+      [
+        '-v', 'error', '-select_streams', 'a:0',
+        '-show_entries', 'stream=codec_name,sample_rate,channels,bit_rate:format=duration,bit_rate',
+        '-of', 'json', file,
+      ],
+      { timeout: 30_000 }
+    );
+    const parsed = JSON.parse(stdout);
+    const s = (parsed.streams || [])[0] || {};
+    out.codec = s.codec_name || '';
+    out.sampleRate = Number(s.sample_rate) || 0;
+    out.channels = Number(s.channels) || 0;
+    out.kbps = Math.round(Number(s.bit_rate || (parsed.format || {}).bit_rate || 0) / 1000);
+    out.seconds = Number((parsed.format || {}).duration) || 0;
+  } catch {
+    return out;
+  }
+  return out;
+}
+
+/** Integrated loudness and true peak of the intro window (EBU R128). */
+async function loudness(file) {
+  try {
+    const { stderr } = await run(
+      FFMPEG,
+      [
+        '-hide_banner', '-nostats', '-t', String(introSeconds()), '-i', file,
+        '-af', 'loudnorm=print_format=json', '-f', 'null', '-',
+      ],
+      { timeout: 60_000 }
+    );
+    const m = String(stderr).match(/\{[\s\S]*"input_i"[\s\S]*\}/);
+    if (!m) return {};
+    const j = JSON.parse(m[0]);
+    return { lufs: Number(j.input_i), truePeak: Number(j.input_tp) };
+  } catch {
+    return {};
+  }
+}
+
+/** Mean RMS of the first three seconds: the hook has to land immediately. */
+async function introRms(file) {
+  try {
+    const { stderr } = await run(
+      FFMPEG,
+      [
+        '-hide_banner', '-nostats', '-t', '3', '-i', file,
+        '-af', 'astats=metadata=0:reset=0', '-f', 'null', '-',
+      ],
+      { timeout: 60_000 }
+    );
+    const levels = [...String(stderr).matchAll(/RMS level dB:\s*(-?[\d.]+)/g)].map((v) => Number(v[1]));
+    return Number.isFinite(levels[levels.length - 1]) ? levels[levels.length - 1] : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Seconds of near-silence at the very start. Native audio always starts at 0. */
+async function leadSilence(file) {
+  try {
+    const { stderr } = await run(
+      FFMPEG,
+      [
+        '-hide_banner', '-nostats', '-t', String(introSeconds()), '-i', file,
+        '-af', 'silencedetect=noise=-38dB:d=0.35', '-f', 'null', '-',
+      ],
+      { timeout: 60_000 }
+    );
+    const text = String(stderr);
+    const starts = [...text.matchAll(/silence_start:\s*(-?[\d.]+)/g)].map((m) => Number(m[1]));
+    if (!starts.some((v) => v <= 0.05)) return 0;
+    const ends = [...text.matchAll(/silence_end:\s*([\d.]+)/g)].map((m) => Number(m[1]));
+    return ends[0] || 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Everything that can be measured without ears: does the file exist, does the
+ * hook start immediately, is it loud enough, does it clip.
+ */
+async function inspectTrack(file) {
+  const [probe, loud, rms, silence] = await Promise.all([
+    probeAudio(file),
+    loudness(file),
+    introRms(file),
+    leadSilence(file),
+  ]);
+  return { ...probe, ...loud, rms3: rms, leadSilence: silence };
+}
+
+/**
+ * Turn metrics into a verdict. Fails are things that will sound broken on the
+ * reel (dead air, no hook, too short); warnings are quality risks (clipping,
+ * mono upload) that can still be acceptable for an edit.
+ */
+function audit(meta, metrics = {}) {
+  const fails = [];
+  const warns = [];
+  const seconds = (Number(meta && meta.duration_in_ms) || 0) / 1000;
+
+  if (!metrics || !metrics.seconds) fails.push('no audio');
+  if (seconds && seconds < minMs() / 1000) fails.push(`short ${seconds.toFixed(0)}s`);
+  if ((metrics.leadSilence || 0) > num('IG_AUDIO_MAX_LEAD_SILENCE', 0.7)) {
+    fails.push(`dead air ${metrics.leadSilence.toFixed(1)}s`);
+  }
+  if (Number.isFinite(metrics.rms3) && metrics.rms3 < num('IG_AUDIO_MIN_RMS3', -32)) {
+    fails.push(`weak start ${metrics.rms3.toFixed(0)}dB`);
+  }
+  if (Number.isFinite(metrics.truePeak) && metrics.truePeak > num('IG_AUDIO_MAX_TRUE_PEAK', 0)) {
+    warns.push(`clipping ${metrics.truePeak.toFixed(1)}dB`);
+  }
+  if (metrics.channels === 1) warns.push('mono');
+
+  return { ok: fails.length === 0, fails, warns };
+}
+
 /** `audio_configuration` payload for the media container, or null. */
-function payload(audio) {
-  if (!audio || !audio.audioId) return null;
+function payload(audio) {  if (!audio || !audio.audioId) return null;
   const out = {
     audio_id: String(audio.audioId),
     audio_volume: Math.min(100, Math.max(0, num('IG_AUDIO_VOLUME', 100))),
@@ -431,6 +562,8 @@ module.exports = {
   listCustom,
   pickAudio,
   downloadTrack,
+  inspectTrack,
+  audit,
   payload,
   describe,
   status,

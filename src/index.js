@@ -412,14 +412,79 @@ const COMMANDS = {
   },
 
   /**
+   * Validate every curated pick with measurements, not keywords: duration,
+   * leading silence (native audio starts at 0), hook loudness of the first 3s,
+   * true peak and channel layout. Exit code 1 when any pick fails.
+   */
+  'audio:verify': async (argv) => {
+    const opts = parseArgs(argv);
+    const moods = opts.mood ? [String(opts.mood)] : musicPicks.moods();
+    if (!ig.isConfigured()) throw new Error('Instagram credentials missing (IG_USER_ID / IG_ACCESS_TOKEN)');
+
+    let total = 0;
+    let failed = 0;
+    let warned = 0;
+
+    for (const mood of moods) {
+      const list = musicPicks.forMood(mood);
+      if (!list.length) continue;
+      console.log(`\n${mood}`);
+      for (const p of list) {
+        total++;
+        try {
+          const meta = await audio.trackMeta(p.id);
+          if (!meta) throw new Error('metadata missing');
+          const file = await audio.downloadTrack({
+            audioId: String(meta.audio_id),
+            downloadUrl: meta.download_url,
+          });
+          const m = await audio.inspectTrack(file);
+          const v = audio.audit(meta, m);
+          const usable = audio.isUsable(meta, mood);
+          const pass = v.ok && usable;
+          if (!pass) failed++;
+          else if (v.warns.length) warned++;
+
+          const flags = [
+            ...(usable ? [] : ['filtered']),
+            ...v.fails,
+            ...v.warns,
+          ];
+          const name = `${meta.title || p.title} — ${meta.display_artist || meta.ig_username || p.artist}`;
+          console.log(
+            `  ${pass ? (v.warns.length ? 'warn' : 'ok  ') : 'FAIL'} ${p.id} | ${name} | ` +
+              `${Math.round((Number(meta.duration_in_ms) || 0) / 1000)}s ${m.kbps || '?'}k ${m.channels || '?'}ch | ` +
+              `LUFS ${Number.isFinite(m.lufs) ? m.lufs.toFixed(1) : '?'} | ` +
+              `hook ${Number.isFinite(m.rms3) ? m.rms3.toFixed(0) : '?'}dB | ` +
+              `sil ${(m.leadSilence || 0).toFixed(1)}s | ` +
+              `peak ${Number.isFinite(m.truePeak) ? m.truePeak.toFixed(1) : '?'}dB` +
+              (flags.length ? ` | ${flags.join(', ')}` : '')
+          );
+        } catch (e) {
+          failed++;
+          console.log(`  FAIL ${p.id} | ${p.title} | ${String(e.message).slice(0, 120)}`);
+        }
+      }
+    }
+
+    log.info(`\nverified ${total}: ${total - failed} pass, ${warned} with warnings, ${failed} fail`);
+    if (failed) process.exitCode = 1;
+  },
+
+  /**
    * Play the curated pool without posting: writes 12s clips to output/audition
    * plus an index.html with one player per track, so the set can be approved or
    * swapped before it reaches the account.
+   *
+   * Clips start at 0 because that is what Instagram plays: the native track
+   * always begins at the top, so a quiet or silent intro is audible here too.
+   * Pass --offset <seconds> to preview another part of the track.
    */
   'audio:audition': async (argv) => {
     const opts = parseArgs(argv);
     const moods = opts.mood ? [String(opts.mood)] : ['heartbreak', 'growth', 'motivation'];
     const seconds = Number(opts.seconds) || 12;
+    const offsetOpt = opts.offset === undefined ? 0 : Number(opts.offset);
     const root = ensureDir(path.join(paths.output, 'audition'));
     if (!ig.isConfigured()) throw new Error('Instagram credentials missing (IG_USER_ID / IG_ACCESS_TOKEN)');
 
@@ -444,7 +509,10 @@ const COMMANDS = {
           });
           const name = `${String(n).padStart(2, '0')}-${slug(meta.title || p.title, 40)}.m4a`;
           const out = path.join(dir, name);
-          const start = Math.max(0, Math.min(30, (Number(meta.duration_in_ms) || 30_000) / 1000 / 4));
+          const dur = (Number(meta.duration_in_ms) || 30_000) / 1000;
+          const start = Number.isFinite(offsetOpt)
+            ? Math.max(0, Math.min(offsetOpt, Math.max(0, dur - seconds)))
+            : 0;
           await run(FFMPEG, [
             '-y', '-hide_banner', '-nostats',
             '-ss', String(start), '-t', String(seconds),
@@ -544,6 +612,7 @@ const USAGE = `usage: node src/index.js <command>
   photos:fetch    bulk-download photos into assets/photos
   music:fetch      download the CC-BY music bed
   audio:check     what Instagram's licensed audio catalogue returns per mood  [--mood]
+  audio:verify    measure every curated track: dead air, hook, clipping       [--mood]
   audio:audition  render 12s clips of the curated pool to output/audition  [--mood] [--seconds]
   library:status  photos / music / line and theme inventory
   cleanup         delete temp files and checkpoint the database

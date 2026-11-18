@@ -58,6 +58,30 @@ test('curated picks are valid, non-duplicated and cover every mood', () => {
   }
 });
 
+test('audit separates broken tracks from quality risks', () => {
+  const good = audio.audit(
+    { duration_in_ms: 60_000 },
+    { seconds: 60, leadSilence: 0, rms3: -18, channels: 2, truePeak: -1 }
+  );
+  assert.equal(good.ok, true);
+  assert.deepEqual(good.warns, []);
+
+  const dead = audio.audit(
+    { duration_in_ms: 71_000 },
+    { seconds: 71, leadSilence: 2.1, rms3: -56, channels: 2, truePeak: -7 }
+  );
+  assert.equal(dead.ok, false);
+  assert.ok(dead.fails.some((f) => /dead air/.test(f)));
+  assert.ok(dead.fails.some((f) => /weak start/.test(f)));
+
+  const clipped = audio.audit(
+    { duration_in_ms: 30_000 },
+    { seconds: 30, leadSilence: 0, rms3: -12, channels: 2, truePeak: 3.7 }
+  );
+  assert.equal(clipped.ok, true);
+  assert.ok(clipped.warns.some((w) => /clipping/.test(w)));
+});
+
 test('payload is a container-ready audio_configuration with a muted bed', () => {
   const previous = process.env.IG_NATIVE_AUDIO_VIDEO_VOLUME;
   delete process.env.IG_NATIVE_AUDIO_VIDEO_VOLUME;
