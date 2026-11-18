@@ -30,10 +30,11 @@ test('every mood has approved lines and picks come from the requested mood', () 
   }
 });
 
-test('random pick varies across repeated calls', () => {
-  const seen = new Set();
-  for (let i = 0; i < 40; i++) seen.add(bank.pick('growth', 'growth').id);
-  assert.ok(seen.size > 5, `expected varied picks, got ${seen.size}`);
+test('sequential pick holds the next line until it is marked used', () => {
+  const a = bank.pick('growth', 'growth');
+  const b = bank.pick('growth', 'growth');
+  assert.ok(a);
+  assert.equal(a.id, b.id);
 });
 
 test('report exposes counts, mood coverage and validation', () => {
@@ -41,6 +42,6 @@ test('report exposes counts, mood coverage and validation', () => {
   assert.equal(r.total, 742);
   assert.equal(r.byStatus.approved, 742);
   assert.equal(Object.keys(r.byMood).length, 3);
-  assert.equal(r.selection, 'random');
+  assert.equal(r.selection, 'sequential');
   assert.deepEqual(r.problems, []);
 });

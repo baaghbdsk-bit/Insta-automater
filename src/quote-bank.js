@@ -7,8 +7,9 @@
  * The database only remembers which line was used last, so the picker can
  * avoid serving the same line twice in a row across GitHub Actions runs.
  *
- * Selection is uniform random over every approved line of the chosen mood.
- * There is no rating filter, no cooldown and no least-recently-used order.
+ * Selection walks the approved lines of the chosen mood one by one, in file
+ * order. A line is used once before the picker moves to the next; the whole
+ * pool is exhausted before anything repeats. No rating filter or cooldown.
  */
 
 const fs = require('node:fs');
@@ -19,6 +20,7 @@ const { MUSIC_MOODS } = require('./themes');
 
 const BANK_FILE = path.join(paths.root, 'assets', 'quotes', 'bank.json');
 const USED_KIND = 'bank_quote';
+const seqKind = (mood) => `bank_seq_${mood}`;
 const STRUCTURES = new Set(['reversal', 'observation', 'insight', 'visual', 'minimal']);
 const STATUSES = new Set(['approved', 'held', 'retired']);
 
@@ -65,28 +67,23 @@ function approved(mood) {
   return load().lines.filter((e) => e.status === 'approved' && (!mood || e.mood === mood));
 }
 
-function lastUsed() {
-  const rows = store
-    .assetUsage(USED_KIND)
-    .slice()
-    .sort((a, b) => String(b.used_at).localeCompare(String(a.used_at)));
-  return rows.length ? rows[0].key : null;
-}
-
 /**
- * Uniform random pick from the approved lines of the chosen mood.
+ * Next approved line in file order for this mood, tracked in used_assets.
+ * pickAsset returns the first never-used line, then the least recently used
+ * once the pool has been exhausted - so nothing repeats until every line in
+ * the mood has been published once.
  * `theme` is accepted for API compatibility but does not bias the pick.
  */
 function pick(theme, mood) {
-  let pool = approved(mood);
+  const pool = approved(mood);
   if (!pool.length) return null;
-  const previous = lastUsed();
-  if (pool.length > 1 && previous) pool = pool.filter((e) => e.id !== previous);
-  return pool[Math.floor(Math.random() * pool.length)];
+  const id = store.pickAsset(seqKind(mood), pool.map((e) => e.id));
+  return pool.find((e) => e.id === id) || null;
 }
 
 function markUsed(entry) {
   store.markAsset(USED_KIND, entry.id);
+  store.markAsset(seqKind(entry.mood), entry.id);
 }
 
 function report() {
@@ -103,7 +100,7 @@ function report() {
     byStatus,
     byMood,
     used: all.filter((e) => usage.has(e.id)).length,
-    selection: 'random',
+    selection: 'sequential',
     problems: problems(),
     held: all
       .filter((e) => e.status === 'held')
