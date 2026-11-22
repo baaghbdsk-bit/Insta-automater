@@ -94,10 +94,10 @@ async function check() {
   // ---- Coverage of the most recent publish ----------------------------------
   // Posts made before cross-posting was deployed are not failures. The marker
   // is set once when the feature goes live; only newer posts are checked.
-  const since = store.getState('crossPostSince', '1970-01-01T00:00:00Z');
+  const sincePost = store.getState('crossPostSince', '1970-01-01T00:00:00Z');
   const last = store.db
     .prepare("SELECT id, status, ig_id, yt_id, yt_error, fb_id, fb_error, published_at FROM posts WHERE status IN ('published','partial') AND created_at >= ? ORDER BY id DESC LIMIT 1")
-    .get(since);
+    .get(sincePost);
   if (last) {
     log.info(`last publish: post #${last.id} (${last.published_at || 'no timestamp'})`);
     if (!last.ig_id) problems.push(`post #${last.id}: missing ig_id`);
