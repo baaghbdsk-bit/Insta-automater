@@ -1,7 +1,8 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { layout, VARIANTS, motionExpressions } = require('../src/quote');
+const { layout, VARIANTS, motionExpressions, fonts } = require('../src/quote');
+const { THEME_KEYS } = require('../src/themes');
 
 const W = 1080;
 
@@ -34,6 +35,29 @@ test('every visual variant resolves to a distinct vertical position', () => {
   assert.deepEqual(keys.sort(), ['center', 'lower', 'upper']);
   assert.ok(VARIANTS.upper < VARIANTS.center);
   assert.ok(VARIANTS.center < VARIANTS.lower);
+});
+
+test('every theme maps to a real, calibrated font', () => {
+  for (const theme of THEME_KEYS) {
+    const f = fonts.forTheme(theme);
+    assert.ok(f.name, `${theme} has no font name`);
+    assert.ok(f.ratio > 0.2 && f.ratio < 0.7, `${theme} ratio ${f.ratio}`);
+  }
+});
+
+test('Devanagari switches script regardless of theme', () => {
+  assert.equal(fonts.pick({ theme: 'motivation', text: 'कभी नहीं छोड़ो' }).key, 'devanagari');
+  assert.equal(fonts.pick({ theme: 'heartbreak', text: 'never give up' }).key, 'barlow');
+  assert.equal(fonts.pick({ theme: 'success', text: 'never give up' }).key, 'archivo');
+});
+
+test('layout fits every font to four lines or fewer', () => {
+  const sample = "Never assume that someone's silence means they have nothing to say";
+  for (const f of Object.values(fonts.FONTS)) {
+    const out = layout(sample, W, f);
+    assert.ok(out.lines.length >= 1 && out.lines.length <= 4, `${f.key}: ${out.lines.length}`);
+    assert.ok(out.size >= 72 && out.size <= 120, `${f.key}: ${out.size}`);
+  }
 });
 
 test('motion expressions stay inside the frame', () => {

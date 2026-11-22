@@ -368,6 +368,7 @@ async function buildPost({ theme, slot = '' }) {
       image: photo.path,
       text: picked.line,
       mood: meta.mood,
+      theme: meta.theme,
       music: track,
       musicStart,
       outPath,

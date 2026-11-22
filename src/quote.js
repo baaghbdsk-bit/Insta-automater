@@ -4,6 +4,7 @@ const path = require('node:path');
 const { config, paths, ROOT } = require('./config');
 const { FFMPEG, log, run, ensureDir, probeDuration, wrapText } = require('./util');
 const { assColor, assTime } = require('./captions');
+const fonts = require('./fonts');
 
 function rel(p) {
   return path.relative(ROOT, p).split(path.sep).join('/');
@@ -14,7 +15,6 @@ function esc(text) {
 }
 
 const SIZES = [120, 112, 104, 96, 88, 80, 72];
-const CHAR_RATIO = 0.29; // Anton, measured
 const MARGIN_X = 88;
 
 /** Where the text block sits. Keeps the grid from looking identical every day. */
@@ -29,12 +29,13 @@ const VARIANTS = {
  * Scans wrap widths so the block never ends in a 1-2 word orphan, and prefers
  * fewer lines when two widths are equally even.
  */
-function layout(text, W) {
+function layout(text, W, font = fonts.FONTS.anton) {
   const usable = W - MARGIN_X * 2;
   const clean = String(text).replace(/\s+/g, ' ').trim();
+  const ratio = font.ratio || fonts.FONTS.anton.ratio;
 
   for (const size of SIZES) {
-    const maxChars = Math.max(8, Math.floor(usable / (CHAR_RATIO * size)));
+    const maxChars = Math.max(8, Math.floor(usable / (ratio * size)));
     const minTarget = Math.max(10, Math.ceil(clean.length / 4));
 
     const candidates = [];
@@ -52,7 +53,7 @@ function layout(text, W) {
   }
 
   const size = SIZES[SIZES.length - 1];
-  const maxChars = Math.max(8, Math.floor(usable / (CHAR_RATIO * size)));
+  const maxChars = Math.max(8, Math.floor(usable / (ratio * size)));
   return { size, lines: wrapText(clean, maxChars, 4) };
 }
 
@@ -61,9 +62,9 @@ function variantCenterY(variant, H) {
   return Math.round(H * frac);
 }
 
-function buildAss({ text, watermark, total, W, H, variant = 'center' }) {
+function buildAss({ text, watermark, total, W, H, variant = 'center', font = fonts.FONTS.anton }) {
   const accent = assColor(config.video.accent);
-  const { size, lines } = layout(text, W);
+  const { size, lines } = layout(text, W, font);
   const lineH = Math.round(size * 1.16);
   const blockH = lineH * lines.length;
   const centerY = variantCenterY(variant, H);
@@ -95,7 +96,7 @@ YCbCr Matrix: TV.709
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Quote,Anton,${size},&H00FFFFFF,&H000000FF,&H00000000,&H9B000000,0,0,0,0,100,100,1,0,1,4,10,5,${MARGIN_X},${MARGIN_X},0,1
+Style: Quote,${font.name},${size},&H00FFFFFF,&H000000FF,&H00000000,&H9B000000,${font.bold},0,0,0,100,100,1,0,1,4,10,5,${MARGIN_X},${MARGIN_X},0,1
 Style: Mark,Anton,38,${accent},&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,8,0,1,3,2,8,40,40,150,1
 
 [Events]
@@ -145,8 +146,6 @@ function motionExpressions(frames) {
   ];
 }
 
-const DEVANAGARI = /[\u0900-\u097F]/;
-
 /**
  * One quote reel: photo + big line + music bed.
  */
@@ -154,6 +153,7 @@ async function renderQuote({
   image,
   text,
   mood = 'motivation',
+  theme = '',
   music,
   outPath,
   duration = 12,
@@ -164,9 +164,7 @@ async function renderQuote({
 }) {
   if (!image || !fs.existsSync(image)) throw new Error(`image not found: ${image}`);
   if (!text || !String(text).trim()) throw new Error('no text to render');
-  if (DEVANAGARI.test(String(text))) {
-    log.warn('quote: text contains Devanagari; Anton has no glyphs for it');
-  }
+  const font = fonts.pick({ theme, text });
 
   const W = config.video.width;
   const H = config.video.height;
@@ -186,6 +184,7 @@ async function renderQuote({
     W,
     H,
     variant,
+    font,
   });
   const assFile = path.join(workDir, 'quote.ass');
   fs.writeFileSync(assFile, ass, 'utf8');
@@ -264,7 +263,7 @@ async function renderQuote({
   );
 
   log.step(
-    `rendering quote (${mood}/${variant}/${move.name}, ${size}px, ${lines.length} lines, ${total.toFixed(1)}s)`
+    `rendering quote (${mood}/${variant}/${move.name}, ${font.name} ${size}px, ${lines.length} lines, ${total.toFixed(1)}s)`
   );
   if (process.env.DEBUG) log.info(`ffmpeg ${args.join(' ')}`);
   const t0 = Date.now();
@@ -281,4 +280,4 @@ async function renderQuote({
   return { outPath, total, size, lines, music: musicFile, offset, variant, motion: move.name };
 }
 
-module.exports = { renderQuote, layout, VARIANTS, motionExpressions };
+module.exports = { renderQuote, layout, VARIANTS, motionExpressions, fonts };
