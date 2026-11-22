@@ -22,6 +22,7 @@ const ig = require('./publish/instagram');
 const audio = require('./audio');
 const { publishVideo, normalise, firstLine, uploadMode } = require('./publish');
 const yt = require('./publish/youtube');
+const fb = require('./publish/facebook');
 const { validateVideo } = require('./video');
 const { THEMES, THEME_KEYS, VISUAL_VARIANTS } = require('./themes');
 
@@ -686,6 +687,29 @@ async function run({ slot = '', theme = '', dryRun = false, force = false } = {}
       store.updatePost(built.postId, { yt_error: msg });
       result.notes.push(`youtube: ${msg}`);
       notify.warn(`youtube: ${msg}`);
+    }
+
+    // -------- Facebook Page Reel (additive cross-post, never fails the IG run)
+    if (fb.enabled() && fb.isConfigured() && !dryRun) {
+      try {
+        const fbResult = await fb.publishReel({
+          videoPath: built.outPath,
+          description: built.caption,
+          title: built.line,
+        });
+        store.updatePost(built.postId, { fb_id: fbResult.videoId, fb_error: null });
+        result.notes.push(`facebook: ${fbResult.url}`);
+        log.ok(`facebook: published Page Reel ${fbResult.videoId}`);
+      } catch (e) {
+        const msg = String(e.message || e).slice(0, 900);
+        store.updatePost(built.postId, { fb_error: msg });
+        notify.warn(`facebook: cross-post failed for post #${built.postId}: ${msg}`);
+        result.notes.push(`facebook: failed - ${msg.slice(0, 120)}`);
+      }
+    } else if (!dryRun) {
+      result.notes.push(
+        `facebook: cross-post ${fb.enabled() ? 'not configured (FB_PAGE_ID/FB_PAGE_TOKEN missing)' : 'disabled'}`
+      );
     }
 
     store.finishRun(runId, { status: result.status, postId: built.postId });

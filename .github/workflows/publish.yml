@@ -59,6 +59,11 @@ env:
   FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
   FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
 
+  # Cross-post every Reel to Threads (native IG flag) and the connected
+  # Facebook Page (Page Reels API). Requires pages_manage_posts on FB_PAGE_TOKEN.
+  CROSS_POST_THREADS: '1'
+  CROSS_POST_FACEBOOK: '1'
+
   IG_USER_ID_2: ${{ secrets.IG_USER_ID_2 }}
   FB_PAGE_TOKEN_2: ${{ secrets.FB_PAGE_TOKEN_2 }}
   IG_USER_ID_3: ${{ secrets.IG_USER_ID_3 }}

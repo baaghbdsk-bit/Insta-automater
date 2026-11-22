@@ -44,6 +44,7 @@ const DEFAULTS = {
     minGapMinutes: 120,
   },
   instagram: { apiVersion: 'v27.0', uploadMode: 'direct' },
+  crossPost: { threads: true, facebook: true },
   safety: {
     blockOnUngroundedNumbers: true,
     blockedTerms: [],
@@ -63,6 +64,7 @@ const config = {
   music: { ...DEFAULTS.music, ...(user.music || {}) },
   schedule: { ...DEFAULTS.schedule, ...(user.schedule || {}) },
   instagram: { ...DEFAULTS.instagram, ...(user.instagram || {}) },
+  crossPost: { ...DEFAULTS.crossPost, ...(user.crossPost || {}) },
   safety: { ...DEFAULTS.safety, ...(user.safety || {}) },
   channel: { ...DEFAULTS.channel, ...(user.channel || {}) },
 };

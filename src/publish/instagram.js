@@ -59,6 +59,13 @@ function version() {
   return String(env.IG_API_VERSION || (config.instagram && config.instagram.apiVersion) || 'v23.0');
 }
 
+/** Cross-post every Reel to the connected Threads account (v27+). */
+function crossPostToThreads() {
+  const raw = env.CROSS_POST_THREADS;
+  if (raw !== undefined && raw !== '') return String(raw) !== '0' && String(raw).toLowerCase() !== 'false';
+  return !(config.crossPost && config.crossPost.threads === false);
+}
+
 function accountSuffix(account = 0) {
   return account === 0 ? '' : `_${account + 1}`;
 }
@@ -181,13 +188,14 @@ function audioConfiguration(value) {
   return JSON.stringify(value);
 }
 
-async function createUrlContainer({ videoUrl, caption, shareToFeed = true, account = 0, audioConfig = null }) {
+async function createUrlContainer({ videoUrl, caption, shareToFeed = true, account = 0, audioConfig = null, crossPostToThreads: threads = true }) {
   const params = {
     media_type: 'REELS',
     video_url: videoUrl,
     caption,
     share_to_feed: shareToFeed ? 'true' : 'false',
   };
+  if (threads) params.cross_post_to_threads = 'true';
   const audio = audioConfiguration(audioConfig);
   if (audio) params.audio_configuration = audio;
 
@@ -202,13 +210,14 @@ async function createUrlContainer({ videoUrl, caption, shareToFeed = true, accou
  * and the rupload URI to POST the bytes to. No video_url is sent: the video is
  * uploaded separately via uploadResumable().
  */
-async function createResumableContainer({ caption, shareToFeed = true, account = 0, audioConfig = null }) {
+async function createResumableContainer({ caption, shareToFeed = true, account = 0, audioConfig = null, crossPostToThreads: threads = true }) {
   const params = {
     media_type: 'REELS',
     upload_type: 'resumable',
     caption,
     share_to_feed: shareToFeed ? 'true' : 'false',
   };
+  if (threads) params.cross_post_to_threads = 'true';
   const audio = audioConfiguration(audioConfig);
   if (audio) params.audio_configuration = audio;
 
@@ -340,34 +349,43 @@ async function publishReel({
   let creationId;
   let uri;
 
-  const create = (withAudio) =>
+  const create = (withAudio, withThreads) =>
     direct
-      ? createResumableContainer({ caption, shareToFeed, account, audioConfig: withAudio })
-      : createUrlContainer({ videoUrl, caption, shareToFeed, account, audioConfig: withAudio });
+      ? createResumableContainer({ caption, shareToFeed, account, audioConfig: withAudio, crossPostToThreads: withThreads })
+      : createUrlContainer({ videoUrl, caption, shareToFeed, account, audioConfig: withAudio, crossPostToThreads: withThreads });
 
-  try {
-    const created = await create(audioConfig);
-    if (direct) {
-      creationId = created.id;
-      uri = created.uri;
-    } else {
-      creationId = created;
+  // Optional extras are tried in decreasing order of richness. If a feature is
+  // not supported by this account/API version, degrade gracefully instead of
+  // losing the Instagram post entirely. Auth/quota errors are never retried.
+  const threadsWanted = crossPostToThreads();
+  const variants = [];
+  if (audioConfig) variants.push({ audio: audioConfig, threads: threadsWanted });
+  variants.push({ audio: null, threads: threadsWanted });
+  if (threadsWanted) {
+    if (audioConfig) variants.push({ audio: audioConfig, threads: false });
+    variants.push({ audio: null, threads: false });
+  }
+
+  let created = null;
+  let lastErr = null;
+  for (const v of variants) {
+    try {
+      created = await create(v.audio, v.threads);
+      if (!v.audio && audioConfig) log.warn('ig: native audio not accepted; using embedded music only');
+      if (threadsWanted && !v.threads) log.warn('ig: cross_post_to_threads not accepted; publishing to Instagram only');
+      break;
+    } catch (e) {
+      if (e instanceof IgError && (e.authProblem || e.quotaProblem)) throw e;
+      lastErr = e;
     }
-  } catch (e) {
-    const attach = audioConfiguration(audioConfig);
-    const hard = e instanceof IgError && (e.authProblem || e.quotaProblem);
-    if (!attach || hard) throw e;
-    // The audio may not be licensed for this account, or the API may have
-    // changed shape. The embedded bed is already in the file, so retrying
-    // without audio_configuration is always safe.
-    log.warn(`ig: native audio rejected (${String(e.message).slice(0, 120)}); retrying with embedded music only`);
-    const created = await create(null);
-    if (direct) {
-      creationId = created.id;
-      uri = created.uri;
-    } else {
-      creationId = created;
-    }
+  }
+  if (!created) throw lastErr;
+
+  if (direct) {
+    creationId = created.id;
+    uri = created.uri;
+  } else {
+    creationId = created;
   }
 
   if (typeof onContainer === 'function') {

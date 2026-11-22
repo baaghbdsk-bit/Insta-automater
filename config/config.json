@@ -28,6 +28,10 @@
   "instagram": {
     "apiVersion": "v27.0"
   },
+  "crossPost": {
+    "threads": true,
+    "facebook": true
+  },
   "music": {
     "creditInCaption": true,
     "credit": "Music: Kevin MacLeod (incompetech.com) — CC BY 4.0"

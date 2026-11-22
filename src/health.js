@@ -14,6 +14,7 @@ const { env } = require('./config');
 const store = require('./db');
 const ig = require('./publish/instagram');
 const yt = require('./publish/youtube');
+const fb = require('./publish/facebook');
 const notify = require('./notify');
 
 function daysLeft(seconds) {
@@ -70,15 +71,38 @@ async function check() {
     log.warn('youtube: not configured (skipping coverage check)');
   }
 
+  // ---- Facebook cross-post credentials --------------------------------------
+  const fbOn = fb.enabled() && fb.isConfigured();
+  if (fbOn) {
+    try {
+      const u = new URL('https://graph.facebook.com/debug_token');
+      u.searchParams.set('input_token', env.FB_PAGE_TOKEN);
+      u.searchParams.set('access_token', `${env.FB_APP_ID}|${env.FB_APP_SECRET}`);
+      const r = await fetch(u, { signal: AbortSignal.timeout(30_000) });
+      const j = await r.json().catch(() => ({}));
+      const scopes = (j.data && j.data.scopes) || [];
+      if (!scopes.includes('pages_manage_posts')) {
+        problems.push('facebook: Page token lacks pages_manage_posts - Page Reel cross-post will fail');
+      } else {
+        log.ok('facebook: Page token has pages_manage_posts');
+      }
+    } catch (e) {
+      problems.push(`facebook token check: ${String(e.message).slice(0, 200)}`);
+    }
+  }
+
   // ---- Coverage of the most recent publish ----------------------------------
   const last = store.db
-    .prepare("SELECT id, status, ig_id, yt_id, yt_error, published_at FROM posts WHERE status IN ('published','partial') ORDER BY id DESC LIMIT 1")
+    .prepare("SELECT id, status, ig_id, yt_id, yt_error, fb_id, fb_error, published_at FROM posts WHERE status IN ('published','partial') ORDER BY id DESC LIMIT 1")
     .get();
   if (last) {
     log.info(`last publish: post #${last.id} (${last.published_at || 'no timestamp'})`);
     if (!last.ig_id) problems.push(`post #${last.id}: missing ig_id`);
     if (ytOn && !last.yt_id) {
       problems.push(`post #${last.id}: missing yt_id (${last.yt_error || 'no error recorded'})`);
+    }
+    if (fbOn && !last.fb_id) {
+      problems.push(`post #${last.id}: missing fb_id (${last.fb_error || 'no error recorded'})`);
     }
   }
 
