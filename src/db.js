@@ -91,9 +91,14 @@ CREATE TABLE IF NOT EXISTS runs (
 // ---- schema migrations -----------------------------------------------------
 function ensureColumn(table, name, def) {
   const cols = db.prepare(`PRAGMA table_info(${table})`).all();
-  if (!cols.some((c) => c.name === name)) {
+  if (cols.some((c) => c.name === name)) return;
+  try {
     db.exec(`ALTER TABLE ${table} ADD COLUMN ${name} ${def}`);
     log.info(`db: added ${table}.${name}`);
+  } catch (e) {
+    // `node --test` runs test files in parallel, each opening this DB. Two can
+    // both see the column missing and race the ALTER; the loser is harmless.
+    if (!/duplicate column name/i.test(String(e.message))) throw e;
   }
 }
 ensureColumn('posts', 'theme', 'TEXT');
