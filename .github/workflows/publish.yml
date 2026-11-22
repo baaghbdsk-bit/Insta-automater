@@ -143,6 +143,12 @@ jobs:
         id: engine
         run: node src/index.js run
 
+      # Loud, non-fatal check: a YT failure must never be invisible again.
+      - name: Publish health check
+        if: always()
+        continue-on-error: true
+        run: node src/index.js pubcheck
+
       - name: Keep the rendered video for debugging
         if: failure()
         uses: actions/upload-artifact@v4

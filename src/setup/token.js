@@ -49,15 +49,21 @@ async function status() {
     return;
   }
   const now = Math.floor(Date.now() / 1000);
-  if (!info.expires_at || info.expires_at === 0) {
-    log.ok('token: never expires');
-  } else {
-    const days = ((info.expires_at - now) / 86400).toFixed(1);
-    const when = new Date(info.expires_at * 1000).toISOString().slice(0, 16).replace('T', ' ');
-    if (info.expires_at < now) log.error(`token EXPIRED on ${when}`);
-    else if (days < 7) log.warn(`token expires in ${days} days (${when}) - refresh now`);
-    else log.ok(`token valid for ${days} days (until ${when})`);
-  }
+  // A user token often has expires_at=0 ("never") while its data-access grant
+  // still has a hard deadline. run.js enforces that deadline, so report both.
+  const report = (label, expires) => {
+    if (!expires || expires === 0) {
+      log.ok(`${label}: never expires`);
+      return;
+    }
+    const days = ((expires - now) / 86400).toFixed(1);
+    const when = new Date(expires * 1000).toISOString().slice(0, 16).replace('T', ' ');
+    if (expires < now) log.error(`${label}: EXPIRED on ${when}`);
+    else if (Number(days) <= 21) log.warn(`${label}: expires in ${days} days (${when}) - re-authorize now`);
+    else log.ok(`${label}: valid for ${days} days (until ${when})`);
+  };
+  report('token', info.expires_at);
+  report('data access', info.data_access_expires_at);
   log.info(`type: ${info.type || '?'}  app: ${info.app_id || '?'}`);
   log.info(`scopes: ${(info.scopes || []).join(', ')}`);
   if (info.scopes && !info.scopes.includes('instagram_content_publish')) {

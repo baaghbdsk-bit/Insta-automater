@@ -670,15 +670,22 @@ async function run({ slot = '', theme = '', dryRun = false, force = false } = {}
           description: built.caption,
           tags: built.hashtags || [],
         });
-        store.updatePost(built.postId, { yt_id: ytResult.videoId });
+        store.updatePost(built.postId, { yt_id: ytResult.videoId, yt_error: null });
         result.notes.push(`youtube: ${ytResult.url}`);
         log.ok(`youtube: published Short ${ytResult.videoId}`);
       } catch (e) {
-        log.warn(`youtube: publish failed (${String(e.message).slice(0, 200)})`);
-        result.notes.push(`youtube: failed - ${String(e.message).slice(0, 120)}`);
+        const msg = String(e.message || e).slice(0, 900);
+        // The run still succeeds (IG is the primary platform), but make the
+        // failure impossible to miss: DB column + annotation + webhook.
+        store.updatePost(built.postId, { yt_error: msg });
+        notify.error(`youtube: publish failed for post #${built.postId}: ${msg}`);
+        result.notes.push(`youtube: failed - ${msg.slice(0, 120)}`);
       }
     } else if (!yt.isConfigured() && !dryRun) {
-      result.notes.push('youtube: not configured (YT_CLIENT_ID/YT_CLIENT_SECRET/YT_REFRESH_TOKEN missing)');
+      const msg = 'not configured (YT_CLIENT_ID/YT_CLIENT_SECRET/YT_REFRESH_TOKEN missing)';
+      store.updatePost(built.postId, { yt_error: msg });
+      result.notes.push(`youtube: ${msg}`);
+      notify.warn(`youtube: ${msg}`);
     }
 
     store.finishRun(runId, { status: result.status, postId: built.postId });

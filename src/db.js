@@ -108,6 +108,7 @@ ensureColumn('posts', 'creation_id_2', 'TEXT');
 ensureColumn('posts', 'ig_id_3', 'TEXT');
 ensureColumn('posts', 'permalink_3', 'TEXT');
 ensureColumn('posts', 'creation_id_3', 'TEXT');
+ensureColumn('posts', 'yt_error', 'TEXT');
 
 // ---- state -----------------------------------------------------------------
 function getState(key, fallback = null) {

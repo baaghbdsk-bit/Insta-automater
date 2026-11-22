@@ -600,6 +600,10 @@ const COMMANDS = {
 
   'token:status': async () => token.status(),
 
+  pubcheck: async () => {
+    await require('./health').check();
+  },
+
   'token:exchange': async (argv) => {
     const opts = parseArgs(argv);
     if (opts.app) token.writeEnvValue('FB_APP_ID', String(opts.app));
@@ -636,6 +640,7 @@ const USAGE = `usage: node src/index.js <command>
   library:status  photos / music / line and theme inventory
   cleanup         delete temp files and checkpoint the database
   token:status    token expiry, scopes, account
+  pubcheck        verify Instagram + YouTube auth and latest post coverage
   token:exchange  turn a short-lived token into a long-lived one
   token:refresh   renew the long-lived token
 `;

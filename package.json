@@ -25,6 +25,7 @@
     "audio:audition": "node src/index.js audio:audition",
     "cleanup": "node src/index.js cleanup",
     "token:status": "node src/index.js token:status",
+    "pubcheck": "node src/index.js pubcheck",
     "test": "node --test tests/*.js"
   },
   "dependencies": {
