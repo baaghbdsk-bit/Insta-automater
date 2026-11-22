@@ -33,7 +33,7 @@ const MOOD_QUERIES = {
 
 // Tracks that are obviously wrong for a quote page regardless of mood.
 const GLOBAL_BLOCK =
-  /\b(kid|kids|nursery|cartoon|comedy|funny|prank|meme|birthday|christmas|holiday|jingle|festive|halloween|horror|spooky|sound effect|sfx)\b/i;
+  /\b(kid|kids|nursery|cartoon|comedy|funny|prank|meme|birthday|christmas|holiday|jingle|festive|halloween|horror|spooky|sound effect|sfx|instrumental|karaoke|no vocals?|beat only|loop|ambient|strings version)\b/i;
 
 // Vibe counter-signals: a "sad" search can still return a party track.
 const MOOD_BLOCK = {
@@ -212,13 +212,27 @@ async function pickCurated({ mood = 'motivation', theme = '', account = 0 } = {}
   const pool = picks.forMood(mood);
   if (!pool.length) return null;
 
-  const used = new Map(store.assetUsage('audio').map((r) => [String(r.key), String(r.used_at || '')]));
-  const fresh = shuffle(pool.filter((p) => !used.has(p.id)));
-  const old = pool
-    .filter((p) => used.has(p.id))
-    .sort((a, b) => String(used.get(a.id) || '').localeCompare(String(used.get(b.id) || '')));
+  const history = store
+    .assetUsage('audio')
+    .slice()
+    .sort((a, b) => String(b.used_at || '').localeCompare(String(a.used_at || '')));
+  const used = new Map(history.map((r) => [String(r.key), String(r.used_at || '')]));
+  const recent = new Set(history.slice(0, 3).map((r) => String(r.key)));
 
-  for (const p of [...fresh, ...old]) {
+  // Vocal tracks with a hook get first refusal, but the last three picks are
+  // excluded so the same song never appears in consecutive reels.
+  const available = pool.filter((p) => !recent.has(p.id));
+  const preferred = shuffle(available.filter((p) => picks.PREFERRED.has(p.id)));
+  const others = shuffle(available.filter((p) => !picks.PREFERRED.has(p.id)));
+  const byAge = (a, b) => String(used.get(a.id) || '').localeCompare(String(used.get(b.id) || ''));
+  const ordered = [
+    ...preferred.filter((p) => !used.has(p.id)),
+    ...others.filter((p) => !used.has(p.id)),
+    ...preferred.filter((p) => used.has(p.id)).sort(byAge),
+    ...others.filter((p) => used.has(p.id)).sort(byAge),
+  ];
+
+  for (const p of ordered) {
     let meta;
     try {
       meta = await trackMeta(p.id, account);

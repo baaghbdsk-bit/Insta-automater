@@ -26,7 +26,6 @@ const TYPE = 'original_sound';
 const PICKS = {
   heartbreak: [
     ['167434233049486', "Yebba's Heartbreak", 'Drake & Yebba'],
-    ['154051524260807', "Yebba's Heartbreak (Strings)", 'stringsfromparis'],
     ['26747970224861864', 'bye (Slowed)', 'justinfeca'],
     ['1571081900463772', 'Elastic Heart', 'Sia'],
     ['323240847404726', 'Another Love', 'Tom Odell'],
@@ -53,9 +52,25 @@ const PICKS = {
     ['252126270877938', 'Lose Yourself x Unstoppable', 'prakash_musical'],
     ['934100598658090', 'Not Afraid', 'Eminem'],
     ['216865824673203', 'Sing For The Moment', 'Eminem'],
-    ['746759628421977', 'Till I Collapse (Instrumental)', 'migasproductions'],
   ],
 };
+
+/**
+ * Vocal tracks with a real hook — the ones that actually carry a quote reel.
+ * They get priority in rotation (see audio.pickCurated). Instrumental and
+ * strings-only edits were removed from the pool entirely: they are the "flat,
+ * nothing to sing" picks the audit could not catch by loudness alone.
+ */
+const PREFERRED = new Set([
+  '366439462826609', // Legends Never Die —Against The Current
+  '834262641203975', // Soso — Omah Lay
+  '642916667155384', // Hall Of Fame — The Script
+  '297768938982507', // Eye Of The Tiger — Survivor
+  '752695924302048', // Remember The Name — Fort Minor
+  '27919155244416158', // Warriors — Imagine Dragons
+  '1375412437508033', // Till I Collapse — Eminem
+  '323240847404726', // Another Love — Tom Odell
+]);
 
 function list(mood) {
   return (PICKS[mood] || []).map(([id, title, artist]) => ({ id: String(id), title, artist, type: TYPE }));
@@ -83,7 +98,10 @@ function problems() {
       seen.set(key, mood);
     }
   }
+  for (const id of PREFERRED) {
+    if (!seen.has(id)) out.push(`preferred id ${id} is not in any mood pool`);
+  }
   return out;
 }
 
-module.exports = { TYPE, PICKS, list, forMood, moods, problems };
+module.exports = { TYPE, PICKS, PREFERRED, list, forMood, moods, problems };

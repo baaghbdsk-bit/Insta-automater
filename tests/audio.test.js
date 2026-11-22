@@ -58,6 +58,27 @@ test('curated picks are valid, non-duplicated and cover every mood', () => {
   }
 });
 
+test('the curated pool has no flat instrumental edits', () => {
+  for (const mood of ['heartbreak', 'growth', 'motivation']) {
+    for (const p of picks.forMood(mood)) {
+      assert.ok(!/instrumental|karaoke|strings version|beat only|ambient/i.test(p.title), p.title);
+    }
+  }
+  assert.equal(audio.isUsable(track({ title: 'Till I Collapse Instrumental' }), 'motivation'), false);
+  assert.equal(audio.isUsable(track({ title: 'Strings Version' }), 'heartbreak'), false);
+});
+
+test('the preferred vocal tier includes the requested favourites', () => {
+  assert.ok(picks.PREFERRED.has('366439462826609'), 'Legends Never Die');
+  assert.ok(picks.PREFERRED.has('834262641203975'), 'Soso');
+  for (const id of picks.PREFERRED) {
+    assert.ok(
+      ['heartbreak', 'growth', 'motivation'].some((m) => picks.forMood(m).some((p) => p.id === id)),
+      `${id} must exist in a mood pool`
+    );
+  }
+});
+
 test('audit separates broken tracks from quality risks', () => {
   const good = audio.audit(
     { duration_in_ms: 60_000 },
