@@ -22,8 +22,8 @@
   "schedule": {
     "timezone": "Asia/Kolkata",
     "times": ["08:00", "14:00", "20:00", "23:00"],
-    "maxPerDay": 8,
-    "minGapMinutes": 90
+    "maxPerDay": 20,
+    "minGapMinutes": 1
   },
   "instagram": {
     "apiVersion": "v27.0"
