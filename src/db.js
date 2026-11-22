@@ -5,7 +5,12 @@ const { ensureDir, log } = require('./util');
 const { paths } = require('./config');
 
 ensureDir(paths.data);
-const db = new DatabaseSync(path.join(paths.data, 'engine.db'));
+// `node --test` runs each test file in its own process. Give each one a private
+// database so parallel tests can never lock the committed production state.
+const dbFile = process.env.NODE_TEST_CONTEXT
+  ? path.join(require('node:os').tmpdir(), `reel-engine-test-${process.pid}.db`)
+  : path.join(paths.data, 'engine.db');
+const db = new DatabaseSync(dbFile);
 
 db.exec(`
 PRAGMA journal_mode = WAL;
