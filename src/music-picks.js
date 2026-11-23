@@ -13,45 +13,49 @@
  *
  * Selection rule (from the account owner's examples):
  *   hard truth  -> rap / hard beat        (Eminem, Till I Collapse, POWER)
- *   quiet hurt  -> slowed + reverb        (Yebba's Heartbreak, bye, Another Love)
- *   rising up   -> anthemic / cinematic   (Hall of Fame, Rise Up, Eye of the Tiger)
+ *   quiet hurt  -> emotional vocal        (Another Love, Arcade, Let Her Go)
+ *   rising up   -> anthemic / cinematic   (Hall of Fame, Unstoppable, High Hopes)
  *
  * Every entry is checked by `npm run audio:verify`: duration, seconds of dead
  * air at 0 (native audio starts at the top), loudness of the first three
  * seconds, true peak and channel layout. Uploads that open with silence or have
  * no hook are dropped even when the song is right.
+ *
+ * Pool history (2026-11-23): the 13 quiet-intro picks the owner flagged as the
+ * "wrong kind of music" were removed, together with the Lose Yourself x
+ * Unstoppable edit. Replacements below were measured before being added: every
+ * one has 0s of leading silence and a first-3s RMS above -20 dB.
  */
 const TYPE = 'original_sound';
 
 const PICKS = {
   heartbreak: [
-    ['167434233049486', "Yebba's Heartbreak", 'Drake & Yebba'],
-    ['26747970224861864', 'bye (Slowed)', 'justinfeca'],
-    ['1571081900463772', 'Elastic Heart', 'Sia'],
     ['323240847404726', 'Another Love', 'Tom Odell'],
     ['627434937082245', 'Wildflower', 'Billie Eilish'],
     ['834262641203975', 'Soso', 'Omah Lay'],
-    ['26339758578979492', 'Reflections', 'The Neighbourhood'],
     ['667162318236142', 'Lovely', 'Billie Eilish & Khalid'],
+    ['676166840945437', 'Arcade', 'Duncan Laurence'],
+    ['781338470751596', 'Let Her Go', 'Passenger'],
+    ['814315207621272', 'Without Me', 'Halsey'],
+    ['907219631086530', 'Lose You To Love Me', 'Selena Gomez'],
   ],
   growth: [
     ['642916667155384', 'Hall Of Fame', 'The Script ft. will.i.am'],
-    ['254274160046909', 'Stronger', 'Kelly Clarkson'],
-    ['1283113742781288', 'Rise Up', 'Andra Day'],
-    ['297768938982507', 'Eye Of The Tiger', 'Survivor'],
     ['366439462826609', 'Legends Never Die', 'Against The Current'],
-    ['27919155244416158', 'Warriors', 'Imagine Dragons'],
-    ['552543731160111', 'Stronger', 'Kanye West'],
-    ['752695924302048', 'Remember The Name', 'Fort Minor'],
     ['27137478635904664', 'Eyes Closed', 'Imagine Dragons'],
+    ['354553290259617', 'Unstoppable', 'Sia'],
+    ['36327110373600135', 'High Hopes', 'Panic! At The Disco'],
+    ['1083563887210703', 'Immortals', 'Fall Out Boy'],
+    ['357257645873841', 'Centuries', 'Fall Out Boy'],
+    ['1121130739701924', 'Fight Song', 'Rachel Platten'],
   ],
   motivation: [
-    ['100113173193451', 'Lose Yourself', 'Eminem'],
     ['1375412437508033', 'Till I Collapse', 'Eminem ft. Nate Dogg'],
-    ['153198434297429', 'The Way I Am', 'Eminem'],
-    ['252126270877938', 'Lose Yourself x Unstoppable', 'prakash_musical'],
-    ['934100598658090', 'Not Afraid', 'Eminem'],
     ['216865824673203', 'Sing For The Moment', 'Eminem'],
+    ['919638282881821', 'POWER', 'Kanye West'],
+    ['575857182007015', "Can't Hold Us", 'Macklemore & Ryan Lewis'],
+    ['1703405753590384', 'Victory', 'Puff Daddy & Notorious B.I.G.'],
+    ['532453552918451', 'HUMBLE', 'Kendrick Lamar'],
   ],
 };
 
@@ -62,14 +66,16 @@ const PICKS = {
  * nothing to sing" picks the audit could not catch by loudness alone.
  */
 const PREFERRED = new Set([
-  '366439462826609', // Legends Never Die —Against The Current
+  '366439462826609', // Legends Never Die — Against The Current
   '834262641203975', // Soso — Omah Lay
   '642916667155384', // Hall Of Fame — The Script
-  '297768938982507', // Eye Of The Tiger — Survivor
-  '752695924302048', // Remember The Name — Fort Minor
-  '27919155244416158', // Warriors — Imagine Dragons
   '1375412437508033', // Till I Collapse — Eminem
   '323240847404726', // Another Love — Tom Odell
+  '676166840945437', // Arcade — Duncan Laurence
+  '814315207621272', // Without Me — Halsey
+  '354553290259617', // Unstoppable — Sia
+  '919638282881821', // POWER — Kanye West
+  '36327110373600135', // High Hopes — Panic! At The Disco
 ]);
 
 function list(mood) {
