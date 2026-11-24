@@ -79,8 +79,8 @@ function chooseVariant() {
 }
 
 function randomDuration() {
-  // 9–15s, biased away from the extremes.
-  return Number((9 + Math.random() * 6).toFixed(1));
+  // Uniform 10–15s. Shorts need the loop, but a quote needs the time to land.
+  return Number((10 + Math.random() * 5).toFixed(1));
 }
 
 // ---------------------------------------------------------------- reconcile
@@ -361,6 +361,13 @@ async function buildPost({ theme, slot = '' }) {
 
     if (!track) track = library.pickTrack(meta.mood);
 
+    // Non-native tracks (custom, local bed): start where the audio actually
+    // starts. Front-loaded hooks stay at 0, tracks with a quiet intro skip it,
+    // so the first frame is never silence.
+    if (musicStart === undefined || musicStart === null) {
+      musicStart = await audio.leadSilence(track).catch(() => 0);
+    }
+
     const stamp = new Date().toISOString().slice(0, 10);
     const outPath = path.join(paths.output, `${stamp}-${meta.theme}-${postId}-${slug(picked.line, 24)}.mp4`);
 
@@ -375,6 +382,7 @@ async function buildPost({ theme, slot = '' }) {
       duration,
       variant,
       watermark: true,
+      attribution: picked.author || '',
     });
 
     const check = await validateVideo(outPath);
@@ -409,6 +417,12 @@ async function buildPost({ theme, slot = '' }) {
       line: picked.line,
       credit,
     });
+    // Same caption without the music line, so the YouTube description can carry
+    // the credit for the track YouTube actually plays.
+    const captionBase =
+      credit && cap.caption.endsWith(credit)
+        ? cap.caption.slice(0, -credit.length).trim()
+        : cap.caption;
 
     store.updatePost(postId, {
       status: 'built',
@@ -444,6 +458,7 @@ async function buildPost({ theme, slot = '' }) {
       postId,
       outPath,
       caption: cap.caption,
+      captionBase,
       hashtags: cap.hashtags,
       theme: meta.theme,
       mood: meta.mood,
@@ -461,6 +476,50 @@ async function buildPost({ theme, slot = '' }) {
     store.updatePost(postId, { status: 'failed', error: String(e.message).slice(0, 900) });
     throw e;
   }
+}
+
+/**
+ * YouTube needs its own audio. The Data API has no field for attaching a track
+ * from the Audio Library, and a baked-in commercial song is claimed the moment
+ * it uploads. So the render keeps the real song for Instagram and Facebook, and
+ * YouTube gets a second MP4 whose audio stream is swapped for a claim-free bed.
+ *
+ * Returns { videoPath, description, note }. videoPath is the Instagram render
+ * when YT_AUDIO_MODE=same, or when the repo holds no safe track.
+ */
+async function prepareYtAudio(built) {
+  const mode = String(env.YT_AUDIO_MODE || 'library').toLowerCase();
+  if (mode === 'same') {
+    return { videoPath: built.outPath, description: built.caption, note: 'same mix as Instagram' };
+  }
+
+  const safe = library.pickYtTrack(built.mood);
+  if (!safe) {
+    return {
+      videoPath: built.outPath,
+      description: built.caption,
+      note: 'no claim-free track in assets/music — uploaded the Instagram mix',
+    };
+  }
+
+  const start = await audio.leadSilence(safe.path).catch(() => 0);
+  const videoPath = path.join(paths.tmp, `yt-${built.postId}.mp4`);
+  await quotes.retrackVideo({
+    video: built.outPath,
+    music: safe.path,
+    outPath: videoPath,
+    musicStart: start,
+    duration: built.duration,
+  });
+
+  const check = await validateVideo(videoPath);
+  if (!check.ok) throw new Error(`youtube variant invalid: ${check.reasons.join('; ')}`);
+
+  return {
+    videoPath,
+    description: [built.captionBase, safe.credit].filter(Boolean).join('\n\n'),
+    note: `${safe.source}: ${path.basename(safe.path)} @ ${start}s`,
+  };
 }
 
 // ------------------------------------------------------------------- main
@@ -665,15 +724,18 @@ async function run({ slot = '', theme = '', dryRun = false, force = false } = {}
     }
     // -------- YouTube Shorts (additive, never fails the Instagram run)
     if (yt.isConfigured() && !dryRun) {
+      let ytAudio = null;
       try {
+        ytAudio = await prepareYtAudio(built);
+        log.info(`youtube: audio ${ytAudio.note}`);
         const ytResult = await yt.publishShort({
-          videoPath: built.outPath,
+          videoPath: ytAudio.videoPath,
           title: built.line,
-          description: built.caption,
+          description: ytAudio.description,
           tags: built.hashtags || [],
         });
         store.updatePost(built.postId, { yt_id: ytResult.videoId, yt_error: null });
-        result.notes.push(`youtube: ${ytResult.url}`);
+        result.notes.push(`youtube: ${ytResult.url}`, `  audio: ${ytAudio.note}`);
         log.ok(`youtube: published Short ${ytResult.videoId}`);
       } catch (e) {
         const msg = String(e.message || e).slice(0, 900);
@@ -682,6 +744,10 @@ async function run({ slot = '', theme = '', dryRun = false, force = false } = {}
         store.updatePost(built.postId, { yt_error: msg });
         notify.error(`youtube: publish failed for post #${built.postId}: ${msg}`);
         result.notes.push(`youtube: failed - ${msg.slice(0, 120)}`);
+      } finally {
+        if (ytAudio && ytAudio.videoPath !== built.outPath) {
+          fs.rmSync(ytAudio.videoPath, { force: true });
+        }
       }
     } else if (!yt.isConfigured() && !dryRun) {
       const msg = 'not configured (YT_CLIENT_ID/YT_CLIENT_SECRET/YT_REFRESH_TOKEN missing)';
@@ -767,4 +833,4 @@ function safe(fn) {
   }
 }
 
-module.exports = { run, buildPost, chooseTheme, chooseVariant, reconcileStale, tokenHealth };
+module.exports = { run, buildPost, chooseTheme, chooseVariant, reconcileStale, tokenHealth, prepareYtAudio };

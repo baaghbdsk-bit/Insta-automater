@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { layout, VARIANTS, motionExpressions, fonts } = require('../src/quote');
+const { layout, VARIANTS, motionExpressions, fonts, buildAss } = require('../src/quote');
 const { THEME_KEYS } = require('../src/themes');
 
 const W = 1080;
@@ -28,6 +28,19 @@ test('layout shrinks the font as the quote grows', () => {
     W
   );
   assert.ok(long.size <= short.size);
+});
+
+test('byline renders only when the bank entry has an author', () => {
+  const base = { text: 'Din kharab tha, zindagi nahi.', watermark: '', total: 10, W, H: 1920 };
+  const plain = buildAss(base);
+  assert.equal(plain.author, '');
+  assert.ok(!plain.ass.includes('Style: Author,'));
+
+  const credited = buildAss({ ...base, attribution: 'Nelson Mandela' });
+  assert.equal(credited.author, 'Nelson Mandela');
+  assert.ok(credited.ass.includes('Style: Author,'));
+  assert.ok(credited.ass.includes('— Nelson Mandela'));
+  assert.ok(credited.authorSize < credited.size, 'byline must be smaller than the quote');
 });
 
 test('every visual variant resolves to a distinct vertical position', () => {

@@ -62,25 +62,39 @@ function variantCenterY(variant, H) {
   return Math.round(H * frac);
 }
 
-function buildAss({ text, watermark, total, W, H, variant = 'center', font = fonts.FONTS.anton }) {
+function buildAss({ text, watermark, total, W, H, variant = 'center', font = fonts.FONTS.anton, attribution = '' }) {
   const accent = assColor(config.video.accent);
   const { size, lines } = layout(text, W, font);
   const lineH = Math.round(size * 1.16);
   const blockH = lineH * lines.length;
   const centerY = variantCenterY(variant, H);
   const topY = Math.round(centerY - blockH / 2 + lineH / 2);
+  const author = String(attribution || '').replace(/\s+/g, ' ').trim();
+  const authorSize = Math.max(36, Math.round(size * 0.36));
 
+  // Every line is fully opaque at t=0. Frame 1 is the Shorts thumbnail and the
+  // only thing a viewer sees before deciding to swipe; a staged fade turned it
+  // into a half-empty photo (and, at two lines, half the quote). The camera
+  // push already supplies motion.
   const events = lines.map((line, i) => {
     const y = topY + i * lineH;
-    const start = 0.1 + i * 0.26;
-    // rise 26px into place, then hold
-    const tags = `{\\an5\\move(${W / 2},${y + 26},${W / 2},${y},0,420)\\fad(320,0)}`;
-    return `Dialogue: 0,${assTime(start)},${assTime(total)},Quote,,0,0,0,,${tags}${esc(line)}`;
+    const tags = `{\\an5\\pos(${W / 2},${y})}`;
+    return `Dialogue: 0,${assTime(0)},${assTime(total)},Quote,,0,0,0,,${tags}${esc(line)}`;
   });
+
+  if (author) {
+    // Sits just under the last line, not centred as a separate block, so the
+    // byline reads as part of the quote. Same frame-1 rule as the quote itself.
+    const authorY = Math.round(topY + (lines.length - 1) * lineH + lineH * 0.72);
+    events.push(
+      `Dialogue: 0,${assTime(0)},${assTime(total)},Author,,0,0,0,,` +
+        `{\\an5\\pos(${W / 2},${authorY})}${esc('— ' + author)}`
+    );
+  }
 
   if (watermark) {
     events.push(
-      `Dialogue: 0,${assTime(0.5)},${assTime(total)},Mark,,0,0,0,,{\\an8\\pos(${W / 2},150)\\fad(500,0)}${esc(
+      `Dialogue: 0,${assTime(0.15)},${assTime(total)},Mark,,0,0,0,,{\\an8\\pos(${W / 2},150)\\fad(200,0)}${esc(
         watermark
       )}`
     );
@@ -98,12 +112,12 @@ YCbCr Matrix: TV.709
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Quote,${font.name},${size},&H00FFFFFF,&H000000FF,&H00000000,&H9B000000,${font.bold},0,0,0,100,100,1,0,1,4,10,5,${MARGIN_X},${MARGIN_X},0,1
 Style: Mark,Anton,38,${accent},&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,8,0,1,3,2,8,40,40,150,1
-
+${author ? `Style: Author,${font.name},${authorSize},${accent},&H000000FF,&H00000000,&H9B000000,0,1,0,0,100,100,2,0,1,3,6,5,${MARGIN_X},${MARGIN_X},0,1\n` : ''}
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `;
 
-  return { ass: style + events.join('\n') + '\n', size, lines, lineH, blockH, centerY };
+  return { ass: style + events.join('\n') + '\n', size, lines, lineH, blockH, centerY, author, authorSize };
 }
 
 /**
@@ -161,6 +175,7 @@ async function renderQuote({
   variant = 'center',
   motion,
   musicStart,
+  attribution = '',
 }) {
   if (!image || !fs.existsSync(image)) throw new Error(`image not found: ${image}`);
   if (!text || !String(text).trim()) throw new Error('no text to render');
@@ -177,7 +192,7 @@ async function renderQuote({
   const move = typeof pick === 'number' ? moves[Math.floor(pick * moves.length) % moves.length] : moves[0];
 
   const workDir = ensureDir(path.join(paths.tmp, `quote-${Date.now()}`));
-  const { ass, size, lines, centerY } = buildAss({
+  const { ass, size, lines, centerY, author } = buildAss({
     text: String(text).trim(),
     watermark: watermark ? config.channel.handle : '',
     total,
@@ -185,6 +200,7 @@ async function renderQuote({
     H,
     variant,
     font,
+    attribution,
   });
   const assFile = path.join(workDir, 'quote.ass');
   fs.writeFileSync(assFile, ass, 'utf8');
@@ -200,15 +216,12 @@ async function renderQuote({
   let musicFile = null;
   if (music && fs.existsSync(music)) {
     musicFile = music;
-    const dur = await probeDuration(music).catch(() => 0);
     // A fixed start is required for native audio: Instagram always plays the
-    // attached track from 0, so the embedded bed must match it.
-    const fixed = musicStart === undefined || musicStart === null ? null : Number(musicStart);
-    offset = Number.isFinite(fixed)
-      ? Math.max(0, fixed)
-      : dur > 25
-        ? Number((dur * (0.12 + Math.random() * 0.38)).toFixed(2))
-        : 0;
+    // attached track from 0, so the embedded bed must match it. Callers pass a
+    // measured start (past any leading silence); the default is 0 rather than a
+    // random point, because a hook that lands 6s into the clip is not a hook.
+    const fixed = musicStart === undefined || musicStart === null ? 0 : Number(musicStart);
+    offset = Number.isFinite(fixed) ? Math.max(0, fixed) : 0;
     args.push('-stream_loop', '-1', '-ss', String(offset), '-i', rel(path.resolve(music)));
     musicIdx = 2;
     log.info(`music: ${path.basename(music)} @ ${offset}s`);
@@ -233,7 +246,9 @@ async function renderQuote({
   if (musicIdx >= 0) {
     filters.push(
       `[${musicIdx}:a]atrim=0:${total.toFixed(2)},asetpts=PTS-STARTPTS,` +
-        `afade=t=in:st=0:d=0.9,afade=t=out:st=${Math.max(0, total - 1.6).toFixed(2)}:d=1.6,` +
+        // Frame 1 has to be audible and the tail must not be dead air, or the
+        // loop restarts out of silence. Both fades are therefore short.
+        `afade=t=in:st=0:d=0.12,afade=t=out:st=${Math.max(0, total - 0.35).toFixed(2)}:d=0.35,` +
         `loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[aout]`
     );
   } else {
@@ -263,7 +278,8 @@ async function renderQuote({
   );
 
   log.step(
-    `rendering quote (${mood}/${variant}/${move.name}, ${font.name} ${size}px, ${lines.length} lines, ${total.toFixed(1)}s)`
+    `rendering quote (${mood}/${variant}/${move.name}, ${font.name} ${size}px, ${lines.length} lines` +
+      `${author ? `, byline: ${author}` : ''}, ${total.toFixed(1)}s)`
   );
   if (process.env.DEBUG) log.info(`ffmpeg ${args.join(' ')}`);
   const t0 = Date.now();
@@ -280,4 +296,46 @@ async function renderQuote({
   return { outPath, total, size, lines, music: musicFile, offset, variant, motion: move.name };
 }
 
-module.exports = { renderQuote, layout, VARIANTS, motionExpressions, fonts };
+/**
+ * Replace a rendered video's audio without touching the video stream.
+ *
+ * YouTube gets a claim-free bed while Instagram keeps the licensed song. The
+ * video is copied, not re-encoded, so this costs a couple of seconds: every
+ * frame, every filter, every caption is already baked in.
+ */
+async function retrackVideo({ video, music, outPath, musicStart = 0, duration }) {
+  if (!fs.existsSync(video)) throw new Error(`video not found: ${video}`);
+  if (!music || !fs.existsSync(music)) throw new Error(`music not found: ${music}`);
+  const total = Number(duration) || (await probeDuration(video));
+  const start = Math.max(0, Number(musicStart) || 0);
+
+  const args = ['-y', '-hide_banner', '-loglevel', 'error'];
+  args.push('-i', rel(path.resolve(video)));
+  args.push('-stream_loop', '-1', '-ss', String(start), '-i', rel(path.resolve(music)));
+  args.push(
+    '-map', '0:v:0',
+    '-map', '1:a:0',
+    '-c:v', 'copy',
+    '-af',
+    `afade=t=in:st=0:d=0.12,afade=t=out:st=${Math.max(0, total - 0.35).toFixed(2)}:d=0.35,` +
+      'loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000',
+    '-t', total.toFixed(2),
+    '-c:a', 'aac',
+    '-b:a', '192k',
+    '-ar', '48000',
+    '-movflags', '+faststart',
+    rel(outPath)
+  );
+
+  ensureDir(path.dirname(outPath));
+  if (process.env.DEBUG) log.info(`ffmpeg ${args.join(' ')}`);
+  try {
+    await run(FFMPEG, args, { cwd: ROOT });
+  } catch (e) {
+    throw new Error(`retrack failed:\n${(e.stderr || e.message || '').slice(-2000)}`);
+  }
+  log.ok(`retracked: ${path.basename(outPath)} with ${path.basename(music)} @ ${start}s`);
+  return { outPath, total, offset: start };
+}
+
+module.exports = { renderQuote, retrackVideo, buildAss, layout, VARIANTS, motionExpressions, fonts };

@@ -16,8 +16,8 @@ GitHub Actions (4 crons, IST)
    ├─ theme picked by past reach (insights)
    ├─ quote written by Gemini (deduped)      ← original lines, not a fixed list
    ├─ photo: Pexels → Openverse → Gemini image → local pool
-   ├─ music: CC BY 4.0 bed from assets/music
-   ├─ render 1080×1920, 9–15 s, slow push/drift, scrim, watermark
+   ├─ music: Instagram Audio API (native); YouTube gets a claim-free re-track
+   ├─ render 1080×1920, 10–15 s, slow push/drift, scrim, watermark
    ├─ validate the MP4 locally (codec, size, duration, faststart, audio)
    ├─ upload via direct resumable upload (no hosting)  [R2 fallback available]
    ├─ POST /media → poll status_code → POST /media_publish → permalink
@@ -42,8 +42,11 @@ GitHub Actions (4 crons, IST)
 **Music comes from Instagram's Audio API.** The container is created with
 `audio_configuration`, so the Reel carries the real track — Eminem, The Script,
 slowed/reverb edits — and Instagram credits it. YouTube cannot attach that
-audio, so the same file Meta exposes for download is muxed into the MP4;
-both platforms play the same song. See [Music](#music) below.
+audio: the Data API has no field for a library track, and a baked-in commercial
+song is claimed on upload. So YouTube gets a **second render** whose audio
+stream is swapped for a claim-free track from `assets/music/youtube/` (YouTube
+Audio Library), with the video stream copied rather than re-encoded. Instagram
+and Facebook keep the real song. See [Music](#music) below.
 
 ---
 
@@ -251,6 +254,21 @@ layers, in priority order:
 3. Keyword search on the same API, then the local CC BY 4.0 bed as a last
    resort.
 
+**Per platform.** Instagram and Facebook get the track above. YouTube gets its
+own audio, because the Data API cannot attach a library track and a baked-in
+commercial song is claimed the moment it uploads:
+
+- `assets/music/youtube/<mood>/` — download claim-free tracks from the
+  [Audio Library](https://www.youtube.com/audiolibrary) (filter *attribution not
+  required*) and drop them in. `library.pickYtTrack(mood)` prefers these.
+- Fallback: the CC BY 4.0 bed in `assets/music/<mood>/`, credited in the YouTube
+  description as before. `custom/` is never used here.
+- `YT_AUDIO_MODE=same` opts out and uploads the Instagram mix unchanged.
+
+The swap is a remux (`quote.retrackVideo`): the video stream is copied, so it
+costs roughly two seconds per post and nothing is re-rendered. Picks rotate
+least-recently-used, independent of the Instagram pool.
+
 `npm run audio:verify` validates the pool without posting: duration, leading
 silence (native audio starts at 0, so an intro is dead air), hook loudness in the
 first three seconds, true peak and channel layout. It exits 1 when a pick would
@@ -264,6 +282,18 @@ it reaches the account. Clips start at 0, which is what Instagram plays.
 capped at four lines. Text sits high, centred or low (rotating), on a generated
 gaussian scrim. Camera motion is one of five slow pushes/drifts, chosen at
 random.
+
+**First frame.** The whole quote is fully opaque on frame 1 — no fade, no
+staggered reveal — because that frame is the Shorts thumbnail and the only thing
+a viewer sees before deciding to swipe. The camera push supplies the motion. The
+audio hook gets the same treatment: the bed fades in over 0.12 s, not 0.9 s, and
+the track starts at the first audible sample instead of a random point 12–50 %
+into the song. The tail fade is 0.35 s so a loop restarts on sound rather than
+dead air.
+
+When the bank entry carries an author, a smaller italic byline ("— Nelson
+Mandela") is drawn just under the last line, in the accent colour, also visible
+on frame 1. Lines without an author render with no byline at all.
 
 ---
 
@@ -311,9 +341,15 @@ random.
    available during implementation, so the upload → container → publish path is
    written and unit-tested (SigV4 matches AWS's published test vector) but has
    not touched the live account.
-2. **Content ID is a real risk on YouTube.** The Shorts use the same real songs,
-   which can be claimed or muted there. Accepted deliberately: the reach is
-   worth it, and Instagram is the primary platform.
+2. **Content ID claims on YouTube.** Since the YouTube upload uses the
+   `assets/music/youtube/` pool, a claim should now be the exception rather than
+   the rule. Before that pool is populated the CC BY 4.0 bed is used instead — and
+   CC BY is a *licence*, not an absence of claims: Kevin MacLeod's catalogue is
+   registered with Content ID, which is where the Belarus/Russia restrictions came
+   from. Observed effect on the live account: visibility unaffected, revenue to
+   the claimant. A pick can still be muted or blocked in a market that matters,
+   which is why the Audio Library pool is the better source. Instagram remains the
+   primary platform.
 3. **Profile fields are not writable** by the Graph API (`code 100,
    subcode 33`). Name, bio and avatar stay manual.
 4. **Cron is best-effort.** A slot can drift by up to ~30 minutes or be dropped.

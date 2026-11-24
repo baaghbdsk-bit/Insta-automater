@@ -14,7 +14,7 @@ const enabled = String(process.env.RUN_RENDER_TEST || '') === '1';
 
 test('renders and validates a quote reel', { skip: !enabled, timeout: 180_000 }, async () => {
   const library = require('../src/library');
-  const { renderQuote } = require('../src/quote');
+  const { renderQuote, retrackVideo } = require('../src/quote');
   const { validateVideo } = require('../src/video');
   const { IMAGE_EXT } = require('../src/util');
 
@@ -31,13 +31,31 @@ test('renders and validates a quote reel', { skip: !enabled, timeout: 180_000 },
     outPath,
     duration: 8,
     variant: 'center',
+    attribution: 'Nelson Mandela',
   });
 
   assert.ok(fs.existsSync(outPath));
-  const check = await validateVideo(outPath);
-  assert.equal(check.ok, true, check.reasons.join('; '));
-  assert.equal(check.info.width, 1080);
-  assert.equal(check.info.height, 1920);
+  const ig = await validateVideo(outPath);
+  assert.equal(ig.ok, true, ig.reasons.join('; '));
+  assert.equal(ig.info.width, 1080);
+  assert.equal(ig.info.height, 1920);
+
+  // The YouTube variant swaps the audio stream only: same duration, same
+  // picture, different track, still valid.
+  const ytPath = outPath.replace(/\.mp4$/i, '-yt.mp4');
+  await retrackVideo({
+    video: outPath,
+    music: track,
+    outPath: ytPath,
+    musicStart: 0,
+    duration: ig.info.duration,
+  });
+  const yt = await validateVideo(ytPath);
+  assert.equal(yt.ok, true, yt.reasons.join('; '));
+  assert.ok(Math.abs(yt.info.duration - ig.info.duration) < 0.1, 'duration must not drift');
+  assert.equal(yt.info.width, 1080);
+  assert.equal(yt.info.bytes > 0, true);
 
   fs.rmSync(outPath, { force: true });
+  fs.rmSync(ytPath, { force: true });
 });

@@ -576,6 +576,7 @@ module.exports = {
   listCustom,
   pickAudio,
   downloadTrack,
+  leadSilence,
   inspectTrack,
   audit,
   payload,

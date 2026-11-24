@@ -879,6 +879,7 @@ async function compose(theme, { allowGenerate = true } = {}) {
         theme: meta.theme,
         mood: meta.mood,
         line: curated.line,
+        author: curated.author || null,
         engine: 'bank',
         bankId: curated.id,
       };

@@ -4,10 +4,10 @@ const assert = require('node:assert/strict');
 const bank = require('../src/quote-bank');
 const { MUSIC_MOODS } = require('../src/themes');
 
-test('bank loads 742 unique lines with no validation problems', () => {
+test('bank loads 1190 unique lines with no validation problems', () => {
   const raw = bank.load();
-  assert.equal(raw.lines.length, 742);
-  assert.equal(new Set(raw.lines.map((l) => l.id)).size, 742);
+  assert.equal(raw.lines.length, 1190);
+  assert.equal(new Set(raw.lines.map((l) => l.id)).size, 1190);
   assert.deepEqual(bank.problems(), []);
 });
 
@@ -17,6 +17,7 @@ test('every line is approved - no rating or attribution filter', () => {
   assert.ok(all.some((l) => l.score === null), 'unrated lines are present');
   assert.ok(all.some((l) => (l.score || 10) <= 4), 'low-rated lines are present');
   assert.ok(all.some((l) => l.flags.includes('attribution')), 'flagged lines are present');
+  assert.ok(all.some((l) => l.author && l.author !== 'Unknown'), 'attributed lines are present');
 });
 
 test('every mood has approved lines and picks come from the requested mood', () => {
@@ -39,8 +40,8 @@ test('sequential pick holds the next line until it is marked used', () => {
 
 test('report exposes counts, mood coverage and validation', () => {
   const r = bank.report();
-  assert.equal(r.total, 742);
-  assert.equal(r.byStatus.approved, 742);
+  assert.equal(r.total, 1190);
+  assert.equal(r.byStatus.approved, 1190);
   assert.equal(Object.keys(r.byMood).length, 3);
   assert.equal(r.selection, 'sequential');
   assert.deepEqual(r.problems, []);

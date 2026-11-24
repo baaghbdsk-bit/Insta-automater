@@ -22,6 +22,7 @@ const store = require('./db');
 const AUDIO_EXT = new Set(['.mp3', '.m4a', '.wav', '.ogg', '.flac']);
 const PHOTOS = path.join(ROOT, 'assets', 'photos');
 const MUSIC = path.join(ROOT, 'assets', 'music');
+const MUSIC_YT = path.join(MUSIC, 'youtube');
 const REMOTE_DIR = path.join(paths.tmp, 'photos');
 
 const MIN_SHORT_SIDE = 900;
@@ -98,6 +99,31 @@ function pickTrack(mood) {
   const chosen = store.pickAsset('music', pool);
   if (chosen) store.markAsset('music', chosen);
   return chosen;
+}
+
+/**
+ * A track YouTube will not claim. The Audio Library pool first
+ * (`assets/music/youtube/<mood>`), then the CC BY 4.0 bed Instagram already
+ * falls back to. `custom/` is excluded on purpose: those are user-supplied
+ * files of unknown provenance, which is the whole thing we are avoiding.
+ * Returns { path, credit, source } or null when nothing in the repo is safe.
+ */
+function pickYtTrack(mood) {
+  const pools = [
+    { root: MUSIC_YT, source: 'audio-library', credit: 'Music: YouTube Audio Library' },
+    { root: MUSIC, source: 'cc-by', credit: MUSIC_CREDIT },
+  ];
+  for (const p of pools) {
+    const pool = moodPool(p.root, mood, AUDIO_EXT).filter(
+      (f) => !/[\\/](custom|youtube)[\\/]/.test(f) || p.root === MUSIC_YT
+    );
+    if (!pool.length) continue;
+    const chosen = store.pickAsset('yt-music', pool);
+    if (!chosen) continue;
+    store.markAsset('yt-music', chosen);
+    return { path: chosen, credit: p.credit, source: p.source };
+  }
+  return null;
 }
 
 // ------------------------------------------------------------ providers
@@ -593,9 +619,13 @@ function libraryStatus() {
   const music = Object.fromEntries(moods.map((m) => [m, walk(path.join(MUSIC, m), AUDIO_EXT).length]));
   music.anywhere = walk(MUSIC, AUDIO_EXT).length;
 
+  const youtube = Object.fromEntries(moods.map((m) => [m, walk(path.join(MUSIC_YT, m), AUDIO_EXT).length]));
+  youtube.anywhere = walk(MUSIC_YT, AUDIO_EXT).length;
+
   return {
     photos,
     music,
+    youtube,
     musicCredit: MUSIC_CREDIT,
     providers: activeProviders().map((p) => p.name),
   };
@@ -630,6 +660,7 @@ function cleanupTemp({ hours = 24 } = {}) {
 module.exports = {
   PHOTOS,
   MUSIC,
+  MUSIC_YT,
   MUSIC_CREDIT,
   MUSIC_CATALOG,
   fetchMusic,
@@ -637,6 +668,7 @@ module.exports = {
   fetchPhotosOpenverse,
   pickPhoto,
   pickTrack,
+  pickYtTrack,
   ensurePhoto,
   photoCount,
   trackCount,

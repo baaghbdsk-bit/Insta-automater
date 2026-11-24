@@ -85,14 +85,14 @@ env:
   # detail gates. Falls back to the seed bank only when the LLM is unavailable.
   LINES_V2: '1'
 
-  # Attach Instagram's licensed audio natively and mux the same track into the
-  # render for YouTube. Any failure falls back to the embedded CC-BY bed.
-  # original_sound = real songs/edits on Reels; the curated pool in
-  # src/music-picks.js is tried before keyword search.
+  # Attach Instagram's licensed audio natively. YouTube cannot attach library
+  # music through the API, so it gets a second render with a claim-free bed from
+  # assets/music/youtube/<mood>/ (falls back to the CC BY pool).
   IG_NATIVE_AUDIO: '1'
   IG_AUDIO_TYPE: original_sound
   IG_AUDIO_CURATED: '1'
   IG_AUDIO_TRENDING_SHARE: '0'
+  YT_AUDIO_MODE: library
 
   R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
   R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}

@@ -136,7 +136,7 @@ async function cmdDoctor() {
 
   const lib = library.libraryStatus();
   log.ok(`photos: ${lib.photos.anywhere} local, providers: ${lib.providers.join(', ')}`);
-  log.ok(`music: ${lib.music.anywhere} tracks`);
+  log.ok(`music: ${lib.music.anywhere} tracks, ${lib.youtube.anywhere} claim-free for YouTube`);
   log.info(`daily cap: ${config.schedule.maxPerDay}, min gap: ${config.schedule.minGapMinutes} min`);
   log.info(`dry run: ${isDryRun ? 'ON (nothing will publish)' : 'off'}`);
 
@@ -238,6 +238,7 @@ async function cmdQuote(argv) {
     duration: opts.duration ? Number(opts.duration) : 12,
     variant: opts.variant ? String(opts.variant) : 'center',
     watermark: !opts['no-watermark'],
+    attribution: picked.author || '',
   });
 
   const check = await validateVideo(outPath);
@@ -259,6 +260,7 @@ async function cmdQuote(argv) {
         theme,
         mood: picked.mood,
         line: picked.line,
+        author: picked.author || null,
         caption: cap.caption,
         hashtags: cap.hashtags,
         video: outPath,
@@ -577,6 +579,8 @@ const COMMANDS = {
     for (const [m, n] of Object.entries(s.photos)) console.log(`  ${m.padEnd(12)} ${n}`);
     console.log('\nmusic:');
     for (const [m, n] of Object.entries(s.music)) console.log(`  ${m.padEnd(12)} ${n}`);
+    console.log('\nmusic (youtube, claim-free):');
+    for (const [m, n] of Object.entries(s.youtube)) console.log(`  ${m.padEnd(12)} ${n}`);
     console.log('\nseed lines:');
     for (const r of lines.bankStatus()) {
       console.log(`  ${r.mood.padEnd(12)} ${r.used} used, ${r.left} left of ${r.total}`);
