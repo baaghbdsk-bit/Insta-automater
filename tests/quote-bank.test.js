@@ -11,13 +11,25 @@ test('bank loads 1190 unique lines with no validation problems', () => {
   assert.deepEqual(bank.problems(), []);
 });
 
-test('every line is approved - no rating or attribution filter', () => {
+test('approved lines keep no rating or attribution filter', () => {
+  const approved = bank.approved();
+  assert.ok(approved.some((l) => l.score === null), 'unrated lines are present');
+  assert.ok(approved.some((l) => (l.score || 10) <= 4), 'low-rated lines are present');
+  assert.ok(approved.some((l) => l.flags.includes('attribution')), 'flagged lines are present');
+});
+
+test('held classics keep their author so a retest still renders a byline', () => {
+  const held = bank.load().lines.filter((l) => l.status === 'held');
+  assert.ok(held.some((l) => l.author && l.author !== 'Unknown'), 'held classics are attributed');
+});
+
+test('the imported classics stay held until they earn a retest', () => {
   const all = bank.load().lines;
-  assert.ok(all.every((l) => l.status === 'approved'));
-  assert.ok(all.some((l) => l.score === null), 'unrated lines are present');
-  assert.ok(all.some((l) => (l.score || 10) <= 4), 'low-rated lines are present');
-  assert.ok(all.some((l) => l.flags.includes('attribution')), 'flagged lines are present');
-  assert.ok(all.some((l) => l.author && l.author !== 'Unknown'), 'attributed lines are present');
+  const held = all.filter((l) => l.status === 'held');
+  assert.equal(held.length, 448);
+  assert.ok(held.every((l) => l.batch === 14), 'only batch 14 is held');
+  assert.ok(all.every((l) => l.status === 'approved' || l.status === 'held'));
+  assert.ok(!bank.approved().some((l) => l.batch === 14), 'held classics are never picked');
 });
 
 test('every mood has approved lines and picks come from the requested mood', () => {
@@ -41,8 +53,10 @@ test('sequential pick holds the next line until it is marked used', () => {
 test('report exposes counts, mood coverage and validation', () => {
   const r = bank.report();
   assert.equal(r.total, 1190);
-  assert.equal(r.byStatus.approved, 1190);
+  assert.equal(r.byStatus.approved, 742);
+  assert.equal(r.byStatus.held, 448);
   assert.equal(Object.keys(r.byMood).length, 3);
   assert.equal(r.selection, 'sequential');
   assert.deepEqual(r.problems, []);
+  assert.equal(r.held.length, 448);
 });

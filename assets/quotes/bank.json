@@ -1,5 +1,11 @@
 {
   "version": 1,
+  "notes": [
+    "Batch 14 (448 imported classics) is held, not retired. Famous, attributed quotes held",
+    "only 18-20% of viewers in the first second versus 37-44% for the original second-person",
+    "lines, and their byline reads as \"famous quote\" before the line is even read. Held lines",
+    "are skipped by the picker but stay in the file: move one back to \"approved\" to test it."
+  ],
   "lines": [
     {
       "id": "q001",
@@ -27,7 +33,7 @@
       ],
       "author": "Nelson Mandela",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q002",
@@ -55,7 +61,7 @@
       ],
       "author": "Steve Jobs",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q004",
@@ -83,7 +89,7 @@
       ],
       "author": "Winston Churchill",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q005",
@@ -111,7 +117,7 @@
       ],
       "author": "Theodore Roosevelt",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q007",
@@ -139,7 +145,7 @@
       ],
       "author": "Wayne Gretzky",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q008",
@@ -167,7 +173,7 @@
       ],
       "author": "Henry Ford",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q010",
@@ -195,7 +201,7 @@
       ],
       "author": "Thomas A. Edison",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q021",
@@ -223,7 +229,7 @@
       ],
       "author": "Eleanor Roosevelt",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q024",
@@ -265,7 +271,7 @@
       ],
       "author": "Sam Levenson",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q027",
@@ -293,7 +299,7 @@
       ],
       "author": "Robert Frost",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q039",
@@ -321,7 +327,7 @@
       ],
       "author": "Confucius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q043",
@@ -349,7 +355,7 @@
       ],
       "author": "Confucius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q044",
@@ -377,7 +383,7 @@
       ],
       "author": "George Addair",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q045",
@@ -405,7 +411,7 @@
       ],
       "author": "Mark Twain",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q046",
@@ -433,7 +439,7 @@
       ],
       "author": "Walt Disney",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q517",
@@ -461,7 +467,7 @@
       ],
       "author": "Walt Disney",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q520",
@@ -501,7 +507,7 @@
       ],
       "author": "Walt Disney",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q527",
@@ -529,7 +535,7 @@
       ],
       "author": "Theodore Roosevelt",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q530",
@@ -557,7 +563,7 @@
       ],
       "author": "Theodore Roosevelt",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q533",
@@ -585,7 +591,7 @@
       ],
       "author": "William James",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q536",
@@ -613,7 +619,7 @@
       ],
       "author": "Henry David Thoreau",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q538",
@@ -641,7 +647,7 @@
       ],
       "author": "Henry David Thoreau",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q539",
@@ -669,7 +675,7 @@
       ],
       "author": "John D. Rockefeller",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q541",
@@ -709,7 +715,7 @@
       ],
       "author": "Thomas Jefferson",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q544",
@@ -737,7 +743,7 @@
       ],
       "author": "Arthur Ashe",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q567",
@@ -765,7 +771,7 @@
       ],
       "author": "Franklin D. Roosevelt",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q570",
@@ -793,7 +799,7 @@
       ],
       "author": "Ralph Waldo Emerson",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q573",
@@ -821,7 +827,7 @@
       ],
       "author": "Ralph Waldo Emerson",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q577",
@@ -849,7 +855,7 @@
       ],
       "author": "C.S. Lewis",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q580",
@@ -877,7 +883,7 @@
       ],
       "author": "C.S. Lewis",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q583",
@@ -905,7 +911,7 @@
       ],
       "author": "George Bernard Shaw",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q586",
@@ -945,7 +951,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q589",
@@ -973,7 +979,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q590",
@@ -1001,7 +1007,7 @@
       ],
       "author": "Charles R. Swindoll",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q592",
@@ -1029,7 +1035,7 @@
       ],
       "author": "Les Brown",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q593",
@@ -1057,7 +1063,7 @@
       ],
       "author": "Norman Vaughan",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q595",
@@ -1085,7 +1091,7 @@
       ],
       "author": "Walt Whitman",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q601",
@@ -1113,7 +1119,7 @@
       ],
       "author": "Zig Ziglar",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q603",
@@ -1141,7 +1147,7 @@
       ],
       "author": "Zig Ziglar",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q604",
@@ -1181,7 +1187,7 @@
       ],
       "author": "Jim Rohn",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q607",
@@ -1209,7 +1215,7 @@
       ],
       "author": "Eleanor Roosevelt",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q609",
@@ -1237,7 +1243,7 @@
       ],
       "author": "Eleanor Roosevelt",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q610",
@@ -1265,7 +1271,7 @@
       ],
       "author": "Eleanor Roosevelt",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q622",
@@ -1293,7 +1299,7 @@
       ],
       "author": "Winston Churchill",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q625",
@@ -1321,7 +1327,7 @@
       ],
       "author": "William Butler Yeats",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q628",
@@ -1349,7 +1355,7 @@
       ],
       "author": "Japanese Proverb",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q632",
@@ -1377,7 +1383,7 @@
       ],
       "author": "Chinese Proverb",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q635",
@@ -1417,7 +1423,7 @@
       ],
       "author": "Confucius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q641",
@@ -1445,7 +1451,7 @@
       ],
       "author": "Confucius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q643",
@@ -1473,7 +1479,7 @@
       ],
       "author": "Benjamin Franklin",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q644",
@@ -1501,7 +1507,7 @@
       ],
       "author": "Friedrich Nietzsche",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q646",
@@ -1529,7 +1535,7 @@
       ],
       "author": "Booker T. Washington",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q647",
@@ -1557,7 +1563,7 @@
       ],
       "author": "Buddha",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q649",
@@ -1585,7 +1591,7 @@
       ],
       "author": "Frank Sinatra",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q650",
@@ -1625,7 +1631,7 @@
       ],
       "author": "Norman Vincent Peale",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q652",
@@ -1653,7 +1659,7 @@
       ],
       "author": "Norman Vincent Peale",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q654",
@@ -1681,7 +1687,7 @@
       ],
       "author": "Mahatma Gandhi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q655",
@@ -1709,7 +1715,7 @@
       ],
       "author": "Mahatma Gandhi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q657",
@@ -1737,7 +1743,7 @@
       ],
       "author": "Arnold Schwarzenegger",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q658",
@@ -1765,7 +1771,7 @@
       ],
       "author": "Muhammad Ali",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q660",
@@ -1793,7 +1799,7 @@
       ],
       "author": "Muhammad Ali",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q681",
@@ -1821,7 +1827,7 @@
       ],
       "author": "Muhammad Ali",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q684",
@@ -1861,7 +1867,7 @@
       ],
       "author": "Jack Dempsey",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q690",
@@ -1889,7 +1895,7 @@
       ],
       "author": "Sylvester Stallone - Rocky Balboa",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q691",
@@ -1917,7 +1923,7 @@
       ],
       "author": "Carol Burnett",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q693",
@@ -1945,7 +1951,7 @@
       ],
       "author": "Maria Robinson",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q694",
@@ -1973,7 +1979,7 @@
       ],
       "author": "Will Rogers",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q696",
@@ -2001,7 +2007,7 @@
       ],
       "author": "Og Mandino",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q697",
@@ -2029,7 +2035,7 @@
       ],
       "author": "Martin Luther King Jr.",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q699",
@@ -2057,7 +2063,7 @@
       ],
       "author": "Martin Luther King Jr.",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q700",
@@ -2097,7 +2103,7 @@
       ],
       "author": "Martin Luther King Jr.",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q704",
@@ -2125,7 +2131,7 @@
       ],
       "author": "Jimmy Dean",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q707",
@@ -2153,7 +2159,7 @@
       ],
       "author": "Helen Keller",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q710",
@@ -2181,7 +2187,7 @@
       ],
       "author": "Ralph Marston",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q712",
@@ -2209,7 +2215,7 @@
       ],
       "author": "Jimmy Johnson",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q715",
@@ -2237,7 +2243,7 @@
       ],
       "author": "Elizabeth Barrett Browning",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q718",
@@ -2265,7 +2271,7 @@
       ],
       "author": "Walter Elliot",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q722",
@@ -2293,7 +2299,7 @@
       ],
       "author": "Thomas A. Edison",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q725",
@@ -2333,7 +2339,7 @@
       ],
       "author": "Karen Lamb",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q732",
@@ -2361,7 +2367,7 @@
       ],
       "author": "Jim Ryun",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q735",
@@ -2389,7 +2395,7 @@
       ],
       "author": "Yoda",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q738",
@@ -2417,7 +2423,7 @@
       ],
       "author": "Estee Lauder",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q742",
@@ -2445,7 +2451,7 @@
       ],
       "author": "John Wooden",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q745",
@@ -2473,7 +2479,7 @@
       ],
       "author": "Babe Ruth",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q748",
@@ -2501,7 +2507,7 @@
       ],
       "author": "Babe Ruth",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q752",
@@ -2529,7 +2535,7 @@
       ],
       "author": "Babe Ruth",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q753",
@@ -2569,7 +2575,7 @@
       ],
       "author": "Billie Jean King",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q756",
@@ -2597,7 +2603,7 @@
       ],
       "author": "Tony Robbins",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q758",
@@ -2625,7 +2631,7 @@
       ],
       "author": "Tony Robbins",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q759",
@@ -2653,7 +2659,7 @@
       ],
       "author": "Tony Robbins",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q761",
@@ -2681,7 +2687,7 @@
       ],
       "author": "Vince Lombardi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q763",
@@ -2709,7 +2715,7 @@
       ],
       "author": "Vince Lombardi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q764",
@@ -2737,7 +2743,7 @@
       ],
       "author": "Vince Lombardi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q766",
@@ -2777,7 +2783,7 @@
       ],
       "author": "Aristotle",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q769",
@@ -2805,7 +2811,7 @@
       ],
       "author": "Jane Goodall",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q770",
@@ -2833,7 +2839,7 @@
       ],
       "author": "Steve Jobs",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q771",
@@ -2861,7 +2867,7 @@
       ],
       "author": "Tanzanian Proverb",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q772",
@@ -2889,7 +2895,7 @@
       ],
       "author": "Milton Berle",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q773",
@@ -2917,7 +2923,7 @@
       ],
       "author": "Muhammad Ali",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q774",
@@ -2945,7 +2951,7 @@
       ],
       "author": "Michael Jordan",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q775",
@@ -2973,7 +2979,7 @@
       ],
       "author": "Winston Churchill",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q776",
@@ -3013,7 +3019,7 @@
       ],
       "author": "Winston Churchill",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q778",
@@ -3041,7 +3047,7 @@
       ],
       "author": "Winston Churchill",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q779",
@@ -3069,7 +3075,7 @@
       ],
       "author": "Nelson Mandela",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q780",
@@ -3097,7 +3103,7 @@
       ],
       "author": "Nelson Mandela",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q781",
@@ -3125,7 +3131,7 @@
       ],
       "author": "Nelson Mandela",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q782",
@@ -3153,7 +3159,7 @@
       ],
       "author": "Eleanor Roosevelt",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q784",
@@ -3181,7 +3187,7 @@
       ],
       "author": "Robert Frost",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q785",
@@ -3209,7 +3215,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q787",
@@ -3249,7 +3255,7 @@
       ],
       "author": "Mark Twain",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q790",
@@ -3277,7 +3283,7 @@
       ],
       "author": "Mark Twain",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q792",
@@ -3305,7 +3311,7 @@
       ],
       "author": "Zig Ziglar",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q795",
@@ -3333,7 +3339,7 @@
       ],
       "author": "Zig Ziglar",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q798",
@@ -3361,7 +3367,7 @@
       ],
       "author": "Michael Jordan",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q832",
@@ -3389,7 +3395,7 @@
       ],
       "author": "Michael Jordan",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q833",
@@ -3417,7 +3423,7 @@
       ],
       "author": "Michael Jordan",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q835",
@@ -3445,7 +3451,7 @@
       ],
       "author": "Muhammad Ali",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q836",
@@ -3485,7 +3491,7 @@
       ],
       "author": "Muhammad Ali",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q839",
@@ -3513,7 +3519,7 @@
       ],
       "author": "Muhammad Ali",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q841",
@@ -3541,7 +3547,7 @@
       ],
       "author": "Thomas A. Edison",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q843",
@@ -3569,7 +3575,7 @@
       ],
       "author": "Thomas A. Edison",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q844",
@@ -3597,7 +3603,7 @@
       ],
       "author": "Thomas A. Edison",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q846",
@@ -3625,7 +3631,7 @@
       ],
       "author": "Babe Ruth",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q847",
@@ -3653,7 +3659,7 @@
       ],
       "author": "Robert H. Schuller",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q849",
@@ -3693,7 +3699,7 @@
       ],
       "author": "Seneca",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q851",
@@ -3721,7 +3727,7 @@
       ],
       "author": "Aristotle Onassis",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q853",
@@ -3749,7 +3755,7 @@
       ],
       "author": "Marcus Aurelius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q854",
@@ -3777,7 +3783,7 @@
       ],
       "author": "Marcus Aurelius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q856",
@@ -3805,7 +3811,7 @@
       ],
       "author": "Marcus Aurelius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q857",
@@ -3833,7 +3839,7 @@
       ],
       "author": "Andre Gide",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q859",
@@ -3861,7 +3867,7 @@
       ],
       "author": "English Proverb",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q860",
@@ -3889,7 +3895,7 @@
       ],
       "author": "Audrey Hepburn",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q861",
@@ -3929,7 +3935,7 @@
       ],
       "author": "Maya Angelou",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q864",
@@ -3957,7 +3963,7 @@
       ],
       "author": "Stephen Covey",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q866",
@@ -3985,7 +3991,7 @@
       ],
       "author": "Peter Drucker",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q867",
@@ -4013,7 +4019,7 @@
       ],
       "author": "Robert Kiyosaki",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q869",
@@ -4041,7 +4047,7 @@
       ],
       "author": "Aristotle",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q870",
@@ -4069,7 +4075,7 @@
       ],
       "author": "Johann Wolfgang von Goethe",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q871",
@@ -4097,7 +4103,7 @@
       ],
       "author": "Johann Wolfgang von Goethe",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q874",
@@ -4125,7 +4131,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q877",
@@ -4165,7 +4171,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q881",
@@ -4193,7 +4199,7 @@
       ],
       "author": "Roy T. Bennett",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q884",
@@ -4221,7 +4227,7 @@
       ],
       "author": "Christian D. Larson",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q887",
@@ -4249,7 +4255,7 @@
       ],
       "author": "Banksy",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q890",
@@ -4277,7 +4283,7 @@
       ],
       "author": "Paulo Coelho",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q901",
@@ -4305,7 +4311,7 @@
       ],
       "author": "Fred DeVito",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q903",
@@ -4333,7 +4339,7 @@
       ],
       "author": "Lance Armstrong",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q904",
@@ -4361,7 +4367,7 @@
       ],
       "author": "Dolly Parton",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q906",
@@ -4401,7 +4407,7 @@
       ],
       "author": "Dolly Parton",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q909",
@@ -4429,7 +4435,7 @@
       ],
       "author": "J.K. Rowling",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q910",
@@ -4457,7 +4463,7 @@
       ],
       "author": "John Lennon",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q912",
@@ -4485,7 +4491,7 @@
       ],
       "author": "Robert Frost",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q915",
@@ -4513,7 +4519,7 @@
       ],
       "author": "Oscar Wilde",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q918",
@@ -4541,7 +4547,7 @@
       ],
       "author": "Oscar Wilde",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q932",
@@ -4569,7 +4575,7 @@
       ],
       "author": "Mahatma Gandhi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q933",
@@ -4597,7 +4603,7 @@
       ],
       "author": "Mahatma Gandhi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q935",
@@ -4637,7 +4643,7 @@
       ],
       "author": "Mahatma Gandhi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q938",
@@ -4665,7 +4671,7 @@
       ],
       "author": "Mahatma Gandhi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q939",
@@ -4693,7 +4699,7 @@
       ],
       "author": "Mahatma Gandhi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q941",
@@ -4721,7 +4727,7 @@
       ],
       "author": "Mahatma Gandhi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q944",
@@ -4749,7 +4755,7 @@
       ],
       "author": "Mahatma Gandhi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q947",
@@ -4777,7 +4783,7 @@
       ],
       "author": "Dalai Lama",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q950",
@@ -4805,7 +4811,7 @@
       ],
       "author": "Dalai Lama",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q951",
@@ -4845,7 +4851,7 @@
       ],
       "author": "Dalai Lama",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q957",
@@ -4873,7 +4879,7 @@
       ],
       "author": "Dalai Lama",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q960",
@@ -4901,7 +4907,7 @@
       ],
       "author": "Confucius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q973",
@@ -4929,7 +4935,7 @@
       ],
       "author": "Confucius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q976",
@@ -4957,7 +4963,7 @@
       ],
       "author": "Lao Tzu",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q979",
@@ -4985,7 +4991,7 @@
       ],
       "author": "Lao Tzu",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q981",
@@ -5013,7 +5019,7 @@
       ],
       "author": "Lao Tzu",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q984",
@@ -5041,7 +5047,7 @@
       ],
       "author": "Lao Tzu",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q987",
@@ -5081,7 +5087,7 @@
       ],
       "author": "Lao Tzu",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q991",
@@ -5109,7 +5115,7 @@
       ],
       "author": "Lao Tzu",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q993",
@@ -5137,7 +5143,7 @@
       ],
       "author": "George Bernard Shaw",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q994",
@@ -5165,7 +5171,7 @@
       ],
       "author": "Helen Keller",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q996",
@@ -5193,7 +5199,7 @@
       ],
       "author": "Helen Keller",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q997",
@@ -5221,7 +5227,7 @@
       ],
       "author": "Helen Keller",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q999",
@@ -5249,7 +5255,7 @@
       ],
       "author": "Buddha",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1000",
@@ -5277,7 +5283,7 @@
       ],
       "author": "Buddha",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1051",
@@ -5317,7 +5323,7 @@
       ],
       "author": "Buddha",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1054",
@@ -5345,7 +5351,7 @@
       ],
       "author": "Buddha",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1056",
@@ -5373,7 +5379,7 @@
       ],
       "author": "Socrates",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1057",
@@ -5401,7 +5407,7 @@
       ],
       "author": "Socrates",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1059",
@@ -5429,7 +5435,7 @@
       ],
       "author": "Plato",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1060",
@@ -5457,7 +5463,7 @@
       ],
       "author": "Plato",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1063",
@@ -5485,7 +5491,7 @@
       ],
       "author": "Soren Kierkegaard",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1066",
@@ -5513,7 +5519,7 @@
       ],
       "author": "Soren Kierkegaard",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1069",
@@ -5553,7 +5559,7 @@
       ],
       "author": "Soren Kierkegaard",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1083",
@@ -5581,7 +5587,7 @@
       ],
       "author": "Mark Twain",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1084",
@@ -5609,7 +5615,7 @@
       ],
       "author": "Mark Twain",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1086",
@@ -5637,7 +5643,7 @@
       ],
       "author": "Mark Twain",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1087",
@@ -5665,7 +5671,7 @@
       ],
       "author": "Mark Twain",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1089",
@@ -5693,7 +5699,7 @@
       ],
       "author": "Robert Frost",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1090",
@@ -5721,7 +5727,7 @@
       ],
       "author": "Robert Frost",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1103",
@@ -5749,7 +5755,7 @@
       ],
       "author": "Henry David Thoreau",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1106",
@@ -5789,7 +5795,7 @@
       ],
       "author": "Henry David Thoreau",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1111",
@@ -5817,7 +5823,7 @@
       ],
       "author": "Annie Dillard",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1112",
@@ -5845,7 +5851,7 @@
       ],
       "author": "Sarah Louise Delany",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1113",
@@ -5873,7 +5879,7 @@
       ],
       "author": "Abraham Lincoln",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1114",
@@ -5901,7 +5907,7 @@
       ],
       "author": "Abraham Lincoln",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1115",
@@ -5929,7 +5935,7 @@
       ],
       "author": "Abraham Lincoln",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1116",
@@ -5957,7 +5963,7 @@
       ],
       "author": "Abraham Lincoln",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1117",
@@ -5997,7 +6003,7 @@
       ],
       "author": "Abraham Lincoln",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1119",
@@ -6025,7 +6031,7 @@
       ],
       "author": "Thich Nhat Hanh",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1120",
@@ -6053,7 +6059,7 @@
       ],
       "author": "Thich Nhat Hanh",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1121",
@@ -6081,7 +6087,7 @@
       ],
       "author": "Thich Nhat Hanh",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1124",
@@ -6109,7 +6115,7 @@
       ],
       "author": "Bill Keane",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1127",
@@ -6137,7 +6143,7 @@
       ],
       "author": "Audrey Hepburn",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1130",
@@ -6165,7 +6171,7 @@
       ],
       "author": "Audrey Hepburn",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1131",
@@ -6193,7 +6199,7 @@
       ],
       "author": "Victor Hugo",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1134",
@@ -6233,7 +6239,7 @@
       ],
       "author": "Victor Hugo",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1140",
@@ -6261,7 +6267,7 @@
       ],
       "author": "Victor Hugo",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1141",
@@ -6289,7 +6295,7 @@
       ],
       "author": "J.R.R. Tolkien",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1143",
@@ -6317,7 +6323,7 @@
       ],
       "author": "J.R.R. Tolkien",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1144",
@@ -6345,7 +6351,7 @@
       ],
       "author": "J.R.R. Tolkien",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1146",
@@ -6373,7 +6379,7 @@
       ],
       "author": "J.R.R. Tolkien",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1147",
@@ -6401,7 +6407,7 @@
       ],
       "author": "J.R.R. Tolkien",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1149",
@@ -6429,7 +6435,7 @@
       ],
       "author": "J.R.R. Tolkien",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1150",
@@ -6469,7 +6475,7 @@
       ],
       "author": "J.R.R. Tolkien",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1153",
@@ -6497,7 +6503,7 @@
       ],
       "author": "J.R.R. Tolkien",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1154",
@@ -6525,7 +6531,7 @@
       ],
       "author": "J.K. Rowling",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1156",
@@ -6553,7 +6559,7 @@
       ],
       "author": "J.K. Rowling",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1157",
@@ -6581,7 +6587,7 @@
       ],
       "author": "J.K. Rowling",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1159",
@@ -6609,7 +6615,7 @@
       ],
       "author": "J.K. Rowling",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1160",
@@ -6637,7 +6643,7 @@
       ],
       "author": "J.K. Rowling",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1161",
@@ -6665,7 +6671,7 @@
       ],
       "author": "J.K. Rowling",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1164",
@@ -6705,7 +6711,7 @@
       ],
       "author": "J.K. Rowling",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1170",
@@ -6733,7 +6739,7 @@
       ],
       "author": "J.K. Rowling",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1181",
@@ -6761,7 +6767,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1184",
@@ -6789,7 +6795,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1187",
@@ -6817,7 +6823,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1190",
@@ -6845,7 +6851,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1191",
@@ -6873,7 +6879,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1193",
@@ -6913,7 +6919,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1197",
@@ -6941,7 +6947,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1198",
@@ -6969,7 +6975,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1202",
@@ -6997,7 +7003,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1205",
@@ -7025,7 +7031,7 @@
       ],
       "author": "Norman Cousins",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1208",
@@ -7053,7 +7059,7 @@
       ],
       "author": "Seneca",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1213",
@@ -7081,7 +7087,7 @@
       ],
       "author": "Seneca",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1216",
@@ -7109,7 +7115,7 @@
       ],
       "author": "Seneca",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1219",
@@ -7149,7 +7155,7 @@
       ],
       "author": "Seneca",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1234",
@@ -7177,7 +7183,7 @@
       ],
       "author": "Seneca",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1236",
@@ -7205,7 +7211,7 @@
       ],
       "author": "Seneca",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1238",
@@ -7233,7 +7239,7 @@
       ],
       "author": "Marcus Aurelius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1239",
@@ -7261,7 +7267,7 @@
       ],
       "author": "Marcus Aurelius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1241",
@@ -7289,7 +7295,7 @@
       ],
       "author": "Marcus Aurelius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1244",
@@ -7317,7 +7323,7 @@
       ],
       "author": "Marcus Aurelius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1247",
@@ -7345,7 +7351,7 @@
       ],
       "author": "Marcus Aurelius",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1250",
@@ -7373,7 +7379,7 @@
       ],
       "author": "Aristotle",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q003",
@@ -7401,7 +7407,7 @@
       ],
       "author": "Mahatma Gandhi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q011",
@@ -7429,7 +7435,7 @@
       ],
       "author": "Audrey Hepburn",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1404",
@@ -7445,7 +7451,7 @@
       ],
       "author": "Martin Luther King Jr.",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q012",
@@ -7473,7 +7479,7 @@
       ],
       "author": "Martin Luther King Jr.",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1406",
@@ -7489,7 +7495,7 @@
       ],
       "author": "David Viscott",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q014",
@@ -7517,7 +7523,7 @@
       ],
       "author": "Dr. Seuss",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q015",
@@ -7545,7 +7551,7 @@
       ],
       "author": "Roy Croft",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1409",
@@ -7561,7 +7567,7 @@
       ],
       "author": "Emily Bronte",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q016",
@@ -7589,7 +7595,7 @@
       ],
       "author": "Emily Bronte",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1411",
@@ -7605,7 +7611,7 @@
       ],
       "author": "Edgar Allan Poe",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q017",
@@ -7633,7 +7639,7 @@
       ],
       "author": "Maya Angelou",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q018",
@@ -7661,7 +7667,7 @@
       ],
       "author": "Maya Angelou",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1414",
@@ -7677,7 +7683,7 @@
       ],
       "author": "Maya Angelou",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q038",
@@ -7705,7 +7711,7 @@
       ],
       "author": "Nicholas Sparks",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q501",
@@ -7733,7 +7739,7 @@
       ],
       "author": "Nicholas Sparks",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1417",
@@ -7749,7 +7755,7 @@
       ],
       "author": "Nicholas Sparks",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q502",
@@ -7777,7 +7783,7 @@
       ],
       "author": "Paulo Coelho",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1419",
@@ -7793,7 +7799,7 @@
       ],
       "author": "Pablo Neruda",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q504",
@@ -7821,7 +7827,7 @@
       ],
       "author": "Pablo Neruda",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q505",
@@ -7849,7 +7855,7 @@
       ],
       "author": "Pablo Neruda",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1422",
@@ -7865,7 +7871,7 @@
       ],
       "author": "Hermann Hesse",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q507",
@@ -7893,7 +7899,7 @@
       ],
       "author": "Hermann Hesse",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q508",
@@ -7921,7 +7927,7 @@
       ],
       "author": "J.R.R. Tolkien",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1425",
@@ -7937,7 +7943,7 @@
       ],
       "author": "F. Scott Fitzgerald",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q510",
@@ -7965,7 +7971,7 @@
       ],
       "author": "F. Scott Fitzgerald",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1427",
@@ -7981,7 +7987,7 @@
       ],
       "author": "Victor Hugo",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q511",
@@ -8009,7 +8015,7 @@
       ],
       "author": "Victor Hugo",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q513",
@@ -8037,7 +8043,7 @@
       ],
       "author": "Khalil Gibran",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1430",
@@ -8053,7 +8059,7 @@
       ],
       "author": "Khalil Gibran",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q514",
@@ -8081,7 +8087,7 @@
       ],
       "author": "Khalil Gibran",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1432",
@@ -8097,7 +8103,7 @@
       ],
       "author": "Khalil Gibran",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q545",
@@ -8125,7 +8131,7 @@
       ],
       "author": "Charles Dickens",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q546",
@@ -8153,7 +8159,7 @@
       ],
       "author": "Charles Dickens",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1435",
@@ -8169,7 +8175,7 @@
       ],
       "author": "Ann Landers",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q548",
@@ -8197,7 +8203,7 @@
       ],
       "author": "Lao Tzu",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q549",
@@ -8225,7 +8231,7 @@
       ],
       "author": "Johann Wolfgang von Goethe",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1438",
@@ -8241,7 +8247,7 @@
       ],
       "author": "John Lennon",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q551",
@@ -8269,7 +8275,7 @@
       ],
       "author": "John Lennon",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1440",
@@ -8285,7 +8291,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q552",
@@ -8313,7 +8319,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q554",
@@ -8341,7 +8347,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1443",
@@ -8357,7 +8363,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q555",
@@ -8385,7 +8391,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q557",
@@ -8413,7 +8419,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1446",
@@ -8429,7 +8435,7 @@
       ],
       "author": "Richard Bach",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q558",
@@ -8457,7 +8463,7 @@
       ],
       "author": "Karl Menninger",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1448",
@@ -8473,7 +8479,7 @@
       ],
       "author": "Eleanor Roosevelt",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q560",
@@ -8501,7 +8507,7 @@
       ],
       "author": "Rabindranath Tagore",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q561",
@@ -8529,7 +8535,7 @@
       ],
       "author": "Rabindranath Tagore",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1451",
@@ -8545,7 +8551,7 @@
       ],
       "author": "Arthur Conan Doyle",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q563",
@@ -8573,7 +8579,7 @@
       ],
       "author": "Franklin P. Jones",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1453",
@@ -8589,7 +8595,7 @@
       ],
       "author": "Andre Breton",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q564",
@@ -8617,7 +8623,7 @@
       ],
       "author": "Eva Gabor",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q611",
@@ -8645,7 +8651,7 @@
       ],
       "author": "Thomas Merton",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1456",
@@ -8661,7 +8667,7 @@
       ],
       "author": "Plato",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q612",
@@ -8689,7 +8695,7 @@
       ],
       "author": "Princess Diana",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q614",
@@ -8717,7 +8723,7 @@
       ],
       "author": "Max Muller",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1459",
@@ -8733,7 +8739,7 @@
       ],
       "author": "Robert A. Heinlein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q615",
@@ -8761,7 +8767,7 @@
       ],
       "author": "Lord Byron",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1461",
@@ -8777,7 +8783,7 @@
       ],
       "author": "Albert Einstein",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q617",
@@ -8805,7 +8811,7 @@
       ],
       "author": "Blaise Pascal",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q618",
@@ -8833,7 +8839,7 @@
       ],
       "author": "H. L. Mencken",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1464",
@@ -8849,7 +8855,7 @@
       ],
       "author": "Mother Teresa",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q620",
@@ -8877,7 +8883,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1466",
@@ -8893,7 +8899,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q631",
@@ -8921,7 +8927,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q633",
@@ -8949,7 +8955,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1469",
@@ -8965,7 +8971,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q634",
@@ -8993,7 +8999,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q636",
@@ -9021,7 +9027,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1472",
@@ -9037,7 +9043,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q637",
@@ -9065,7 +9071,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1474",
@@ -9081,7 +9087,7 @@
       ],
       "author": "Jane Austen",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q639",
@@ -9109,7 +9115,7 @@
       ],
       "author": "Jane Austen",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q640",
@@ -9137,7 +9143,7 @@
       ],
       "author": "Jane Austen",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1477",
@@ -9153,7 +9159,7 @@
       ],
       "author": "Jane Austen",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q662",
@@ -9181,7 +9187,7 @@
       ],
       "author": "Annie Proulx",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q665",
@@ -9209,7 +9215,7 @@
       ],
       "author": "Eden Ahbez",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1480",
@@ -9225,7 +9231,7 @@
       ],
       "author": "Erich Segal",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q668",
@@ -9253,7 +9259,7 @@
       ],
       "author": "Bram Stoker",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1482",
@@ -9269,7 +9275,7 @@
       ],
       "author": "Nora Ephron",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q671",
@@ -9297,7 +9303,7 @@
       ],
       "author": "Vladimir Nabokov",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q672",
@@ -9325,7 +9331,7 @@
       ],
       "author": "Gabriel Garcia Marquez",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1485",
@@ -9341,7 +9347,7 @@
       ],
       "author": "James L. Brooks",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q674",
@@ -9369,7 +9375,7 @@
       ],
       "author": "Leo Buscaglia",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1487",
@@ -9385,7 +9391,7 @@
       ],
       "author": "E.E. Cummings",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q675",
@@ -9413,7 +9419,7 @@
       ],
       "author": "E.E. Cummings",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q677",
@@ -9441,7 +9447,7 @@
       ],
       "author": "Robert Browning",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1490",
@@ -9457,7 +9463,7 @@
       ],
       "author": "Elizabeth Barrett Browning",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q678",
@@ -9485,7 +9491,7 @@
       ],
       "author": "Frida Kahlo",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q680",
@@ -9513,7 +9519,7 @@
       ],
       "author": "Sophocles",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1493",
@@ -9529,7 +9535,7 @@
       ],
       "author": "Dalai Lama",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q721",
@@ -9557,7 +9563,7 @@
       ],
       "author": "Ralph Waldo Emerson",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1495",
@@ -9573,7 +9579,7 @@
       ],
       "author": "Oliver Wendell Holmes Sr.",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q723",
@@ -9601,7 +9607,7 @@
       ],
       "author": "Margaret Mitchell",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q724",
@@ -9629,7 +9635,7 @@
       ],
       "author": "Margaret Mitchell",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1498",
@@ -9645,7 +9651,7 @@
       ],
       "author": "Marilyn Monroe",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q726",
@@ -9673,7 +9679,7 @@
       ],
       "author": "H. Jackson Brown Jr.",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q727",
@@ -9701,7 +9707,7 @@
       ],
       "author": "Alfred Lord Tennyson",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1501",
@@ -9717,7 +9723,7 @@
       ],
       "author": "Alfred Lord Tennyson",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q729",
@@ -9745,7 +9751,7 @@
       ],
       "author": "Oscar Wilde",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1503",
@@ -9761,7 +9767,7 @@
       ],
       "author": "Oscar Wilde",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q730",
@@ -9789,7 +9795,7 @@
       ],
       "author": "Oscar Wilde",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q801",
@@ -9817,7 +9823,7 @@
       ],
       "author": "Oscar Wilde",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1506",
@@ -9833,7 +9839,7 @@
       ],
       "author": "Khalil Gibran",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q803",
@@ -9861,7 +9867,7 @@
       ],
       "author": "Khalil Gibran",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1508",
@@ -9877,7 +9883,7 @@
       ],
       "author": "Khalil Gibran",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q804",
@@ -9905,7 +9911,7 @@
       ],
       "author": "Anais Nin",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q806",
@@ -9933,7 +9939,7 @@
       ],
       "author": "Socrates",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1511",
@@ -9949,7 +9955,7 @@
       ],
       "author": "Mineko Iwasaki",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q807",
@@ -9977,7 +9983,7 @@
       ],
       "author": "Nicholas Sparks",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q809",
@@ -10005,7 +10011,7 @@
       ],
       "author": "Nicholas Sparks",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1514",
@@ -10021,7 +10027,7 @@
       ],
       "author": "Lord Byron",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q810",
@@ -10049,7 +10055,7 @@
       ],
       "author": "Tennessee Williams",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1516",
@@ -10065,7 +10071,7 @@
       ],
       "author": "Charles Bukowski",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q811",
@@ -10093,7 +10099,7 @@
       ],
       "author": "Sylvia Plath",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q812",
@@ -10121,7 +10127,7 @@
       ],
       "author": "Sylvia Plath",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1519",
@@ -10137,7 +10143,7 @@
       ],
       "author": "Ernest Hemingway",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q814",
@@ -10165,7 +10171,7 @@
       ],
       "author": "Ernest Hemingway",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1521",
@@ -10181,7 +10187,7 @@
       ],
       "author": "Ernest Hemingway",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q815",
@@ -10209,7 +10215,7 @@
       ],
       "author": "Frida Kahlo",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q817",
@@ -10237,7 +10243,7 @@
       ],
       "author": "Frida Kahlo",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1524",
@@ -10253,7 +10259,7 @@
       ],
       "author": "Frida Kahlo",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q818",
@@ -10281,7 +10287,7 @@
       ],
       "author": "William Faulkner",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q820",
@@ -10309,7 +10315,7 @@
       ],
       "author": "Washington Irving",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1527",
@@ -10325,7 +10331,7 @@
       ],
       "author": "Dr. Seuss",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q892",
@@ -10353,7 +10359,7 @@
       ],
       "author": "Christopher Morley",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1529",
@@ -10369,7 +10375,7 @@
       ],
       "author": "Paulo Coelho",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q895",
@@ -10397,7 +10403,7 @@
       ],
       "author": "John Green",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q898",
@@ -10425,7 +10431,7 @@
       ],
       "author": "C.S. Lewis",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1532",
@@ -10441,7 +10447,7 @@
       ],
       "author": "Queen Elizabeth II",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q921",
@@ -10469,7 +10475,7 @@
       ],
       "author": "J.K. Rowling",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q922",
@@ -10497,7 +10503,7 @@
       ],
       "author": "A.A. Milne",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1535",
@@ -10513,7 +10519,7 @@
       ],
       "author": "Moira Rogers",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q923",
@@ -10541,7 +10547,7 @@
       ],
       "author": "Charles M. Schulz",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1537",
@@ -10557,7 +10563,7 @@
       ],
       "author": "Neil Gaiman",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q924",
@@ -10585,7 +10591,7 @@
       ],
       "author": "Pablo Neruda",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q925",
@@ -10613,7 +10619,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1540",
@@ -10629,7 +10635,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q926",
@@ -10657,7 +10663,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1542",
@@ -10673,7 +10679,7 @@
       ],
       "author": "Rumi",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q927",
@@ -10701,7 +10707,7 @@
       ],
       "author": "Hafiz",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q928",
@@ -10729,7 +10735,7 @@
       ],
       "author": "Bob Marley",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1545",
@@ -10745,7 +10751,7 @@
       ],
       "author": "Bob Marley",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q929",
@@ -10773,7 +10779,7 @@
       ],
       "author": "Bob Marley",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q930",
@@ -10801,7 +10807,7 @@
       ],
       "author": "Bob Marley",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1548",
@@ -10817,7 +10823,7 @@
       ],
       "author": "Friedrich Nietzsche",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q961",
@@ -10845,7 +10851,7 @@
       ],
       "author": "Friedrich Nietzsche",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1550",
@@ -10861,7 +10867,7 @@
       ],
       "author": "Friedrich Nietzsche",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q962",
@@ -10889,7 +10895,7 @@
       ],
       "author": "Friedrich Nietzsche",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q964",
@@ -10917,7 +10923,7 @@
       ],
       "author": "Edgar Allan Poe",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1553",
@@ -10933,7 +10939,7 @@
       ],
       "author": "Edgar Allan Poe",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q965",
@@ -10961,7 +10967,7 @@
       ],
       "author": "Jean de La Fontaine",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1555",
@@ -10977,7 +10983,7 @@
       ],
       "author": "Jim Rohn",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q967",
@@ -11005,7 +11011,7 @@
       ],
       "author": "Violeta Parra",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q968",
@@ -11033,7 +11039,7 @@
       ],
       "author": "Jonathan Safran Foer",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1558",
@@ -11049,7 +11055,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q970",
@@ -11077,7 +11083,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q983",
@@ -11105,7 +11111,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1561",
@@ -11121,7 +11127,7 @@
       ],
       "author": "William Shakespeare",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q986",
@@ -11149,7 +11155,7 @@
       ],
       "author": "Jane Austen",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1563",
@@ -11165,7 +11171,7 @@
       ],
       "author": "Jane Austen",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q989",
@@ -11193,7 +11199,7 @@
       ],
       "author": "Jane Austen",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1073",
@@ -11221,7 +11227,7 @@
       ],
       "author": "Elie Wiesel",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1566",
@@ -11237,7 +11243,7 @@
       ],
       "author": "Elie Wiesel",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1076",
@@ -11265,7 +11271,7 @@
       ],
       "author": "Jodi Picoult",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1079",
@@ -11293,7 +11299,7 @@
       ],
       "author": "Steve Maraboli",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1569",
@@ -11309,7 +11315,7 @@
       ],
       "author": "Steve Maraboli",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1092",
@@ -11337,7 +11343,7 @@
       ],
       "author": "Steve Maraboli",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1571",
@@ -11353,7 +11359,7 @@
       ],
       "author": "Steve Maraboli",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1095",
@@ -11381,7 +11387,7 @@
       ],
       "author": "Sarah Williams",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1098",
@@ -11409,7 +11415,7 @@
       ],
       "author": "Robert Morley",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1574",
@@ -11425,7 +11431,7 @@
       ],
       "author": "John Vance Cheney",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1123",
@@ -11453,7 +11459,7 @@
       ],
       "author": "Margaret Guiney",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1576",
@@ -11469,7 +11475,7 @@
       ],
       "author": "James Dean",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1126",
@@ -11497,7 +11503,7 @@
       ],
       "author": "Pat Benatar",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1129",
@@ -11525,7 +11531,7 @@
       ],
       "author": "Nazareth",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1579",
@@ -11541,7 +11547,7 @@
       ],
       "author": "Albert Camus",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1171",
@@ -11569,7 +11575,7 @@
       ],
       "author": "Gilbert K. Chesterton",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1172",
@@ -11597,7 +11603,7 @@
       ],
       "author": "Alysha Speer",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1582",
@@ -11612,7 +11618,7 @@
       ],
       "author": "Unknown",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1174",
@@ -11639,7 +11645,7 @@
       ],
       "author": "Unknown",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1584",
@@ -11654,7 +11660,7 @@
       ],
       "author": "Unknown",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1175",
@@ -11682,7 +11688,7 @@
       ],
       "author": "Henny Youngman",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1177",
@@ -11709,7 +11715,7 @@
       ],
       "author": "Unknown",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1587",
@@ -11724,7 +11730,7 @@
       ],
       "author": "Unknown",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1178",
@@ -11752,7 +11758,7 @@
       ],
       "author": "Jennifer Aniston",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1180",
@@ -11780,7 +11786,7 @@
       ],
       "author": "David Levithan",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1590",
@@ -11796,7 +11802,7 @@
       ],
       "author": "Oscar Wilde",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1204",
@@ -11824,7 +11830,7 @@
       ],
       "author": "Oscar Wilde",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1592",
@@ -11840,7 +11846,7 @@
       ],
       "author": "Gwyneth Paltrow",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1207",
@@ -11868,7 +11874,7 @@
       ],
       "author": "Mandy Hale",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1210",
@@ -11896,7 +11902,7 @@
       ],
       "author": "L. Frank Baum",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1595",
@@ -11912,7 +11918,7 @@
       ],
       "author": "Aristotle",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1224",
@@ -11940,7 +11946,7 @@
       ],
       "author": "Percy Bysshe Shelley",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1597",
@@ -11956,7 +11962,7 @@
       ],
       "author": "J.K. Rowling",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1227",
@@ -11984,7 +11990,7 @@
       ],
       "author": "Helen Keller",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q1230",
@@ -12012,7 +12018,7 @@
       ],
       "author": "Alphonse de Lamartine",
       "batch": 14,
-      "status": "approved"
+      "status": "held"
     },
     {
       "id": "q006",

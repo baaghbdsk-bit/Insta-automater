@@ -104,7 +104,10 @@ function report() {
     problems: problems(),
     held: all
       .filter((e) => e.status === 'held')
-      .map((e) => `${e.id} [${e.score}] ${e.flags.join(',') || 'low score'} ${e.line.slice(0, 62)}`),
+      .map((e) => {
+        const why = e.flags.join(',') || (e.score != null && e.score <= 4 ? 'low score' : 'held');
+        return `${e.id} [${e.score}] ${why} ${e.line.slice(0, 62)}`;
+      }),
   };
 }
 

@@ -298,6 +298,14 @@ When the bank entry carries an author, a smaller italic byline ("— Nelson
 Mandela") is drawn just under the last line, in the accent colour, also visible
 on frame 1. Lines without an author render with no byline at all.
 
+**Held lines.** The 448 imported classics (batch 14) are `status: "held"`, not
+deleted. They stay in `assets/quotes/bank.json` but the picker skips them, so
+the feed is back to the 742 original second-person lines — the ones that held
+37–44 % of viewers instead of 18–20 %. Because every authored line is in that
+batch, no byline is currently drawn; move one entry back to `"approved"` to test
+it, and the byline comes back with it. `node src/index.js lines:bank` lists every
+held line and why it is held.
+
 ---
 
 ## Reliability
