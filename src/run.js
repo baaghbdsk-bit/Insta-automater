@@ -15,6 +15,7 @@ const store = require('./db');
 const lines = require('./lines');
 const library = require('./library');
 const quotes = require('./quote');
+const mix = require('./music-mix');
 const insights = require('./insights');
 const notify = require('./notify');
 const host = require('./host');
@@ -361,11 +362,11 @@ async function buildPost({ theme, slot = '' }) {
 
     if (!track) track = library.pickTrack(meta.mood);
 
-    // Non-native tracks (custom, local bed): start where the audio actually
-    // starts. Front-loaded hooks stay at 0, tracks with a quiet intro skip it,
-    // so the first frame is never silence.
+    // Non-native tracks (custom, local bed): start where the music actually
+    // starts. Front-loaded hooks stay at 0, slow swells are skipped by energy
+    // rather than by silence, so the first frame is never near-silent.
     if (musicStart === undefined || musicStart === null) {
-      musicStart = await audio.leadSilence(track).catch(() => 0);
+      musicStart = await mix.pickStart(track);
     }
 
     const stamp = new Date().toISOString().slice(0, 10);
@@ -502,7 +503,7 @@ async function prepareYtAudio(built) {
     };
   }
 
-  const start = await audio.leadSilence(safe.path).catch(() => 0);
+  const start = await mix.pickStart(safe.path);
   const videoPath = path.join(paths.tmp, `yt-${built.postId}.mp4`);
   await quotes.retrackVideo({
     video: built.outPath,

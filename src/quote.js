@@ -5,6 +5,7 @@ const { config, paths, ROOT } = require('./config');
 const { FFMPEG, log, run, ensureDir, probeDuration, wrapText } = require('./util');
 const { assColor, assTime } = require('./captions');
 const fonts = require('./fonts');
+const mix = require('./music-mix');
 
 function rel(p) {
   return path.relative(ROOT, p).split(path.sep).join('/');
@@ -214,17 +215,27 @@ async function renderQuote({
   let musicIdx = -1;
   let offset = 0;
   let musicFile = null;
+  let measured = null;
   if (music && fs.existsSync(music)) {
     musicFile = music;
     // A fixed start is required for native audio: Instagram always plays the
     // attached track from 0, so the embedded bed must match it. Callers pass a
-    // measured start (past any leading silence); the default is 0 rather than a
+    // measured start (past any quiet intro); the default is 0 rather than a
     // random point, because a hook that lands 6s into the clip is not a hook.
     const fixed = musicStart === undefined || musicStart === null ? 0 : Number(musicStart);
     offset = Number.isFinite(fixed) ? Math.max(0, fixed) : 0;
     args.push('-stream_loop', '-1', '-ss', String(offset), '-i', rel(path.resolve(music)));
     musicIdx = 2;
-    log.info(`music: ${path.basename(music)} @ ${offset}s`);
+    // Measured over the exact segment that plays, so the gain is fixed for the
+    // whole clip instead of being re-decided while it runs.
+    measured = await mix.measure(music, { start: offset, duration: total });
+    const gain = mix.gainFor(measured);
+    log.info(
+      `music: ${path.basename(music)} @ ${offset}s` +
+        (gain === null
+          ? ' (no measurement, loudnorm)'
+          : ` (${measured.i.toFixed(1)} LUFS in, gain ${gain >= 0 ? '+' : ''}${gain.toFixed(1)} dB)`)
+    );
   } else {
     log.warn('no music - reel will be silent');
   }
@@ -244,13 +255,8 @@ async function renderQuote({
   );
 
   if (musicIdx >= 0) {
-    filters.push(
-      `[${musicIdx}:a]atrim=0:${total.toFixed(2)},asetpts=PTS-STARTPTS,` +
-        // Frame 1 has to be audible and the tail must not be dead air, or the
-        // loop restarts out of silence. Both fades are therefore short.
-        `afade=t=in:st=0:d=0.12,afade=t=out:st=${Math.max(0, total - 0.35).toFixed(2)}:d=0.35,` +
-        `loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[aout]`
-    );
+    // High-pass and low-shelf first, then the short fades, then one fixed gain.
+    filters.push(`[${musicIdx}:a]${mix.bedFilter({ total, measured })}[aout]`);
   } else {
     filters.push(`anullsrc=r=48000:cl=stereo,atrim=0:${total.toFixed(2)}[aout]`);
   }
@@ -308,6 +314,7 @@ async function retrackVideo({ video, music, outPath, musicStart = 0, duration })
   if (!music || !fs.existsSync(music)) throw new Error(`music not found: ${music}`);
   const total = Number(duration) || (await probeDuration(video));
   const start = Math.max(0, Number(musicStart) || 0);
+  const measured = await mix.measure(music, { start, duration: total });
 
   const args = ['-y', '-hide_banner', '-loglevel', 'error'];
   args.push('-i', rel(path.resolve(video)));
@@ -317,8 +324,7 @@ async function retrackVideo({ video, music, outPath, musicStart = 0, duration })
     '-map', '1:a:0',
     '-c:v', 'copy',
     '-af',
-    `afade=t=in:st=0:d=0.12,afade=t=out:st=${Math.max(0, total - 0.35).toFixed(2)}:d=0.35,` +
-      'loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000',
+    mix.bedFilter({ total, measured, trim: false }),
     '-t', total.toFixed(2),
     '-c:a', 'aac',
     '-b:a', '192k',

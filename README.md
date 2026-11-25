@@ -277,6 +277,21 @@ silence (native audio starts at 0, so an intro is dead air), hook loudness in th
 first three seconds, true peak and channel layout. It exits 1 when a pick would
 sound broken on a reel.
 
+`npm run music:audit` checks the local beds: where the clip actually starts,
+how loud the first two seconds are against the body, source level and true peak.
+It flags clipped masters, slow intros and files that need a huge boost.
+
+Every bed is measured over the exact segment that plays, then gets a **fixed**
+gain towards -14 LUFS and a lookahead limiter at -2 dBTP. `loudnorm`'s single
+pass was dynamic mode — it kept re-deciding the level inside a ten-second clip;
+even two-pass fell back to dynamic on most of this pool, landing between -16.4
+and -12.8 LUFS. A 95 Hz high-pass and a gentle low shelf clear the phone-speaker
+mud. Gain is capped so the limiter never removes more than 6 dB, which leaves
+dynamic material a little under -14 instead of squashing it. Start points are
+picked by energy rather than by silence: `five-armies` used to open 13 dB below
+its own body, now it opens level. The same chain feeds the first render and the
+YouTube re-track.
+
 `npm run audio:audition` renders 12-second clips of the whole curated
 pool to `output/audition/index.html` so the set can be heard and edited before
 it reaches the account. Clips start at 0, which is what Instagram plays.

@@ -10,6 +10,7 @@ const quotes = require('./quote');
 const lines = require('./lines');
 const library = require('./library');
 const audio = require('./audio');
+const mix = require('./music-mix');
 const musicPicks = require('./music-picks');
 const host = require('./host');
 const ig = require('./publish/instagram');
@@ -37,6 +38,11 @@ function parseArgs(argv) {
     } else out._.push(a);
   }
   return out;
+}
+
+/** Signed decibel for the audit table; a missing measurement prints as "?". */
+function fmtDb(v) {
+  return Number.isFinite(v) ? `${v >= 0 ? '+' : ''}${v.toFixed(1)}` : '  ?';
 }
 
 // ---------------------------------------------------------------- doctor
@@ -318,6 +324,47 @@ const COMMANDS = {
       for (const h of r.held) console.log(`  ${h}`);
     }
     if (r.problems.length) process.exitCode = 1;
+  },
+
+  /**
+   * Local music bed health. Prints the start the render will use, how loud the
+   * first two seconds are against the body, the source level, and a verdict —
+   * the numbers that decide whether a bed sounds broken on a phone.
+   */
+  'music:audit': async (argv) => {
+    const opts = parseArgs(argv);
+    const moods = opts.mood ? [String(opts.mood)] : ['motivation', 'heartbreak', 'growth'];
+    const pools = moods.map((m) => ({ label: m, dir: path.join(library.MUSIC, m) }));
+    if (!opts.mood) pools.push({ label: 'youtube', dir: library.MUSIC_YT });
+
+    let files = 0;
+    let bad = 0;
+    for (const pool of pools) {
+      const list = library.walk(pool.dir, library.AUDIO_EXT).sort();
+      if (!list.length) {
+        console.log(`\n${pool.label}: empty`);
+        continue;
+      }
+      console.log(`\n${pool.label}`);
+      for (const file of list) {
+        files += 1;
+        const a = await mix.audit(file);
+        const ok = a.verdict === 'ok';
+        if (!ok) bad += 1;
+        console.log(
+          `  ${ok ? 'ok  ' : 'warn'} ${path.basename(file).padEnd(30)} ` +
+            `${String(Math.round(a.duration)).padStart(4)}s  start ${a.start.toFixed(2)}s  ` +
+            `hook ${fmtDb(a.hook)}  body ${fmtDb(a.body)}  ` +
+            `gap ${fmtDb(a.gap)}  src ${fmtDb(a.source)}  peak ${fmtDb(a.peak)}  ${a.verdict}`
+        );
+      }
+    }
+
+    console.log(
+      `\n${files} tracks, ${bad} flagged. ` +
+        `Start point is chosen by energy; render normalises to ${mix.TARGET_I} LUFS / ${mix.TARGET_TP} dBTP.`
+    );
+    if (bad) process.exitCode = 1;
   },
 
   'r2:check': async () => {
@@ -638,6 +685,7 @@ const USAGE = `usage: node src/index.js <command>
   ig:upload-check verify a direct resumable upload without publishing  [--file path]
   photos:fetch    bulk-download photos into assets/photos
   music:fetch      download the CC-BY music bed
+  music:audit     local bed health: start point, hook, level, verdict  [--mood]
   audio:check     what Instagram's licensed audio catalogue returns per mood  [--mood]
   audio:verify    measure every curated track: dead air, hook, clipping       [--mood]
   audio:audition  render 12s clips of the curated pool to output/audition  [--mood] [--seconds]
