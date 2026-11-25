@@ -22,6 +22,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const readline = require('node:readline');
+const { spawn } = require('node:child_process');
 const { chromium } = require('playwright-core');
 const { ROOT } = require('../src/config');
 
@@ -29,6 +30,7 @@ const PROFILE = path.join(ROOT, '.auth', 'yt-audio-profile');
 const CAPTURE = path.join(ROOT, 'assets', 'music', 'youtube', '_captured');
 const DOWNLOADS = path.join(CAPTURE, 'downloads');
 const AUDIO_LIBRARY_URL = 'https://www.youtube.com/audiolibrary';
+const DEBUG_PORT = 9333;
 
 function browserPath() {
   if (process.env.YT_BROWSER_PATH) return process.env.YT_BROWSER_PATH;
@@ -56,6 +58,8 @@ function safeName(url) {
     .slice(0, 90);
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 function ask(prompt) {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   return new Promise((resolve) => rl.question(prompt, (answer) => {
@@ -64,22 +68,72 @@ function ask(prompt) {
   }));
 }
 
+/**
+ * Launch a real Chrome/Edge window with a dedicated profile, then attach over
+ * the DevTools protocol. Playwright's own launch adds --enable-automation and
+ * navigator.webdriver, which is exactly what makes Google show "This browser
+ * or app may not be secure" at sign-in. Attaching to a browser we started
+ * ourselves avoids both flags.
+ */
+async function openBrowser() {
+  const child = spawn(
+    browserPath(),
+    [
+      `--remote-debugging-port=${DEBUG_PORT}`,
+      `--user-data-dir=${PROFILE}`,
+      '--no-first-run',
+      '--no-default-browser-check',
+      '--disable-default-apps',
+      '--new-window',
+      AUDIO_LIBRARY_URL,
+    ],
+    { detached: true, stdio: 'ignore', windowsHide: false }
+  );
+  child.unref();
+
+  let ready = false;
+  for (let i = 0; i < 40; i += 1) {
+    try {
+      const res = await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`);
+      if (res.ok) {
+        ready = true;
+        break;
+      }
+    } catch {
+      // Browser is still starting.
+    }
+    await sleep(500);
+  }
+  if (!ready) {
+    throw new Error(
+      `Chrome did not open a debug port on ${DEBUG_PORT}. ` +
+        'Close every Chrome window using .auth/yt-audio-profile, then retry.'
+    );
+  }
+
+  const browser = await chromium.connectOverCDP(`http://127.0.0.1:${DEBUG_PORT}`);
+  return { browser, context: browser.contexts()[0] };
+}
+
 async function main() {
   fs.mkdirSync(DOWNLOADS, { recursive: true });
   fs.mkdirSync(path.dirname(PROFILE), { recursive: true });
 
-  const context = await chromium.launchPersistentContext(PROFILE, {
-    executablePath: browserPath(),
-    headless: false,
-    acceptDownloads: true,
-    viewport: { width: 1440, height: 900 },
-    args: ['--no-first-run', '--no-default-browser-check'],
-  });
+  const { browser, context } = await openBrowser();
 
   const payloads = [];
   const mp3Urls = new Set();
 
-  const watch = (page) => {
+  const watch = async (page) => {
+    // Files clicked in the UI land in _captured/downloads/ rather than the
+    // user's Downloads folder. CDP is needed because the context is attached.
+    try {
+      const cdp = await context.newCDPSession(page);
+      await cdp.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: DOWNLOADS });
+    } catch {
+      console.log('warning: could not set the download folder');
+    }
+
     page.on('response', async (res) => {
       const url = res.url();
       if (/\.mp3(\?|$)/i.test(url)) mp3Urls.add(url);
@@ -121,8 +175,8 @@ async function main() {
     });
   };
 
-  for (const page of context.pages()) watch(page);
-  context.on('page', watch);
+  for (const page of context.pages()) await watch(page);
+  context.on('page', (page) => { watch(page).catch(() => {}); });
 
   const page = context.pages()[0] || (await context.newPage());
   console.log('\nOpening the Audio Library in a browser window...');
@@ -161,7 +215,13 @@ async function main() {
   const manifestPath = path.join(CAPTURE, 'manifest.json');
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
 
-  await context.close();
+  // Close the browser we started, not just the DevTools connection.
+  try {
+    const cdp = await context.newCDPSession(page);
+    await cdp.send('Browser.close');
+  } catch {
+    await browser.close().catch(() => {});
+  }
 
   console.log(`\nDone. ${payloads.length} payload(s), ${mp3Urls.size} mp3 URL(s), ${manifest.downloads.length} downloaded file(s).`);
   console.log(`Manifest: ${manifestPath}`);

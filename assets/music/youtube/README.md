@@ -25,6 +25,13 @@ script saves the page's data and any downloaded MP3s under `_captured/`, both
 gitignored. I read that capture to turn the tracks into the mood folders below.
 The sign-in itself is never committed.
 
+The script starts a real Chrome/Edge window and attaches over the DevTools
+protocol instead of using Playwright's own launch flags. That matters: Playwright
+adds `--enable-automation` and `navigator.webdriver`, which is what triggers
+Google's "This browser or app may not be secure" sign-in error. If you see that
+error, close any leftover Chrome windows using `.auth/yt-audio-profile` and run
+`npm run yt:login` again — do not sign in through the old window.
+
 ## How it is used
 
 - `library.pickYtTrack(mood)` prefers `<mood>/` here, then falls back to the
