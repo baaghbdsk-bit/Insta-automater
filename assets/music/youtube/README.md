@@ -16,6 +16,15 @@ per-track attribution is needed. If you pick tracks that *do* require
 attribution, add the credit to `assets/music/CREDITS.json` yourself — nothing
 reads that file for YouTube today.
 
+## Getting the tracks (one-time sign-in)
+
+Run `npm run yt:login` on this machine. It opens Chrome/Edge at the Audio
+Library with a persistent profile in `.auth/`; log in, select the **Music** tab,
+click DOWNLOAD on the tracks you want, then press Enter in the terminal. The
+script saves the page's data and any downloaded MP3s under `_captured/`, both
+gitignored. I read that capture to turn the tracks into the mood folders below.
+The sign-in itself is never committed.
+
 ## How it is used
 
 - `library.pickYtTrack(mood)` prefers `<mood>/` here, then falls back to the

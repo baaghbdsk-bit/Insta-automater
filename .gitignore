@@ -18,3 +18,8 @@ data/*
 data/*.db-wal
 data/*.db-shm
 data/*.db-journal
+
+# YouTube Audio Library sign-in session and raw captures. Never commit either:
+# the profile holds real Google cookies and the payloads can hold signed URLs.
+.auth/
+assets/music/youtube/_captured/

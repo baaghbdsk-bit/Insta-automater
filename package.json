@@ -26,10 +26,14 @@
     "cleanup": "node src/index.js cleanup",
     "token:status": "node src/index.js token:status",
     "pubcheck": "node src/index.js pubcheck",
+    "yt:login": "node scripts/yt-audio-login.js",
     "test": "node --test tests/*.js"
   },
   "dependencies": {
     "ffmpeg-static": "^5.3.0",
     "ffprobe-static": "^3.1.0"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.1"
   }
 }
