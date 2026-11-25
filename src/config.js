@@ -39,8 +39,8 @@ const DEFAULTS = {
   },
   schedule: {
     timezone: 'Asia/Kolkata',
-    times: ['08:00', '14:00', '20:00', '23:00'],
-    maxPerDay: 4,
+    times: ['10:00', '18:30', '21:00'],
+    maxPerDay: 3,
     minGapMinutes: 120,
   },
   instagram: { apiVersion: 'v27.0', uploadMode: 'direct' },

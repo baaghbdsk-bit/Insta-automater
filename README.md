@@ -172,16 +172,19 @@ The workflow commits `data/engine.db` back to the repo.
 
 The cron entries are already in `.github/workflows/publish.yml`:
 
-| IST | Cron (UTC) |
-|---|---|
-| 08:00 | `30 2 * * *` |
-| 14:00 | `30 8 * * *` |
-| 20:00 | `30 14 * * *` |
-| 23:00 | `30 17 * * *` |
+| Intended (IST) | Cron (UTC) | Fires (IST) |
+|---|---|---|
+| 10:00 | `20 4 * * *` | 09:50 |
+| 18:30 | `50 12 * * *` | 18:20 |
+| 21:00 | `20 15 * * *` | 20:50 |
 
-GitHub cron is best-effort: expect 5–30 minute delays and the occasional dropped
-run. The engine is built for that — a late trigger cannot double-post, because
-it checks the daily cap and the minimum gap between posts.
+The cron fires ten minutes early on purpose: GitHub cron is best-effort with
+5–30 minute delays, and rendering plus publishing take a few more minutes, so
+the upload normally lands close to the intended time rather than after it.
+
+Occasional dropped runs still happen. The engine is built for that — a late or
+duplicated trigger cannot double-post, because it checks the daily cap and the
+minimum gap between posts.
 
 **Test it before trusting cron:**
 
@@ -327,7 +330,7 @@ on frame 1. Lines without an author render with no byline at all.
 | GitHub Actions (public repo) | unlimited | ~300 min/month |
 | GitHub Actions (private repo) | 2,000 min/month | ~300 min/month |
 | Cloudflare R2 | 10 GB, 1 M writes, 10 M reads | <1 GB, <400 ops/month |
-| Instagram Graph API | free | 4 publishes/day |
+| Instagram Graph API | free | 3 publishes/day |
 | Gemini free tier | yes | ~4 calls/day |
 | Domain for the R2 custom domain | — | ₹800–1,200/year (optional but recommended) |
 
@@ -353,7 +356,8 @@ on frame 1. Lines without an author render with no byline at all.
 3. **Profile fields are not writable** by the Graph API (`code 100,
    subcode 33`). Name, bio and avatar stay manual.
 4. **Cron is best-effort.** A slot can drift by up to ~30 minutes or be dropped.
-   The daily cap is 4; three or four posts a day is the normal outcome.
+   The crons fire ten minutes early to absorb that; the daily cap is 3, so a
+   dropped slot is not replaced automatically.
 5. **Gemini image generation is quota-blocked** on the current key (HTTP 429 on
    every image model). The provider is implemented and stays dormant until
    `GEMINI_IMAGE_MODEL` is set to a model the key can use.
