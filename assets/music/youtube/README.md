@@ -25,6 +25,13 @@ script saves the page's data and any downloaded MP3s under `_captured/`, both
 gitignored. I read that capture to turn the tracks into the mood folders below.
 The sign-in itself is never committed.
 
+`npm run yt:fetch` then reads the same library through Studio's own endpoints,
+scores every track by mood/genre/instrument, downloads the signed MP3 URLs and
+trims each to 60 s at 128 kbps. It records title, artist and track id in
+`SOURCES.json`, so the pool is reproducible and auditable; `music:audit` checks
+the files with the same loudness rules as the renderer. Current pool: 8 tracks
+per mood, all with the standard YouTube (no attribution) license.
+
 The script starts a real Chrome/Edge window and attaches over the DevTools
 protocol instead of using Playwright's own launch flags. That matters: Playwright
 adds `--enable-automation` and `navigator.webdriver`, which is what triggers

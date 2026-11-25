@@ -1,0 +1,414 @@
+{
+  "source": "YouTube Audio Library",
+  "license": "YouTube (no attribution required)",
+  "tracks": [
+    {
+      "mood": "heartbreak",
+      "trackId": "JSndMwAAAAA",
+      "viperId": "d50e0a84249df107",
+      "title": "No.6 In My Dreams",
+      "artist": "Esther Abrami",
+      "seconds": 175,
+      "genres": [
+        "CLASSICAL"
+      ],
+      "moods": [
+        "SAD"
+      ],
+      "score": 40,
+      "file": "assets\\music\\youtube\\heartbreak\\No.6 In My Dreams.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "heartbreak",
+      "trackId": "YJkAMuMK3Q0",
+      "viperId": "f6a50d71bfd67fa5",
+      "title": "Somewhere Fuse",
+      "artist": "French Fuse",
+      "seconds": 136,
+      "genres": [
+        "CINEMATIC"
+      ],
+      "moods": [
+        "SAD"
+      ],
+      "score": 38,
+      "file": "assets\\music\\youtube\\heartbreak\\Somewhere Fuse.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "heartbreak",
+      "trackId": "Rc-kx6kY7cE",
+      "viperId": "301b945820777e7b",
+      "title": "Denied Access",
+      "artist": "Density & Time",
+      "seconds": 233,
+      "genres": [
+        "AMBIENT"
+      ],
+      "moods": [
+        "ROMANTIC"
+      ],
+      "score": 37,
+      "file": "assets\\music\\youtube\\heartbreak\\Denied Access.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "heartbreak",
+      "trackId": "F65XUlKnSqE",
+      "viperId": "161f00781c5696a2",
+      "title": "Hopeless",
+      "artist": "Jimena Contreras",
+      "seconds": 252,
+      "genres": [
+        "CINEMATIC"
+      ],
+      "moods": [
+        "SAD"
+      ],
+      "score": 36,
+      "file": "assets\\music\\youtube\\heartbreak\\Hopeless.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "heartbreak",
+      "trackId": "_JTgH6kCi64",
+      "viperId": "a7c36ffd3a6afc42",
+      "title": "Rain Fuse",
+      "artist": "French Fuse",
+      "seconds": 108,
+      "genres": [
+        "CINEMATIC"
+      ],
+      "moods": [
+        "SAD"
+      ],
+      "score": 36,
+      "file": "assets\\music\\youtube\\heartbreak\\Rain Fuse.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "heartbreak",
+      "trackId": "WxZoTFJuciQ",
+      "viperId": "0fb53c97eb2678aa",
+      "title": "When I Am Laid in Earth",
+      "artist": "Mostly Moss",
+      "seconds": 228,
+      "genres": [
+        "CLASSICAL"
+      ],
+      "moods": [
+        "SAD"
+      ],
+      "score": 35,
+      "file": "assets\\music\\youtube\\heartbreak\\When I Am Laid in Earth.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "heartbreak",
+      "trackId": "Yk-xBgAAAAA",
+      "viperId": "195bd883d4ddb74f",
+      "title": "Nebular Focus",
+      "artist": "Dan Henig",
+      "seconds": 119,
+      "genres": [
+        "AMBIENT"
+      ],
+      "moods": [
+        "CALM"
+      ],
+      "score": 35,
+      "file": "assets\\music\\youtube\\heartbreak\\Nebular Focus.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "heartbreak",
+      "trackId": "1PMLOgAAAAA",
+      "viperId": "e630bc7e3fb6cea9",
+      "title": "No.5 The Day I Met Her",
+      "artist": "Esther Abrami",
+      "seconds": 162,
+      "genres": [
+        "CLASSICAL"
+      ],
+      "moods": [
+        "ROMANTIC"
+      ],
+      "score": 35,
+      "file": "assets\\music\\youtube\\heartbreak\\No.5 The Day I Met Her.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "growth",
+      "trackId": "MrphNwAAAAA",
+      "viperId": "76c6f7e1e9eaeb5b",
+      "title": "Motor Hums",
+      "artist": "The 126ers",
+      "seconds": 211,
+      "genres": [
+        "ROCK"
+      ],
+      "moods": [
+        "INSPIRATIONAL"
+      ],
+      "score": 37,
+      "file": "assets\\music\\youtube\\growth\\Motor Hums.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "growth",
+      "trackId": "Z9gKtzc_LBM",
+      "viperId": "07a20bbcb1cba24b",
+      "title": "Nineties Pad",
+      "artist": "Brian Bolger",
+      "seconds": 94,
+      "genres": [
+        "CINEMATIC"
+      ],
+      "moods": [
+        "CALM"
+      ],
+      "score": 36,
+      "file": "assets\\music\\youtube\\growth\\Nineties Pad.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "growth",
+      "trackId": "uUHBHgAAAAA",
+      "viperId": "5877f511dca655d7",
+      "title": "Outlaw's Farewell (part I)",
+      "artist": "Reed Mathis",
+      "seconds": 140,
+      "genres": [
+        "COUNTRY_AND_FOLK"
+      ],
+      "moods": [
+        "CALM"
+      ],
+      "score": 36,
+      "file": "assets\\music\\youtube\\growth\\Outlaw's Farewell (part I).mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "growth",
+      "trackId": "d-4ABgAAAAA",
+      "viperId": "55bf4d1ed4fdd99b",
+      "title": "Outlaw's Farewell (part II)",
+      "artist": "Reed Mathis",
+      "seconds": 157,
+      "genres": [
+        "COUNTRY_AND_FOLK"
+      ],
+      "moods": [
+        "CALM"
+      ],
+      "score": 36,
+      "file": "assets\\music\\youtube\\growth\\Outlaw's Farewell (part II).mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "growth",
+      "trackId": "Z9IC9nqT3Ko",
+      "viperId": "4aed6ec7098672cf",
+      "title": "Ripples In Time",
+      "artist": "Asher Fulero",
+      "seconds": 237,
+      "genres": [
+        "CLASSICAL"
+      ],
+      "moods": [
+        "INSPIRATIONAL"
+      ],
+      "score": 35,
+      "file": "assets\\music\\youtube\\growth\\Ripples In Time.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "growth",
+      "trackId": "IYgGGVh_1ho",
+      "viperId": "0352b8aa325a9764",
+      "title": "Last Sunrise",
+      "artist": "Adam MacDougall",
+      "seconds": 207,
+      "genres": [
+        "AMBIENT"
+      ],
+      "moods": [
+        "CALM"
+      ],
+      "score": 35,
+      "file": "assets\\music\\youtube\\growth\\Last Sunrise.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "growth",
+      "trackId": "D-cHBgAAAAA",
+      "viperId": "5c8357b8d451ba6e",
+      "title": "Peaceful Mind",
+      "artist": "Astron",
+      "seconds": 211,
+      "genres": [
+        "AMBIENT"
+      ],
+      "moods": [
+        "CALM"
+      ],
+      "score": 35,
+      "file": "assets\\music\\youtube\\growth\\Peaceful Mind.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "growth",
+      "trackId": "jACEJwAAAAA",
+      "viperId": "6599214ec53ebdf0",
+      "title": "Leaning On the Everlasting Arms",
+      "artist": "Zachariah Hickman",
+      "seconds": 179,
+      "genres": [
+        "COUNTRY_AND_FOLK"
+      ],
+      "moods": [
+        "CALM"
+      ],
+      "score": 34,
+      "file": "assets\\music\\youtube\\growth\\Leaning On the Everlasting Arms.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "motivation",
+      "trackId": "jSc9CQAAAAA",
+      "viperId": "9282ce2b6cf2d300",
+      "title": "Before I Go",
+      "artist": "RKVC",
+      "seconds": 207,
+      "genres": [
+        "CINEMATIC"
+      ],
+      "moods": [
+        "INSPIRATIONAL"
+      ],
+      "score": 43,
+      "file": "assets\\music\\youtube\\motivation\\Before I Go.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "motivation",
+      "trackId": "IJWsMwAAAAA",
+      "viperId": "668de1c52cc83c90",
+      "title": "Across The Pier",
+      "artist": "VYEN",
+      "seconds": 107,
+      "genres": [
+        "CINEMATIC"
+      ],
+      "moods": [
+        "DRAMATIC"
+      ],
+      "score": 41,
+      "file": "assets\\music\\youtube\\motivation\\Across The Pier.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "motivation",
+      "trackId": "5dsPmQbC7t0",
+      "viperId": "683774291930240f",
+      "title": "Depth Fuse",
+      "artist": "French Fuse",
+      "seconds": 116,
+      "genres": [
+        "CINEMATIC"
+      ],
+      "moods": [
+        "INSPIRATIONAL"
+      ],
+      "score": 40,
+      "file": "assets\\music\\youtube\\motivation\\Depth Fuse.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "motivation",
+      "trackId": "e8yWlOdkylU",
+      "viperId": "d5ffca21ca97a67f",
+      "title": "Serenade Wicked",
+      "artist": "Freedom Trail Studio",
+      "seconds": 134,
+      "genres": [
+        "ROCK"
+      ],
+      "moods": [
+        "INSPIRATIONAL"
+      ],
+      "score": 39,
+      "file": "assets\\music\\youtube\\motivation\\Serenade Wicked.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "motivation",
+      "trackId": "9h_SDUvhd-A",
+      "viperId": "daa1d1a17318a191",
+      "title": "Night Falls",
+      "artist": "Everet Almond",
+      "seconds": 174,
+      "genres": [
+        "CINEMATIC"
+      ],
+      "moods": [
+        "DRAMATIC"
+      ],
+      "score": 39,
+      "file": "assets\\music\\youtube\\motivation\\Night Falls.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "motivation",
+      "trackId": "wzeeOWn69tw",
+      "viperId": "26df3e3403f250f4",
+      "title": "Videodrome",
+      "artist": "National Sweetheart",
+      "seconds": 187,
+      "genres": [
+        "CINEMATIC"
+      ],
+      "moods": [
+        "DRAMATIC"
+      ],
+      "score": 39,
+      "file": "assets\\music\\youtube\\motivation\\Videodrome.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "motivation",
+      "trackId": "xEPAI1QMQTo",
+      "viperId": "b27ee5cadc162b72",
+      "title": "Moonlight in Mexico",
+      "artist": "Jimena Contreras",
+      "seconds": 170,
+      "genres": [
+        "CINEMATIC"
+      ],
+      "moods": [
+        "DRAMATIC"
+      ],
+      "score": 39,
+      "file": "assets\\music\\youtube\\motivation\\Moonlight in Mexico.mp3",
+      "status": "downloaded"
+    },
+    {
+      "mood": "motivation",
+      "trackId": "YCzne3zvZhM",
+      "viperId": "4375b551c548117c",
+      "title": "Tales from Southern Mexico",
+      "artist": "Jimena Contreras",
+      "seconds": 145,
+      "genres": [
+        "CINEMATIC"
+      ],
+      "moods": [
+        "DRAMATIC"
+      ],
+      "score": 39,
+      "file": "assets\\music\\youtube\\motivation\\Tales from Southern Mexico.mp3",
+      "status": "downloaded"
+    }
+  ]
+}

@@ -27,6 +27,7 @@
     "token:status": "node src/index.js token:status",
     "pubcheck": "node src/index.js pubcheck",
     "yt:login": "node scripts/yt-audio-login.js",
+    "yt:fetch": "node scripts/yt-audio-fetch.js",
     "test": "node --test tests/*.js"
   },
   "dependencies": {
