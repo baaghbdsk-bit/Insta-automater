@@ -300,11 +300,19 @@ on frame 1. Lines without an author render with no byline at all.
 
 **Held lines.** The 448 imported classics (batch 14) are `status: "held"`, not
 deleted. They stay in `assets/quotes/bank.json` but the picker skips them, so
-the feed is back to the 742 original second-person lines — the ones that held
+the feed is back to the original second-person lines — the ones that held
 37–44 % of viewers instead of 18–20 %. Because every authored line is in that
 batch, no byline is currently drawn; move one entry back to `"approved"` to test
 it, and the byline comes back with it. `node src/index.js lines:bank` lists every
 held line and why it is held.
+
+**Line shape.** Batch 15 is the counterweight to the classics: second person, one
+concrete noun from ordinary life, a deadline, and no moral attached. Eighteen
+lines, interleaved at one new line per two originals starting at the current
+rotation point of each mood, so the shape is measured against the original lines
+within days instead of sitting at the end of the queue for months. If it holds
+better, the same constraints get applied to the weakest of the original 742;
+if it does not, nothing else changes.
 
 ---
 

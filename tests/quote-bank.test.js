@@ -4,10 +4,10 @@ const assert = require('node:assert/strict');
 const bank = require('../src/quote-bank');
 const { MUSIC_MOODS } = require('../src/themes');
 
-test('bank loads 1190 unique lines with no validation problems', () => {
+test('bank loads 1208 unique lines with no validation problems', () => {
   const raw = bank.load();
-  assert.equal(raw.lines.length, 1190);
-  assert.equal(new Set(raw.lines.map((l) => l.id)).size, 1190);
+  assert.equal(raw.lines.length, 1208);
+  assert.equal(new Set(raw.lines.map((l) => l.id)).size, 1208);
   assert.deepEqual(bank.problems(), []);
 });
 
@@ -21,6 +21,23 @@ test('approved lines keep no rating or attribution filter', () => {
 test('held classics keep their author so a retest still renders a byline', () => {
   const held = bank.load().lines.filter((l) => l.status === 'held');
   assert.ok(held.some((l) => l.author && l.author !== 'Unknown'), 'held classics are attributed');
+});
+
+test('batch 15 is interleaved into the rotation, not appended to it', () => {
+  const all = bank.load().lines;
+  const fresh = all.filter((l) => l.batch === 15);
+  assert.equal(fresh.length, 18);
+  assert.ok(fresh.every((l) => l.status === 'approved'));
+
+  for (const mood of MUSIC_MOODS) {
+    const seq = all.filter((l) => l.status === 'approved' && l.mood === mood);
+    const at = seq.reduce((acc, l, i) => (l.batch === 15 ? [...acc, i] : acc), []);
+    assert.ok(at.length > 0, `${mood} has no batch 15 line`);
+    assert.ok(at[0] < seq.length * 0.4, `${mood}: first new line is buried at ${at[0]}/${seq.length}`);
+    for (let i = 1; i < at.length; i += 1) {
+      assert.ok(at[i] - at[i - 1] >= 2, `${mood}: new lines are clustered at ${at[i - 1]}-${at[i]}`);
+    }
+  }
 });
 
 test('the imported classics stay held until they earn a retest', () => {
@@ -52,8 +69,8 @@ test('sequential pick holds the next line until it is marked used', () => {
 
 test('report exposes counts, mood coverage and validation', () => {
   const r = bank.report();
-  assert.equal(r.total, 1190);
-  assert.equal(r.byStatus.approved, 742);
+  assert.equal(r.total, 1208);
+  assert.equal(r.byStatus.approved, 760);
   assert.equal(r.byStatus.held, 448);
   assert.equal(Object.keys(r.byMood).length, 3);
   assert.equal(r.selection, 'sequential');
