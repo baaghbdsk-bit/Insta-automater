@@ -12,8 +12,8 @@ const DEVANAGARI = /[\u0900-\u097F]/;
 const FONTS = {
   anton: { key: 'anton', name: 'Anton', ratio: 0.29, bold: 0 },
   archivo: { key: 'archivo', name: 'Archivo Black', ratio: 0.425, bold: 0 },
-  barlow: { key: 'barlow', name: 'Barlow Semi Condensed', ratio: 0.303, bold: -1 },
-  devanagari: { key: 'devanagari', name: 'Noto Sans Devanagari', ratio: 0.36, bold: -1 },
+  barlow: { key: 'barlow', name: 'Barlow Semi Condensed', ratio: 0.303, bold: 0 },
+  devanagari: { key: 'devanagari', name: 'Noto Sans Devanagari', ratio: 0.36, bold: 0 },
 };
 
 // Quiet themes get the lighter condensed face, statements get the heavy

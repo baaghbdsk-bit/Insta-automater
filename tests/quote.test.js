@@ -45,9 +45,9 @@ test('byline renders only when the bank entry has an author', () => {
 
 test('every visual variant resolves to a distinct vertical position', () => {
   const keys = Object.keys(VARIANTS);
-  assert.deepEqual(keys.sort(), ['center', 'lower', 'upper']);
+  assert.deepEqual(keys.sort(), ['center', 'upper']);
   assert.ok(VARIANTS.upper < VARIANTS.center);
-  assert.ok(VARIANTS.center < VARIANTS.lower);
+  assert.ok(VARIANTS.center <= 0.5);
 });
 
 test('every theme maps to a real, calibrated font', () => {

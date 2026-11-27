@@ -15,8 +15,8 @@ test('every theme is complete', () => {
   }
 });
 
-test('visual variants cover all three placements', () => {
-  assert.deepEqual(VISUAL_VARIANTS.slice().sort(), ['center', 'lower', 'upper']);
+test('visual variants cover upper and center safe-zone placements', () => {
+  assert.deepEqual(VISUAL_VARIANTS.slice().sort(), ['center', 'upper']);
 });
 
 test('validateVideo rejects a missing file without throwing', async () => {

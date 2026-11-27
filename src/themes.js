@@ -85,7 +85,7 @@ const THEMES = {
 const THEME_KEYS = Object.keys(THEMES);
 const MUSIC_MOODS = ['heartbreak', 'growth', 'motivation'];
 
-const VISUAL_VARIANTS = ['center', 'lower', 'upper'];
+const VISUAL_VARIANTS = ['center', 'upper'];
 
 function themeFor(mood) {
   return THEME_KEYS.find((t) => THEMES[t].music === mood) || 'motivation';

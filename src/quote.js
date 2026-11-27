@@ -15,14 +15,13 @@ function esc(text) {
   return String(text).replace(/[{}\\]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-const SIZES = [120, 112, 104, 96, 88, 80, 72];
-const MARGIN_X = 88;
+const SIZES = [100, 92, 84, 78, 72];
+const MARGIN_X = 96;
 
 /** Where the text block sits. Keeps the grid from looking identical every day. */
 const VARIANTS = {
-  upper: 0.30,
+  upper: 0.32,
   center: 0.46,
-  lower: 0.63,
 };
 
 /**
@@ -63,25 +62,41 @@ function variantCenterY(variant, H) {
   return Math.round(H * frac);
 }
 
+const MOOD_GRADES = {
+  heartbreak: 'eq=contrast=1.10:saturation=0.78:brightness=-0.05:gamma=0.96,colorbalance=bs=0.06:bm=0.02:rs=-0.03',
+  growth: 'eq=contrast=1.10:saturation=0.92:brightness=-0.03:gamma=0.98,colorbalance=rs=0.02:gs=0.01:bh=0.02',
+  motivation: 'eq=contrast=1.12:saturation=0.95:brightness=-0.03:gamma=0.97,colorbalance=rs=0.04:gs=0.02:bs=-0.03:rh=0.03',
+};
+
+function gradeForMood(mood) {
+  return MOOD_GRADES[mood] || MOOD_GRADES.motivation;
+}
+
 function buildAss({ text, watermark, total, W, H, variant = 'center', font = fonts.FONTS.anton, attribution = '' }) {
   const accent = assColor(config.video.accent);
   const { size, lines } = layout(text, W, font);
-  const lineH = Math.round(size * 1.16);
+  const lineH = Math.round(size * 1.24);
   const blockH = lineH * lines.length;
   const centerY = variantCenterY(variant, H);
   const topY = Math.round(centerY - blockH / 2 + lineH / 2);
   const author = String(attribution || '').replace(/\s+/g, ' ').trim();
   const authorSize = Math.max(36, Math.round(size * 0.36));
 
+  // Crisp 88x4 editorial accent bar under the @handle masthead (layer 0, visible at t=0).
+  const ruleY = 208;
+  const events = [
+    `Dialogue: 0,${assTime(0)},${assTime(total)},Rule,,0,0,0,,{\\an5\\pos(${W / 2},${ruleY})\\p1}m -44 -2 l 44 -2 44 2 -44 2{\\p0}`,
+  ];
+
   // Every line is fully opaque at t=0. Frame 1 is the Shorts thumbnail and the
   // only thing a viewer sees before deciding to swipe; a staged fade turned it
   // into a half-empty photo (and, at two lines, half the quote). The camera
   // push already supplies motion.
-  const events = lines.map((line, i) => {
+  for (let i = 0; i < lines.length; i++) {
     const y = topY + i * lineH;
     const tags = `{\\an5\\pos(${W / 2},${y})}`;
-    return `Dialogue: 0,${assTime(0)},${assTime(total)},Quote,,0,0,0,,${tags}${esc(line)}`;
-  });
+    events.push(`Dialogue: 0,${assTime(0)},${assTime(total)},Quote,,0,0,0,,${tags}${esc(lines[i])}`);
+  }
 
   if (author) {
     // Sits just under the last line, not centred as a separate block, so the
@@ -111,7 +126,8 @@ YCbCr Matrix: TV.709
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Quote,${font.name},${size},&H00FFFFFF,&H000000FF,&H00000000,&H9B000000,${font.bold},0,0,0,100,100,1,0,1,4,10,5,${MARGIN_X},${MARGIN_X},0,1
+Style: Quote,${font.name},${size},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,${font.bold},0,0,0,100,100,1.5,0,1,2.5,6,5,${MARGIN_X},${MARGIN_X},0,1
+Style: Rule,Arial,10,${accent},&H000000FF,&H00000000,&H60000000,0,0,0,0,100,100,0,0,1,0,2,5,0,0,0,1
 Style: Mark,Anton,38,${accent},&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,8,0,1,3,2,8,40,40,150,1
 ${author ? `Style: Author,${font.name},${authorSize},${accent},&H000000FF,&H00000000,&H9B000000,0,1,0,0,100,100,2,0,1,3,6,5,${MARGIN_X},${MARGIN_X},0,1\n` : ''}
 [Events]
@@ -246,11 +262,11 @@ async function renderQuote({
       `crop=${W * 2}:${H * 2},setsar=1,` +
       `zoompan=z='min(1+0.0007*on,1.22)':x='${move.x}':y='${move.y}':` +
       `d=${frames}:s=${W}x${H}:fps=${FPS},` +
-      `eq=contrast=1.08:saturation=0.86:brightness=-0.04:gamma=0.98,format=yuv420p[base]`
+      `${gradeForMood(mood)},unsharp=5:5:0.45:5:5:0.0,format=yuv420p[base]`
   );
   filters.push('[base][1:v]overlay=0:0:format=auto[v1]');
   filters.push(
-    `[v1]vignette=PI/4.2,noise=alls=5:allf=t,` +
+    `[v1]vignette=PI/4.2,noise=alls=4:allf=t,` +
       `ass=${rel(assFile)}:fontsdir=${rel(paths.fonts)},format=yuv420p[vout]`
   );
 

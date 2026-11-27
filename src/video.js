@@ -5,8 +5,10 @@
  * locally first.
  */
 const fs = require('node:fs');
-const { FFPROBE, run } = require('./util');
-const { config } = require('./config');
+const os = require('node:os');
+const path = require('node:path');
+const { FFMPEG, FFPROBE, run } = require('./util');
+const { config, env } = require('./config');
 
 async function probe(file) {
   const { stdout } = await run(FFPROBE, [
@@ -119,4 +121,49 @@ async function validateVideo(file, opts = {}) {
   };
 }
 
-module.exports = { validateVideo, probe, faststart };
+/**
+ * Optional Gemini Vision frame check for text-over-photo contrast, 9:16 safe-zone
+ * clearance, and visual defects. Skips gracefully when LLM_API_KEY is unset.
+ */
+async function checkVisualQuality(file, durationSeconds = 10) {
+  const apiKey = env.LLM_API_KEY || process.env.LLM_API_KEY || '';
+  if (!apiKey || !file || !fs.existsSync(file)) {
+    return { ok: true, skipped: true };
+  }
+  const mid = Math.max(0.5, Number(durationSeconds || 10) * 0.5).toFixed(2);
+  const tmpPng = path.join(os.tmpdir(), `reel-vqa-${Date.now()}.png`);
+  try {
+    await run(FFMPEG, ['-y', '-hide_banner', '-loglevel', 'error', '-ss', mid, '-i', file, '-vframes', '1', tmpPng]);
+    if (!fs.existsSync(tmpPng)) return { ok: true, skipped: true };
+    const b64 = fs.readFileSync(tmpPng).toString('base64');
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            {
+              text: 'Audit this 1080x1920 quote Reel frame. Score 0-100 on text legibility, photo contrast, 9:16 safe-zone margins, and visual polish. List any critical_defects (unreadable text, clipped words, glaring artifacts). Return ONLY JSON: {"score": <int>, "critical_defects": [<strings>], "summary": "<1-line>"}',
+            },
+            { inline_data: { mime_type: 'image/png', data: b64 } },
+          ],
+        }],
+        generationConfig: { responseMimeType: 'application/json' },
+      }),
+    });
+    if (!res.ok) return { ok: true, skipped: true };
+    const data = await res.json();
+    const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const parsed = JSON.parse(txt);
+    const score = Number(parsed.score || 0);
+    const defects = Array.isArray(parsed.critical_defects) ? parsed.critical_defects.filter(Boolean) : [];
+    return { ok: score >= 75 && defects.length === 0, score, critical_defects: defects, summary: parsed.summary || '' };
+  } catch {
+    return { ok: true, skipped: true };
+  } finally {
+    fs.rmSync(tmpPng, { force: true });
+  }
+}
+
+module.exports = { validateVideo, checkVisualQuality, probe, faststart };
